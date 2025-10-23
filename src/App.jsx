@@ -5,6 +5,7 @@ import Standings from './components/dashboards/Standings'
 import WeatherDashboard from './components/dashboards/WeatherDashboard'
 import CountdownDashboard from './components/dashboards/CountdownDashboard'
 import DisneyDashboard from './components/dashboards/DisneyDashboard'
+import MoviesDashboard from './components/dashboards/MoviesDashboard'
 import Settings from './components/settings/Settings'
 import usePreferences from './hooks/usePreferences'
 import './App.css'
@@ -47,6 +48,8 @@ function App() {
         return <CountdownDashboard preferences={preferences} />
       case 'disney':
         return <DisneyDashboard preferences={preferences} />
+      case 'movies':
+        return <MoviesDashboard preferences={preferences} />
       case 'settings':
         return (
           <Settings

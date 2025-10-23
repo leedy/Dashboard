@@ -7,6 +7,7 @@ function Layout({ children, currentDashboard, onDashboardChange }) {
     { id: 'weather', name: 'Weather', available: true },
     { id: 'countdown', name: 'Countdown', available: true },
     { id: 'disney', name: 'Disney Info', available: true },
+    { id: 'movies', name: 'Movies', available: true },
   ];
 
   return (

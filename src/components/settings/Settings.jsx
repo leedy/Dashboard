@@ -317,6 +317,16 @@ function Settings({ preferences, onSave, onCancel }) {
               />
               <span>Disney Info</span>
             </label>
+            <label>
+              <input
+                type="radio"
+                name="defaultDashboard"
+                value="movies"
+                checked={localPrefs.defaultDashboard === 'movies'}
+                onChange={handleDefaultDashboardChange}
+              />
+              <span>Movies</span>
+            </label>
           </div>
         </div>
 
