@@ -3,26 +3,72 @@ import axios from 'axios';
 import './SportsDashboard.css';
 import PlayerStats from './PlayerStats';
 
-function SportsDashboard() {
+function SportsDashboard({ preferences }) {
   const [selectedSport, setSelectedSport] = useState('nhl');
   const [nhlData, setNhlData] = useState({ recentGames: [], upcomingGames: [], standings: [] });
   const [nflData, setNflData] = useState({ recentGames: [], upcomingGames: [], standings: [] });
   const [loading, setLoading] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null); // { abbrev: 'PHI', name: 'Philadelphia Flyers' }
 
-  // Favorite team configuration (will be user-selectable in the future)
-  const favoriteTeam = {
-    name: 'Philadelphia Flyers',
-    abbrev: 'PHI',
-    searchTerms: ['Flyers', 'Philadelphia']
-  };
+  // Get favorite teams from preferences
+  const favoriteNHLTeam = preferences?.favoriteNHLTeam || { name: 'Philadelphia Flyers', abbrev: 'PHI' };
+  const favoriteNFLTeam = preferences?.favoriteNFLTeam || { name: 'Philadelphia Eagles', abbrev: 'PHI' };
 
-  // Helper function to check if a team is the favorite
+  // Helper function to check if a team is the favorite (works for both NHL and NFL)
   const isFavoriteTeam = (teamName) => {
     if (!teamName) return false;
-    return favoriteTeam.searchTerms.some(term =>
-      teamName.toLowerCase().includes(term.toLowerCase())
-    );
+
+    const teamNameLower = teamName.toLowerCase();
+
+    // Check against NHL favorite
+    if (selectedSport === 'nhl' && favoriteNHLTeam) {
+      const favNameLower = favoriteNHLTeam.name.toLowerCase();
+      const favAbbrevLower = favoriteNHLTeam.abbrev.toLowerCase();
+
+      // Check full name match
+      if (teamNameLower.includes(favNameLower) || favNameLower.includes(teamNameLower)) {
+        return true;
+      }
+
+      // Check abbreviation match
+      if (teamNameLower.includes(favAbbrevLower)) {
+        return true;
+      }
+
+      // Check individual words (e.g., "Senators" in "Ottawa Senators")
+      const words = favNameLower.split(' ');
+      for (const word of words) {
+        if (word.length > 3 && teamNameLower.includes(word)) {
+          return true;
+        }
+      }
+    }
+
+    // Check against NFL favorite
+    if (selectedSport === 'nfl' && favoriteNFLTeam) {
+      const favNameLower = favoriteNFLTeam.name.toLowerCase();
+      const favAbbrevLower = favoriteNFLTeam.abbrev.toLowerCase();
+
+      // Check full name match
+      if (teamNameLower.includes(favNameLower) || favNameLower.includes(teamNameLower)) {
+        return true;
+      }
+
+      // Check abbreviation match
+      if (teamNameLower.includes(favAbbrevLower)) {
+        return true;
+      }
+
+      // Check individual words (e.g., "Eagles" in "Philadelphia Eagles")
+      const words = favNameLower.split(' ');
+      for (const word of words) {
+        if (word.length > 3 && teamNameLower.includes(word)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   };
 
   // Helper function to get team logo URL

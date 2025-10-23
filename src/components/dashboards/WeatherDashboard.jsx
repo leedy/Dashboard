@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './WeatherDashboard.css';
 
-function WeatherDashboard() {
+function WeatherDashboard({ preferences }) {
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Location for zipcode 17042 (Lebanon, PA)
-  const location = {
+  // Get location from preferences with fallback to Lebanon, PA
+  const location = preferences?.weatherLocation || {
     name: 'Lebanon, PA',
     zipcode: '17042',
     latitude: 40.34093,
@@ -17,7 +17,7 @@ function WeatherDashboard() {
 
   useEffect(() => {
     fetchWeatherData();
-  }, []);
+  }, [location.zipcode]); // Re-fetch when zipcode changes
 
   const fetchWeatherData = async () => {
     setLoading(true);

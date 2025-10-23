@@ -23,6 +23,12 @@ function Layout({ children, currentDashboard, onDashboardChange }) {
               {!dashboard.available && ' (Coming Soon)'}
             </button>
           ))}
+          <button
+            className={`nav-button settings-button ${currentDashboard === 'settings' ? 'active' : ''}`}
+            onClick={() => onDashboardChange('settings')}
+          >
+            ⚙️ Settings
+          </button>
         </nav>
       </header>
       <main className="main-content">
