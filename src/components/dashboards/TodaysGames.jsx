@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './SportsDashboard.css';
+import PlayerStats from './PlayerStats';
 
 function TodaysGames({ preferences }) {
   const [selectedSport, setSelectedSport] = useState('nhl');
   const [gamesData, setGamesData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [selectedTeam, setSelectedTeam] = useState(null); // { abbrev: 'PHI', name: 'Philadelphia Flyers' }
 
   const favoriteNHLTeam = preferences?.favoriteNHLTeam || { name: 'Philadelphia Flyers', abbrev: 'PHI' };
   const favoriteNFLTeam = preferences?.favoriteNFLTeam || { name: 'Philadelphia Eagles', abbrev: 'PHI' };
@@ -88,6 +90,55 @@ function TodaysGames({ preferences }) {
       return `https://assets.nhle.com/logos/nhl/svg/${abbrev}_light.svg`;
     }
     return null;
+  };
+
+  const getTeamAbbrev = (teamName) => {
+    if (!teamName) return null;
+    const teamAbbrevMap = {
+      'Anaheim Ducks': 'ANA', 'Ducks': 'ANA',
+      'Arizona Coyotes': 'ARI', 'Coyotes': 'ARI',
+      'Boston Bruins': 'BOS', 'Bruins': 'BOS',
+      'Buffalo Sabres': 'BUF', 'Sabres': 'BUF',
+      'Calgary Flames': 'CGY', 'Flames': 'CGY',
+      'Carolina Hurricanes': 'CAR', 'Hurricanes': 'CAR',
+      'Chicago Blackhawks': 'CHI', 'Blackhawks': 'CHI',
+      'Colorado Avalanche': 'COL', 'Avalanche': 'COL',
+      'Columbus Blue Jackets': 'CBJ', 'Blue Jackets': 'CBJ',
+      'Dallas Stars': 'DAL', 'Stars': 'DAL',
+      'Detroit Red Wings': 'DET', 'Red Wings': 'DET',
+      'Edmonton Oilers': 'EDM', 'Oilers': 'EDM',
+      'Florida Panthers': 'FLA', 'Panthers': 'FLA',
+      'Los Angeles Kings': 'LAK', 'Kings': 'LAK',
+      'Minnesota Wild': 'MIN', 'Wild': 'MIN',
+      'Montréal Canadiens': 'MTL', 'Montreal Canadiens': 'MTL', 'Canadiens': 'MTL',
+      'Nashville Predators': 'NSH', 'Predators': 'NSH',
+      'New Jersey Devils': 'NJD', 'Devils': 'NJD',
+      'New York Islanders': 'NYI', 'Islanders': 'NYI',
+      'New York Rangers': 'NYR', 'Rangers': 'NYR',
+      'Ottawa Senators': 'OTT', 'Senators': 'OTT',
+      'Philadelphia Flyers': 'PHI', 'Flyers': 'PHI',
+      'Pittsburgh Penguins': 'PIT', 'Penguins': 'PIT',
+      'San Jose Sharks': 'SJS', 'Sharks': 'SJS',
+      'Seattle Kraken': 'SEA', 'Kraken': 'SEA',
+      'St. Louis Blues': 'STL', 'Blues': 'STL',
+      'Tampa Bay Lightning': 'TBL', 'Lightning': 'TBL',
+      'Toronto Maple Leafs': 'TOR', 'Maple Leafs': 'TOR',
+      'Utah Hockey Club': 'UTA', 'Hockey Club': 'UTA',
+      'Utah Mammoth': 'UTA', 'Mammoth': 'UTA',
+      'Vancouver Canucks': 'VAN', 'Canucks': 'VAN',
+      'Vegas Golden Knights': 'VGK', 'Golden Knights': 'VGK',
+      'Washington Capitals': 'WSH', 'Capitals': 'WSH',
+      'Winnipeg Jets': 'WPG', 'Jets': 'WPG'
+    };
+    return teamAbbrevMap[teamName] || null;
+  };
+
+  const handleTeamClick = (teamName) => {
+    if (selectedSport !== 'nhl') return; // Only works for NHL
+    const abbrev = getTeamAbbrev(teamName);
+    if (abbrev) {
+      setSelectedTeam({ abbrev, name: teamName });
+    }
   };
 
   const fetchNHLGames = async () => {
@@ -222,7 +273,10 @@ function TodaysGames({ preferences }) {
                         {selectedSport === 'nfl' && game.awayLogo && (
                           <img src={game.awayLogo} alt={game.awayTeam} className="team-logo" />
                         )}
-                        <span className={`team-name ${isFavoriteTeam(game.awayTeam) ? 'favorite' : ''}`}>
+                        <span
+                          className={`team-name ${isFavoriteTeam(game.awayTeam) ? 'favorite' : ''} ${selectedSport === 'nhl' ? 'clickable' : ''}`}
+                          onClick={selectedSport === 'nhl' ? () => handleTeamClick(game.awayTeam) : undefined}
+                        >
                           {game.awayTeam}
                         </span>
                       </div>
@@ -236,7 +290,10 @@ function TodaysGames({ preferences }) {
                         {selectedSport === 'nfl' && game.homeLogo && (
                           <img src={game.homeLogo} alt={game.homeTeam} className="team-logo" />
                         )}
-                        <span className={`team-name ${isFavoriteTeam(game.homeTeam) ? 'favorite' : ''}`}>
+                        <span
+                          className={`team-name ${isFavoriteTeam(game.homeTeam) ? 'favorite' : ''} ${selectedSport === 'nhl' ? 'clickable' : ''}`}
+                          onClick={selectedSport === 'nhl' ? () => handleTeamClick(game.homeTeam) : undefined}
+                        >
                           {game.homeTeam}
                         </span>
                       </div>
@@ -247,6 +304,14 @@ function TodaysGames({ preferences }) {
             </div>
           </div>
         </div>
+      )}
+
+      {selectedTeam && (
+        <PlayerStats
+          teamAbbrev={selectedTeam.abbrev}
+          teamName={selectedTeam.name}
+          onClose={() => setSelectedTeam(null)}
+        />
       )}
     </div>
   );
