@@ -224,6 +224,44 @@ function Settings({ preferences, onSave, onCancel }) {
           </div>
         </div>
 
+        {/* Countdown Event Section */}
+        <div className="settings-section">
+          <h3>Countdown Event</h3>
+
+          <div className="setting-item">
+            <label htmlFor="event-name">Event Name</label>
+            <input
+              id="event-name"
+              type="text"
+              value={localPrefs.countdownEvent?.name || ''}
+              onChange={(e) => setLocalPrefs(prev => ({
+                ...prev,
+                countdownEvent: {
+                  ...prev.countdownEvent,
+                  name: e.target.value
+                }
+              }))}
+              placeholder="Enter event name"
+            />
+          </div>
+
+          <div className="setting-item">
+            <label htmlFor="event-date">Event Date</label>
+            <input
+              id="event-date"
+              type="date"
+              value={localPrefs.countdownEvent?.date || ''}
+              onChange={(e) => setLocalPrefs(prev => ({
+                ...prev,
+                countdownEvent: {
+                  ...prev.countdownEvent,
+                  date: e.target.value
+                }
+              }))}
+            />
+          </div>
+        </div>
+
         {/* Default Dashboard Section */}
         <div className="settings-section">
           <h3>Default Dashboard</h3>
@@ -248,6 +286,16 @@ function Settings({ preferences, onSave, onCancel }) {
                 onChange={handleDefaultDashboardChange}
               />
               <span>Weather</span>
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="defaultDashboard"
+                value="countdown"
+                checked={localPrefs.defaultDashboard === 'countdown'}
+                onChange={handleDefaultDashboardChange}
+              />
+              <span>Countdown</span>
             </label>
           </div>
         </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Layout from './components/layout/Layout'
 import SportsDashboard from './components/dashboards/SportsDashboard'
 import WeatherDashboard from './components/dashboards/WeatherDashboard'
+import CountdownDashboard from './components/dashboards/CountdownDashboard'
 import Settings from './components/settings/Settings'
 import usePreferences from './hooks/usePreferences'
 import './App.css'
@@ -38,6 +39,8 @@ function App() {
         return <SportsDashboard preferences={preferences} />
       case 'weather':
         return <WeatherDashboard preferences={preferences} />
+      case 'countdown':
+        return <CountdownDashboard preferences={preferences} />
       case 'settings':
         return (
           <Settings

@@ -15,6 +15,10 @@ const DEFAULT_PREFERENCES = {
     latitude: 40.34093,
     longitude: -76.41135
   },
+  countdownEvent: {
+    name: 'New Year',
+    date: '2026-01-01'
+  },
   defaultDashboard: 'sports',
   displaySettings: {
     autoRotate: false,
@@ -97,6 +101,13 @@ export const usePreferences = () => {
     }));
   };
 
+  const updateCountdownEvent = (event) => {
+    setPreferences(prev => ({
+      ...prev,
+      countdownEvent: event
+    }));
+  };
+
   // Reset to defaults
   const resetPreferences = () => {
     setPreferences(DEFAULT_PREFERENCES);
@@ -110,6 +121,7 @@ export const usePreferences = () => {
     updateWeatherLocation,
     updateDefaultDashboard,
     updateDisplaySettings,
+    updateCountdownEvent,
     resetPreferences
   };
 };
