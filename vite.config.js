@@ -18,6 +18,18 @@ export default defineConfig({
             console.log('Proxy response:', req.url, proxyRes.statusCode);
           });
         }
+      },
+      '/api/nfl': {
+        target: 'https://site.api.espn.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/nfl/, ''),
+        secure: false,
+        followRedirects: true,
+        configure: (proxy, options) => {
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            console.log('ESPN NFL Proxy response:', req.url, proxyRes.statusCode);
+          });
+        }
       }
     }
   }

@@ -218,6 +218,34 @@
   width: 100%;
 }
 
+.nfl-divisions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+@media (max-width: 1200px) {
+  .nfl-divisions {
+    grid-template-columns: 1fr;
+  }
+}
+
+.division-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.division-name {
+  margin: 0 0 1rem 0;
+  color: #667eea;
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #667eea;
+}
+
 .standings-table {
   overflow-x: auto;
 }
@@ -237,12 +265,7 @@
   border-bottom: 3px solid #e0e0e0;
 }
 
-.standings-table th:nth-child(2),
-.standings-table th:nth-child(3),
-.standings-table th:nth-child(4),
-.standings-table th:nth-child(5),
-.standings-table th:nth-child(6),
-.standings-table th:nth-child(7) {
+.standings-table th:not(:first-child) {
   text-align: center;
 }
 
@@ -254,10 +277,7 @@
   font-weight: 600;
 }
 
-.standings-table td:nth-child(2),
-.standings-table td:nth-child(3),
-.standings-table td:nth-child(4),
-.standings-table td:nth-child(6) {
+.standings-table td:not(:first-child) {
   text-align: center;
 }
 
@@ -283,6 +303,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  white-space: nowrap;
 }
 
 .team-name-cell .team-logo {
@@ -471,5 +492,14 @@
 
   .points-cell {
     color: #8896ff;
+  }
+
+  .division-section {
+    background: #1a1a1a;
+  }
+
+  .division-name {
+    color: #8896ff;
+    border-bottom-color: #8896ff;
   }
 }

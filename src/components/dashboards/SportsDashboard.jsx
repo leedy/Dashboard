@@ -6,6 +6,7 @@ import PlayerStats from './PlayerStats';
 function SportsDashboard() {
   const [selectedSport, setSelectedSport] = useState('nhl');
   const [nhlData, setNhlData] = useState({ recentGames: [], upcomingGames: [], standings: [] });
+  const [nflData, setNflData] = useState({ recentGames: [], upcomingGames: [], standings: [] });
   const [loading, setLoading] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null); // { abbrev: 'PHI', name: 'Philadelphia Flyers' }
 
@@ -108,12 +109,8 @@ function SportsDashboard() {
 
     const abbrev = teamAbbrevMap[teamName];
     if (abbrev) {
-      const logoUrl = `https://assets.nhle.com/logos/nhl/svg/${abbrev}_light.svg`;
-      console.log(`getTeamLogo: ${teamName} -> ${abbrev} -> ${logoUrl}`);
-      return logoUrl;
+      return `https://assets.nhle.com/logos/nhl/svg/${abbrev}_light.svg`;
     }
-
-    console.log(`getTeamLogo: No mapping found for "${teamName}"`);
     return null;
   };
 
@@ -174,6 +171,8 @@ function SportsDashboard() {
   useEffect(() => {
     if (selectedSport === 'nhl') {
       fetchNHLData();
+    } else if (selectedSport === 'nfl') {
+      fetchNFLData();
     }
   }, [selectedSport]);
 
@@ -188,13 +187,11 @@ function SportsDashboard() {
       const yesterdayStr = yesterday.toISOString().split('T')[0];
 
       // Fetch today's and yesterday's scores for recent games (using proxy to avoid CORS)
-      console.log('Fetching NHL data for:', todayStr, yesterdayStr);
       const [todayScores, yesterdayScores, standings] = await Promise.all([
         axios.get(`/api/nhl/v1/score/${todayStr}`),
         axios.get(`/api/nhl/v1/score/${yesterdayStr}`),
         axios.get(`/api/nhl/v1/standings/${todayStr}`)
       ]);
-      console.log('NHL API responses:', { todayScores: todayScores.data, yesterdayScores: yesterdayScores.data, standings: standings.data });
 
       // Process recent games (completed games from today and yesterday)
       const allGames = [...(yesterdayScores.data.games || []), ...(todayScores.data.games || [])];
@@ -280,6 +277,129 @@ function SportsDashboard() {
     }
   };
 
+  const fetchNFLData = async () => {
+    setLoading(true);
+    try {
+      // NFL division IDs from ESPN API
+      const divisions = [
+        { id: 1, name: 'NFC East', conference: 'NFC' },
+        { id: 10, name: 'NFC North', conference: 'NFC' },
+        { id: 11, name: 'NFC South', conference: 'NFC' },
+        { id: 3, name: 'NFC West', conference: 'NFC' },
+        { id: 4, name: 'AFC East', conference: 'AFC' },
+        { id: 12, name: 'AFC North', conference: 'AFC' },
+        { id: 13, name: 'AFC South', conference: 'AFC' },
+        { id: 6, name: 'AFC West', conference: 'AFC' }
+      ];
+
+      // Fetch scoreboard and all division standings in parallel
+      const requests = [
+        axios.get('/api/nfl/apis/site/v2/sports/football/nfl/scoreboard'),
+        ...divisions.map(div => axios.get(`/api/nfl/apis/v2/sports/football/nfl/standings?group=${div.id}`))
+      ];
+
+      const responses = await Promise.all(requests);
+      const scoreboard = responses[0];
+      const divisionResponses = responses.slice(1);
+
+      // Process games from scoreboard
+      const events = scoreboard.data.events || [];
+
+      // Separate completed games and upcoming games
+      const completed = events.filter(event => {
+        const competition = event.competitions?.[0];
+        return competition?.status?.type?.completed === true;
+      }).map(event => {
+        const competition = event.competitions[0];
+        const homeTeam = competition.competitors.find(c => c.homeAway === 'home');
+        const awayTeam = competition.competitors.find(c => c.homeAway === 'away');
+
+        return {
+          homeTeam: homeTeam.team.displayName,
+          awayTeam: awayTeam.team.displayName,
+          homeLogo: homeTeam.team.logo,
+          awayLogo: awayTeam.team.logo,
+          homeScore: parseInt(homeTeam.score || 0),
+          awayScore: parseInt(awayTeam.score || 0),
+          status: 'Final'
+        };
+      });
+
+      const upcoming = events.filter(event => {
+        const competition = event.competitions?.[0];
+        return competition?.status?.type?.completed === false;
+      }).map(event => {
+        const competition = event.competitions[0];
+        const homeTeam = competition.competitors.find(c => c.homeAway === 'home');
+        const awayTeam = competition.competitors.find(c => c.homeAway === 'away');
+        const gameDate = new Date(event.date);
+        const timeStr = gameDate.toLocaleString('en-US', {
+          weekday: 'short',
+          hour: 'numeric',
+          minute: '2-digit',
+          timeZoneName: 'short'
+        });
+
+        return {
+          homeTeam: homeTeam.team.displayName,
+          awayTeam: awayTeam.team.displayName,
+          homeLogo: homeTeam.team.logo,
+          awayLogo: awayTeam.team.logo,
+          date: timeStr
+        };
+      });
+
+      // Process division standings
+      const divisionStandings = divisionResponses.map((response, index) => {
+        const divisionInfo = divisions[index];
+        const divisionData = response.data;
+        const teams = [];
+
+        // Get teams from division standings
+        divisionData.standings?.entries?.forEach(teamEntry => {
+          const stats = teamEntry.stats || [];
+          const wins = stats.find(s => s.name === 'wins')?.value || 0;
+          const losses = stats.find(s => s.name === 'losses')?.value || 0;
+          const ties = stats.find(s => s.name === 'ties')?.value || 0;
+          const winPercent = stats.find(s => s.name === 'winPercent')?.value || 0;
+
+          // Get team logo - use the first logo (default)
+          const logo = teamEntry.team.logos?.[0]?.href || null;
+
+          teams.push({
+            team: teamEntry.team.displayName,
+            logo: logo,
+            wins: wins,
+            losses: losses,
+            ties: ties,
+            pct: winPercent.toFixed(3)
+          });
+        });
+
+        return {
+          division: divisionInfo.name,
+          conference: divisionInfo.conference,
+          teams: teams
+        };
+      });
+
+      setNflData({
+        recentGames: completed.length > 0 ? completed : [{ homeTeam: 'No recent games', awayTeam: '', homeScore: '-', awayScore: '-', status: '' }],
+        upcomingGames: upcoming.length > 0 ? upcoming : [{ homeTeam: 'No upcoming games', awayTeam: '', date: '' }],
+        standings: divisionStandings
+      });
+    } catch (error) {
+      console.error('Error fetching NFL data:', error);
+      setNflData({
+        recentGames: [{ homeTeam: 'Error loading data', awayTeam: '', homeScore: '-', awayScore: '-', status: error.message }],
+        upcomingGames: [{ homeTeam: 'Error loading data', awayTeam: '', date: '' }],
+        standings: []
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const sportsData = {
     nhl: {
       name: 'NHL',
@@ -289,23 +409,9 @@ function SportsDashboard() {
     },
     nfl: {
       name: 'NFL',
-      recentGames: [
-        { homeTeam: 'Kansas City Chiefs', awayTeam: 'Miami Dolphins', homeScore: 28, awayScore: 24, status: 'Final' },
-        { homeTeam: 'San Francisco 49ers', awayTeam: 'Dallas Cowboys', homeScore: 31, awayScore: 21, status: 'Final' },
-        { homeTeam: 'Buffalo Bills', awayTeam: 'New York Jets', homeScore: 35, awayScore: 14, status: 'Final' },
-      ],
-      upcomingGames: [
-        { homeTeam: 'Green Bay Packers', awayTeam: 'Chicago Bears', date: 'Sun 1:00 PM' },
-        { homeTeam: 'Philadelphia Eagles', awayTeam: 'Washington Commanders', date: 'Sun 4:25 PM' },
-        { homeTeam: 'Los Angeles Rams', awayTeam: 'Seattle Seahawks', date: 'Sun 8:20 PM' },
-      ],
-      standings: [
-        { team: 'Kansas City Chiefs', wins: 6, losses: 1, pct: '.857' },
-        { team: 'San Francisco 49ers', wins: 5, losses: 2, pct: '.714' },
-        { team: 'Philadelphia Eagles', wins: 5, losses: 2, pct: '.714' },
-        { team: 'Buffalo Bills', wins: 5, losses: 2, pct: '.714' },
-        { team: 'Miami Dolphins', wins: 4, losses: 3, pct: '.571' },
-      ]
+      recentGames: nflData.recentGames,
+      upcomingGames: nflData.upcomingGames,
+      standings: nflData.standings
     },
     nba: {
       name: 'NBA',
@@ -368,9 +474,9 @@ function SportsDashboard() {
         </div>
       </div>
 
-      {loading && selectedSport === 'nhl' ? (
+      {loading ? (
         <div className="loading-container">
-          <p>Loading NHL data...</p>
+          <p>Loading {selectedSport === 'nhl' ? 'NHL' : selectedSport === 'nfl' ? 'NFL' : ''} data...</p>
         </div>
       ) : (
       <div className="dashboard-content">
@@ -387,6 +493,9 @@ function SportsDashboard() {
                       {selectedSport === 'nhl' && getTeamLogo(game.awayTeam) && (
                         <img src={getTeamLogo(game.awayTeam)} alt={game.awayTeam} className="team-logo" />
                       )}
+                      {selectedSport === 'nfl' && game.awayLogo && (
+                        <img src={game.awayLogo} alt={game.awayTeam} className="team-logo" />
+                      )}
                       <span
                         className={`team-name ${isFavoriteTeam(game.awayTeam) ? 'favorite' : ''} ${selectedSport === 'nhl' ? 'clickable' : ''}`}
                         onClick={() => handleTeamClick(game.awayTeam)}
@@ -400,6 +509,9 @@ function SportsDashboard() {
                     <div className="team-info">
                       {selectedSport === 'nhl' && getTeamLogo(game.homeTeam) && (
                         <img src={getTeamLogo(game.homeTeam)} alt={game.homeTeam} className="team-logo" />
+                      )}
+                      {selectedSport === 'nfl' && game.homeLogo && (
+                        <img src={game.homeLogo} alt={game.homeTeam} className="team-logo" />
                       )}
                       <span
                         className={`team-name ${isFavoriteTeam(game.homeTeam) ? 'favorite' : ''} ${selectedSport === 'nhl' ? 'clickable' : ''}`}
@@ -418,54 +530,99 @@ function SportsDashboard() {
         {/* Standings */}
         <div className="dashboard-card standings-card">
           <h3>Standings</h3>
-          <div className="standings-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Team</th>
-                  <th>GP</th>
-                  <th>W</th>
-                  <th>L</th>
-                  <th>PTS</th>
-                  <th>PCT</th>
-                  <th>Streak</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentSportData.standings.map((team, index) => (
-                  <tr key={index} className={team.isFavorite ? 'favorite-team-row' : ''}>
-                    <td className={`team-name-cell ${team.isFavorite ? 'favorite' : ''}`}>
-                      <div className="team-info">
-                        {selectedSport === 'nhl' && getTeamLogo(team.team) && (
-                          <img src={getTeamLogo(team.team)} alt={team.team} className="team-logo" />
-                        )}
-                        <span
-                          className={selectedSport === 'nhl' ? 'clickable' : ''}
-                          onClick={() => handleTeamClick(team.team)}
-                        >
-                          {team.team}
-                        </span>
-                      </div>
-                    </td>
-                    <td>{team.gamesPlayed}</td>
-                    <td>{team.wins}</td>
-                    <td>{team.losses}</td>
-                    <td className="points-cell">{team.points}</td>
-                    <td>{team.pct}</td>
-                    <td className={`streak-cell ${team.streak?.startsWith('W') ? 'win-streak' : team.streak?.startsWith('L') ? 'loss-streak' : ''}`}>
-                      {team.streak || '-'}
-                    </td>
+          {selectedSport === 'nfl' && currentSportData.standings.length > 0 && currentSportData.standings[0].division ? (
+            // NFL Division-based standings
+            <div className="nfl-divisions">
+              {currentSportData.standings.map((division, divIndex) => (
+                <div key={divIndex} className="division-section">
+                  <h4 className="division-name">{division.division}</h4>
+                  <div className="standings-table">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Team</th>
+                          <th>W</th>
+                          <th>L</th>
+                          <th>T</th>
+                          <th>PCT</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {division.teams.map((team, teamIndex) => (
+                          <tr key={teamIndex}>
+                            <td className="team-name-cell">
+                              <div className="team-info">
+                                {team.logo && (
+                                  <img src={team.logo} alt={team.team} className="team-logo" />
+                                )}
+                                <span>{team.team}</span>
+                              </div>
+                            </td>
+                            <td>{team.wins}</td>
+                            <td>{team.losses}</td>
+                            <td>{team.ties || 0}</td>
+                            <td>{team.pct}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            // Standard standings table for other sports
+            <div className="standings-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Team</th>
+                    {selectedSport === 'nhl' && <th>GP</th>}
+                    <th>W</th>
+                    <th>L</th>
+                    {selectedSport === 'nhl' && <th>PTS</th>}
+                    <th>PCT</th>
+                    {selectedSport === 'nhl' && <th>Streak</th>}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {currentSportData.standings.map((team, index) => (
+                    <tr key={index} className={team.isFavorite ? 'favorite-team-row' : ''}>
+                      <td className={`team-name-cell ${team.isFavorite ? 'favorite' : ''}`}>
+                        <div className="team-info">
+                          {selectedSport === 'nhl' && getTeamLogo(team.team) && (
+                            <img src={getTeamLogo(team.team)} alt={team.team} className="team-logo" />
+                          )}
+                          <span
+                            className={selectedSport === 'nhl' ? 'clickable' : ''}
+                            onClick={() => handleTeamClick(team.team)}
+                          >
+                            {team.team}
+                          </span>
+                        </div>
+                      </td>
+                      {selectedSport === 'nhl' && <td>{team.gamesPlayed}</td>}
+                      <td>{team.wins}</td>
+                      <td>{team.losses}</td>
+                      {selectedSport === 'nhl' && <td className="points-cell">{team.points}</td>}
+                      <td>{team.pct}</td>
+                      {selectedSport === 'nhl' && (
+                        <td className={`streak-cell ${team.streak?.startsWith('W') ? 'win-streak' : team.streak?.startsWith('L') ? 'loss-streak' : ''}`}>
+                          {team.streak || '-'}
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
       )}
 
       <div className="info-box">
-        <p><strong>Note:</strong> {selectedSport === 'nhl' ? 'NHL data is live from the official NHL API! Click on any team name to see player stats.' : 'NFL, NBA, and MLB are showing sample data. NHL uses real live data from the official NHL API.'}</p>
+        <p><strong>Note:</strong> {selectedSport === 'nhl' ? 'NHL data is live from the official NHL API! Click on any team name to see player stats.' : selectedSport === 'nfl' ? 'NFL data is live from the ESPN API!' : 'NBA and MLB are showing sample data. NHL and NFL use real live data.'}</p>
       </div>
 
       {/* Player Stats Modal */}
