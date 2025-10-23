@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Layout from './components/layout/Layout'
 import SportsDashboard from './components/dashboards/SportsDashboard'
+import WeatherDashboard from './components/dashboards/WeatherDashboard'
 import './App.css'
 
 function App() {
@@ -11,7 +12,7 @@ function App() {
       case 'sports':
         return <SportsDashboard />
       case 'weather':
-        return <div>Weather Dashboard - Coming Soon!</div>
+        return <WeatherDashboard />
       case 'disney':
         return <div>Disney Dashboard - Coming Soon!</div>
       default:
