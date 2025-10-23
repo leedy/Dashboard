@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './SportsDashboard.css';
+import PlayerStats from './PlayerStats';
 
 function SportsDashboard() {
   const [selectedSport, setSelectedSport] = useState('nhl');
   const [nhlData, setNhlData] = useState({ recentGames: [], upcomingGames: [], standings: [] });
   const [loading, setLoading] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState(null); // { abbrev: 'PHI', name: 'Philadelphia Flyers' }
 
   // Favorite team configuration (will be user-selectable in the future)
   const favoriteTeam = {
@@ -62,6 +64,7 @@ function SportsDashboard() {
       'Tampa Bay Lightning': 'TBL',
       'Toronto Maple Leafs': 'TOR',
       'Utah Hockey Club': 'UTA',
+      'Utah Mammoth': 'UTA',
       'Vancouver Canucks': 'VAN',
       'Vegas Golden Knights': 'VGK',
       'Washington Capitals': 'WSH',
@@ -96,6 +99,7 @@ function SportsDashboard() {
       'Lightning': 'TBL',
       'Maple Leafs': 'TOR',
       'Hockey Club': 'UTA',
+      'Mammoth': 'UTA',
       'Canucks': 'VAN',
       'Golden Knights': 'VGK',
       'Capitals': 'WSH',
@@ -111,6 +115,59 @@ function SportsDashboard() {
 
     console.log(`getTeamLogo: No mapping found for "${teamName}"`);
     return null;
+  };
+
+  // Helper function to get team abbreviation from team name
+  const getTeamAbbrev = (teamName) => {
+    if (!teamName) return null;
+
+    const teamAbbrevMap = {
+      'Anaheim Ducks': 'ANA', 'Ducks': 'ANA',
+      'Arizona Coyotes': 'ARI', 'Coyotes': 'ARI',
+      'Boston Bruins': 'BOS', 'Bruins': 'BOS',
+      'Buffalo Sabres': 'BUF', 'Sabres': 'BUF',
+      'Calgary Flames': 'CGY', 'Flames': 'CGY',
+      'Carolina Hurricanes': 'CAR', 'Hurricanes': 'CAR',
+      'Chicago Blackhawks': 'CHI', 'Blackhawks': 'CHI',
+      'Colorado Avalanche': 'COL', 'Avalanche': 'COL',
+      'Columbus Blue Jackets': 'CBJ', 'Blue Jackets': 'CBJ',
+      'Dallas Stars': 'DAL', 'Stars': 'DAL',
+      'Detroit Red Wings': 'DET', 'Red Wings': 'DET',
+      'Edmonton Oilers': 'EDM', 'Oilers': 'EDM',
+      'Florida Panthers': 'FLA', 'Panthers': 'FLA',
+      'Los Angeles Kings': 'LAK', 'Kings': 'LAK',
+      'Minnesota Wild': 'MIN', 'Wild': 'MIN',
+      'Montréal Canadiens': 'MTL', 'Montreal Canadiens': 'MTL', 'Canadiens': 'MTL',
+      'Nashville Predators': 'NSH', 'Predators': 'NSH',
+      'New Jersey Devils': 'NJD', 'Devils': 'NJD',
+      'New York Islanders': 'NYI', 'Islanders': 'NYI',
+      'New York Rangers': 'NYR', 'Rangers': 'NYR',
+      'Ottawa Senators': 'OTT', 'Senators': 'OTT',
+      'Philadelphia Flyers': 'PHI', 'Flyers': 'PHI',
+      'Pittsburgh Penguins': 'PIT', 'Penguins': 'PIT',
+      'San Jose Sharks': 'SJS', 'Sharks': 'SJS',
+      'Seattle Kraken': 'SEA', 'Kraken': 'SEA',
+      'St. Louis Blues': 'STL', 'Blues': 'STL',
+      'Tampa Bay Lightning': 'TBL', 'Lightning': 'TBL',
+      'Toronto Maple Leafs': 'TOR', 'Maple Leafs': 'TOR',
+      'Utah Hockey Club': 'UTA', 'Hockey Club': 'UTA',
+      'Utah Mammoth': 'UTA', 'Mammoth': 'UTA',
+      'Vancouver Canucks': 'VAN', 'Canucks': 'VAN',
+      'Vegas Golden Knights': 'VGK', 'Golden Knights': 'VGK',
+      'Washington Capitals': 'WSH', 'Capitals': 'WSH',
+      'Winnipeg Jets': 'WPG', 'Jets': 'WPG'
+    };
+
+    return teamAbbrevMap[teamName] || null;
+  };
+
+  // Handler for clicking on a team name
+  const handleTeamClick = (teamName) => {
+    if (selectedSport !== 'nhl') return; // Only works for NHL
+    const abbrev = getTeamAbbrev(teamName);
+    if (abbrev) {
+      setSelectedTeam({ abbrev, name: teamName });
+    }
   };
 
   // Fetch NHL data
@@ -330,7 +387,12 @@ function SportsDashboard() {
                       {selectedSport === 'nhl' && getTeamLogo(game.awayTeam) && (
                         <img src={getTeamLogo(game.awayTeam)} alt={game.awayTeam} className="team-logo" />
                       )}
-                      <span className={`team-name ${isFavoriteTeam(game.awayTeam) ? 'favorite' : ''}`}>{game.awayTeam}</span>
+                      <span
+                        className={`team-name ${isFavoriteTeam(game.awayTeam) ? 'favorite' : ''} ${selectedSport === 'nhl' ? 'clickable' : ''}`}
+                        onClick={() => handleTeamClick(game.awayTeam)}
+                      >
+                        {game.awayTeam}
+                      </span>
                     </div>
                     <span className="vs">@</span>
                   </div>
@@ -339,7 +401,12 @@ function SportsDashboard() {
                       {selectedSport === 'nhl' && getTeamLogo(game.homeTeam) && (
                         <img src={getTeamLogo(game.homeTeam)} alt={game.homeTeam} className="team-logo" />
                       )}
-                      <span className={`team-name ${isFavoriteTeam(game.homeTeam) ? 'favorite' : ''}`}>{game.homeTeam}</span>
+                      <span
+                        className={`team-name ${isFavoriteTeam(game.homeTeam) ? 'favorite' : ''} ${selectedSport === 'nhl' ? 'clickable' : ''}`}
+                        onClick={() => handleTeamClick(game.homeTeam)}
+                      >
+                        {game.homeTeam}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -372,7 +439,12 @@ function SportsDashboard() {
                         {selectedSport === 'nhl' && getTeamLogo(team.team) && (
                           <img src={getTeamLogo(team.team)} alt={team.team} className="team-logo" />
                         )}
-                        <span>{team.team}</span>
+                        <span
+                          className={selectedSport === 'nhl' ? 'clickable' : ''}
+                          onClick={() => handleTeamClick(team.team)}
+                        >
+                          {team.team}
+                        </span>
                       </div>
                     </td>
                     <td>{team.gamesPlayed}</td>
@@ -393,8 +465,17 @@ function SportsDashboard() {
       )}
 
       <div className="info-box">
-        <p><strong>Note:</strong> {selectedSport === 'nhl' ? 'NHL data is live from the official NHL API!' : 'NFL, NBA, and MLB are showing sample data. NHL uses real live data from the official NHL API.'}</p>
+        <p><strong>Note:</strong> {selectedSport === 'nhl' ? 'NHL data is live from the official NHL API! Click on any team name to see player stats.' : 'NFL, NBA, and MLB are showing sample data. NHL uses real live data from the official NHL API.'}</p>
       </div>
+
+      {/* Player Stats Modal */}
+      {selectedTeam && (
+        <PlayerStats
+          teamAbbrev={selectedTeam.abbrev}
+          teamName={selectedTeam.name}
+          onClose={() => setSelectedTeam(null)}
+        />
+      )}
     </div>
   );
 }

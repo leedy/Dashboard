@@ -186,6 +186,16 @@
   font-size: 1.2rem;
 }
 
+.team-name.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.team-name.clickable:hover {
+  text-decoration: underline;
+  transform: scale(1.05);
+}
+
 .team-score {
   font-weight: 800;
   color: #666;
@@ -284,6 +294,15 @@
   color: #F74902;
   font-weight: 800;
   font-size: 1.15rem;
+}
+
+.team-name-cell span.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.team-name-cell span.clickable:hover {
+  text-decoration: underline;
 }
 
 .points-cell {
