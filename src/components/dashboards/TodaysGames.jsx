@@ -159,10 +159,25 @@ function TodaysGames({ preferences }) {
             minute: '2-digit',
             timeZoneName: 'short'
           });
+
+          // Get period and clock info for live games
+          let periodInfo = '';
+          if (game.gameState === 'LIVE' || game.gameState === 'CRIT') {
+            const period = game.period || game.periodDescriptor?.number;
+            const clock = game.clock?.timeRemaining || '';
+            if (period && clock) {
+              periodInfo = `${period}${period === 1 ? 'st' : period === 2 ? 'nd' : period === 3 ? 'rd' : 'th'} ${clock}`;
+            } else if (period) {
+              periodInfo = `Period ${period}`;
+            }
+          }
+
           return {
             homeTeam: homeTeamName,
             awayTeam: awayTeamName,
-            date: game.gameState === 'LIVE' ? 'LIVE NOW' : timeStr,
+            homeScore: game.homeTeam.score || 0,
+            awayScore: game.awayTeam.score || 0,
+            date: game.gameState === 'LIVE' || game.gameState === 'CRIT' ? (periodInfo || 'LIVE NOW') : timeStr,
             isFavorite: isFavoriteTeam(homeTeamName) || isFavoriteTeam(awayTeamName),
             isLive: game.gameState === 'LIVE' || game.gameState === 'CRIT'
           };
@@ -280,7 +295,13 @@ function TodaysGames({ preferences }) {
                           {game.awayTeam}
                         </span>
                       </div>
-                      <span className="vs">@</span>
+                      {game.isLive && game.awayScore !== undefined ? (
+                        <span className={`team-score ${game.awayScore > game.homeScore ? 'winner' : ''}`}>
+                          {game.awayScore}
+                        </span>
+                      ) : (
+                        <span className="vs">@</span>
+                      )}
                     </div>
                     <div className="team-row">
                       <div className="team-info">
@@ -297,6 +318,11 @@ function TodaysGames({ preferences }) {
                           {game.homeTeam}
                         </span>
                       </div>
+                      {game.isLive && game.homeScore !== undefined && (
+                        <span className={`team-score ${game.homeScore > game.awayScore ? 'winner' : ''}`}>
+                          {game.homeScore}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
