@@ -13,7 +13,6 @@ function Layout({ children, currentDashboard, onDashboardChange }) {
   return (
     <div className="layout">
       <header className="header">
-        <h1>My Dashboard</h1>
         <nav className="nav">
           {dashboards.map(dashboard => (
             <button
