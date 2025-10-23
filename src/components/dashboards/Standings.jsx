@@ -273,7 +273,6 @@ function Standings({ preferences }) {
       ) : (
         <div className="dashboard-content">
           <div className="dashboard-card standings-card">
-            <h3>Division Standings</h3>
             {selectedSport === 'nfl' && nflStandings.length > 0 ? (
               <div className="nfl-divisions">
                 {nflStandings.map((division, divIndex) => (
