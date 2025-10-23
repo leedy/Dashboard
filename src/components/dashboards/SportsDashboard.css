@@ -6,11 +6,22 @@
   margin-bottom: 2rem;
 }
 
+.dashboard-header .header-title {
+  margin-bottom: 1rem;
+}
+
 .dashboard-header h2 {
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.5rem 0;
   color: #333;
   font-size: 2.5rem;
   font-weight: 700;
+}
+
+.dashboard-header .last-updated {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .sport-selector {

@@ -6,16 +6,31 @@ function TodaysGames({ preferences }) {
   const [selectedSport, setSelectedSport] = useState('nhl');
   const [gamesData, setGamesData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   const favoriteNHLTeam = preferences?.favoriteNHLTeam || { name: 'Philadelphia Flyers', abbrev: 'PHI' };
   const favoriteNFLTeam = preferences?.favoriteNFLTeam || { name: 'Philadelphia Eagles', abbrev: 'PHI' };
 
+  // Initial fetch when sport changes
   useEffect(() => {
     if (selectedSport === 'nhl') {
       fetchNHLGames();
     } else if (selectedSport === 'nfl') {
       fetchNFLGames();
     }
+  }, [selectedSport]);
+
+  // Auto-refresh every 1 minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (selectedSport === 'nhl') {
+        fetchNHLGames();
+      } else if (selectedSport === 'nfl') {
+        fetchNFLGames();
+      }
+    }, 60000); // 60000ms = 1 minute
+
+    return () => clearInterval(interval); // Cleanup on unmount
   }, [selectedSport]);
 
   const isFavoriteTeam = (teamName) => {
@@ -103,6 +118,7 @@ function TodaysGames({ preferences }) {
         });
 
       setGamesData(upcomingGames.length > 0 ? upcomingGames : [{ homeTeam: 'No games scheduled', awayTeam: '', date: '' }]);
+      setLastUpdated(new Date());
     } catch (error) {
       console.error('Error fetching NHL games:', error);
       setGamesData([{ homeTeam: 'Error loading data', awayTeam: '', date: error.message }]);
@@ -142,6 +158,7 @@ function TodaysGames({ preferences }) {
       });
 
       setGamesData(upcomingGames.length > 0 ? upcomingGames : [{ homeTeam: 'No games scheduled', awayTeam: '', date: '' }]);
+      setLastUpdated(new Date());
     } catch (error) {
       console.error('Error fetching NFL games:', error);
       setGamesData([{ homeTeam: 'Error loading data', awayTeam: '', date: error.message }]);
@@ -150,10 +167,24 @@ function TodaysGames({ preferences }) {
     }
   };
 
+  const formatLastUpdated = () => {
+    if (!lastUpdated) return '';
+    return lastUpdated.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
+
   return (
     <div className="sports-dashboard">
       <div className="dashboard-header">
-        <h2>Today's Games</h2>
+        <div className="header-title">
+          <h2>Today's Games</h2>
+          {lastUpdated && (
+            <p className="last-updated">Last updated: {formatLastUpdated()}</p>
+          )}
+        </div>
         <div className="sport-selector">
           <button
             className={`sport-btn ${selectedSport === 'nhl' ? 'active' : ''}`}
