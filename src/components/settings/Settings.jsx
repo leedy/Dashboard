@@ -307,6 +307,16 @@ function Settings({ preferences, onSave, onCancel }) {
               />
               <span>Countdown</span>
             </label>
+            <label>
+              <input
+                type="radio"
+                name="defaultDashboard"
+                value="disney"
+                checked={localPrefs.defaultDashboard === 'disney'}
+                onChange={handleDefaultDashboardChange}
+              />
+              <span>Disney Info</span>
+            </label>
           </div>
         </div>
 

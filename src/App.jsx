@@ -4,6 +4,7 @@ import TodaysGames from './components/dashboards/TodaysGames'
 import Standings from './components/dashboards/Standings'
 import WeatherDashboard from './components/dashboards/WeatherDashboard'
 import CountdownDashboard from './components/dashboards/CountdownDashboard'
+import DisneyDashboard from './components/dashboards/DisneyDashboard'
 import Settings from './components/settings/Settings'
 import usePreferences from './hooks/usePreferences'
 import './App.css'
@@ -44,6 +45,8 @@ function App() {
         return <WeatherDashboard preferences={preferences} />
       case 'countdown':
         return <CountdownDashboard preferences={preferences} />
+      case 'disney':
+        return <DisneyDashboard preferences={preferences} />
       case 'settings':
         return (
           <Settings
@@ -52,8 +55,6 @@ function App() {
             onCancel={handleCancelSettings}
           />
         )
-      case 'disney':
-        return <div>Disney Dashboard - Coming Soon!</div>
       case 'sports':
         // Backward compatibility - redirect to todays-games
         return <TodaysGames preferences={preferences} />

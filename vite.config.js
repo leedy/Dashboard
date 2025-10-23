@@ -30,6 +30,18 @@ export default defineConfig({
             console.log('ESPN NFL Proxy response:', req.url, proxyRes.statusCode);
           });
         }
+      },
+      '/api/queue-times': {
+        target: 'https://queue-times.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/queue-times/, ''),
+        secure: false,
+        followRedirects: true,
+        configure: (proxy, options) => {
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            console.log('Queue-Times Proxy response:', req.url, proxyRes.statusCode);
+          });
+        }
       }
     }
   }
