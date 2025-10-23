@@ -135,7 +135,13 @@ function Standings({ preferences }) {
       const response = await axios.get(`/api/nhl/v1/standings/${todayStr}`);
 
       const standingsData = response.data.standings || [];
-      const topTeams = standingsData.slice(0, 10).map(team => {
+
+      // Group teams by division
+      const divisionMap = {};
+
+      standingsData.forEach(team => {
+        const divisionName = team.divisionName || 'Unknown';
+        const conferenceName = team.conferenceName || '';
         const teamName = team.teamName?.default || team.teamAbbrev?.default || 'Unknown';
         const gamesPlayed = team.gamesPlayed || (team.wins + team.losses + (team.otLosses || 0));
 
@@ -144,19 +150,34 @@ function Standings({ preferences }) {
           streak = `${team.streakCode}${team.streakCount}`;
         }
 
-        return {
+        if (!divisionMap[divisionName]) {
+          divisionMap[divisionName] = {
+            division: divisionName,
+            conference: conferenceName,
+            teams: []
+          };
+        }
+
+        divisionMap[divisionName].teams.push({
           team: teamName,
           gamesPlayed: gamesPlayed,
           wins: team.wins,
           losses: team.losses,
+          otLosses: team.otLosses || 0,
           points: team.points || 0,
           pct: ((team.wins / (team.wins + team.losses + team.otLosses)) || 0).toFixed(3),
           streak: streak,
           isFavorite: isFavoriteTeam(teamName)
-        };
+        });
       });
 
-      setNhlStandings(topTeams.length > 0 ? topTeams : []);
+      // Convert to array and sort divisions (Atlantic, Metropolitan, Central, Pacific)
+      const divisionOrder = ['Atlantic', 'Metropolitan', 'Central', 'Pacific'];
+      const divisionStandings = divisionOrder
+        .map(divName => divisionMap[divName])
+        .filter(div => div !== undefined);
+
+      setNhlStandings(divisionStandings);
     } catch (error) {
       console.error('Error fetching NHL standings:', error);
       setNhlStandings([]);
@@ -252,7 +273,7 @@ function Standings({ preferences }) {
       ) : (
         <div className="dashboard-content">
           <div className="dashboard-card standings-card">
-            <h3>{selectedSport === 'nhl' ? 'Top 10 Teams' : 'Division Standings'}</h3>
+            <h3>Division Standings</h3>
             {selectedSport === 'nfl' && nflStandings.length > 0 ? (
               <div className="nfl-divisions">
                 {nflStandings.map((division, divIndex) => (
@@ -292,48 +313,59 @@ function Standings({ preferences }) {
                   </div>
                 ))}
               </div>
+            ) : selectedSport === 'nhl' && nhlStandings.length > 0 ? (
+              <div className="nfl-divisions">
+                {nhlStandings.map((division, divIndex) => (
+                  <div key={divIndex} className="division-section">
+                    <h4 className="division-name">{division.division} Division</h4>
+                    <div className="standings-table">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Team</th>
+                            <th>GP</th>
+                            <th>W</th>
+                            <th>L</th>
+                            <th>OTL</th>
+                            <th>PTS</th>
+                            <th>Streak</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {division.teams.map((team, teamIndex) => (
+                            <tr key={teamIndex} className={team.isFavorite ? 'favorite-team-row' : ''}>
+                              <td className={`team-name-cell ${team.isFavorite ? 'favorite' : ''}`}>
+                                <div className="team-info">
+                                  {getTeamLogo(team.team) && (
+                                    <img src={getTeamLogo(team.team)} alt={team.team} className="team-logo" />
+                                  )}
+                                  <span
+                                    className="clickable"
+                                    onClick={() => handleTeamClick(team.team)}
+                                  >
+                                    {team.team}
+                                  </span>
+                                </div>
+                              </td>
+                              <td>{team.gamesPlayed}</td>
+                              <td>{team.wins}</td>
+                              <td>{team.losses}</td>
+                              <td>{team.otLosses}</td>
+                              <td className="points-cell">{team.points}</td>
+                              <td className={`streak-cell ${team.streak?.startsWith('W') ? 'win-streak' : team.streak?.startsWith('L') ? 'loss-streak' : ''}`}>
+                                {team.streak || '-'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
               <div className="standings-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Team</th>
-                      <th>GP</th>
-                      <th>W</th>
-                      <th>L</th>
-                      <th>PTS</th>
-                      <th>PCT</th>
-                      <th>Streak</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {nhlStandings.map((team, index) => (
-                      <tr key={index} className={team.isFavorite ? 'favorite-team-row' : ''}>
-                        <td className={`team-name-cell ${team.isFavorite ? 'favorite' : ''}`}>
-                          <div className="team-info">
-                            {getTeamLogo(team.team) && (
-                              <img src={getTeamLogo(team.team)} alt={team.team} className="team-logo" />
-                            )}
-                            <span
-                              className="clickable"
-                              onClick={() => handleTeamClick(team.team)}
-                            >
-                              {team.team}
-                            </span>
-                          </div>
-                        </td>
-                        <td>{team.gamesPlayed}</td>
-                        <td>{team.wins}</td>
-                        <td>{team.losses}</td>
-                        <td className="points-cell">{team.points}</td>
-                        <td>{team.pct}</td>
-                        <td className={`streak-cell ${team.streak?.startsWith('W') ? 'win-streak' : team.streak?.startsWith('L') ? 'loss-streak' : ''}`}>
-                          {team.streak || '-'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <p>No standings data available</p>
               </div>
             )}
           </div>
