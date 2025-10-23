@@ -271,11 +271,21 @@ function Settings({ preferences, onSave, onCancel }) {
               <input
                 type="radio"
                 name="defaultDashboard"
-                value="sports"
-                checked={localPrefs.defaultDashboard === 'sports'}
+                value="todays-games"
+                checked={localPrefs.defaultDashboard === 'todays-games' || localPrefs.defaultDashboard === 'sports'}
                 onChange={handleDefaultDashboardChange}
               />
-              <span>Sports Info</span>
+              <span>Today's Games</span>
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="defaultDashboard"
+                value="standings"
+                checked={localPrefs.defaultDashboard === 'standings'}
+                onChange={handleDefaultDashboardChange}
+              />
+              <span>Standings</span>
             </label>
             <label>
               <input

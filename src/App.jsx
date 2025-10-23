@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Layout from './components/layout/Layout'
-import SportsDashboard from './components/dashboards/SportsDashboard'
+import TodaysGames from './components/dashboards/TodaysGames'
+import Standings from './components/dashboards/Standings'
 import WeatherDashboard from './components/dashboards/WeatherDashboard'
 import CountdownDashboard from './components/dashboards/CountdownDashboard'
 import Settings from './components/settings/Settings'
@@ -26,17 +27,19 @@ function App() {
 
   const handleSaveSettings = (newPreferences) => {
     updatePreferences(newPreferences);
-    setCurrentDashboard('sports'); // Return to sports after saving
+    setCurrentDashboard('todays-games'); // Return to today's games after saving
   };
 
   const handleCancelSettings = () => {
-    setCurrentDashboard('sports'); // Return to sports without saving
+    setCurrentDashboard('todays-games'); // Return to today's games without saving
   };
 
   const renderDashboard = () => {
     switch (currentDashboard) {
-      case 'sports':
-        return <SportsDashboard preferences={preferences} />
+      case 'todays-games':
+        return <TodaysGames preferences={preferences} />
+      case 'standings':
+        return <Standings preferences={preferences} />
       case 'weather':
         return <WeatherDashboard preferences={preferences} />
       case 'countdown':
@@ -51,8 +54,11 @@ function App() {
         )
       case 'disney':
         return <div>Disney Dashboard - Coming Soon!</div>
+      case 'sports':
+        // Backward compatibility - redirect to todays-games
+        return <TodaysGames preferences={preferences} />
       default:
-        return <SportsDashboard preferences={preferences} />
+        return <TodaysGames preferences={preferences} />
     }
   }
 

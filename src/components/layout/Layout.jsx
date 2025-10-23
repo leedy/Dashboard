@@ -2,7 +2,8 @@ import './Layout.css';
 
 function Layout({ children, currentDashboard, onDashboardChange }) {
   const dashboards = [
-    { id: 'sports', name: 'Sports Info', available: true },
+    { id: 'todays-games', name: "Today's Games", available: true },
+    { id: 'standings', name: 'Standings', available: true },
     { id: 'weather', name: 'Weather', available: true },
     { id: 'countdown', name: 'Countdown', available: true },
     { id: 'disney', name: 'Disney Info', available: false },
