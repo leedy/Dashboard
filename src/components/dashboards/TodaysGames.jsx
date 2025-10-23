@@ -274,7 +274,6 @@ function TodaysGames({ preferences }) {
       ) : (
         <div className="dashboard-content">
           <div className="dashboard-card todays-games-card">
-            <h3>Upcoming Games</h3>
             <div className="games-list">
               {gamesData.map((game, index) => (
                 <div key={index} className={`game-card upcoming ${game.isFavorite ? 'favorite-team' : ''} ${game.isLive ? 'live-game' : ''}`}>
