@@ -145,7 +145,11 @@ function TodaysGames({ preferences }) {
     setLoading(true);
     try {
       const today = new Date();
-      const todayStr = today.toISOString().split('T')[0];
+      // Use local date, not UTC, to avoid date shifting issues
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
       const response = await axios.get(`/api/nhl/v1/score/${todayStr}`);
 
       // Show all games for today (don't filter by state to avoid missing any)
