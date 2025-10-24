@@ -148,8 +148,8 @@ function TodaysGames({ preferences }) {
       const todayStr = today.toISOString().split('T')[0];
       const response = await axios.get(`/api/nhl/v1/score/${todayStr}`);
 
+      // Show all games for today (don't filter by state to avoid missing any)
       const upcomingGames = (response.data.games || [])
-        .filter(game => game.gameState === 'FUT' || game.gameState === 'LIVE' || game.gameState === 'CRIT')
         .map(game => {
           const homeTeamName = game.homeTeam.name.default || game.homeTeam.abbrev;
           const awayTeamName = game.awayTeam.name.default || game.awayTeam.abbrev;
@@ -172,14 +172,27 @@ function TodaysGames({ preferences }) {
             }
           }
 
+          // Determine display status
+          const isFinal = game.gameState === 'FINAL' || game.gameState === 'OFF';
+          const isLive = game.gameState === 'LIVE' || game.gameState === 'CRIT';
+          let displayDate;
+          if (isFinal) {
+            displayDate = 'FINAL';
+          } else if (isLive) {
+            displayDate = periodInfo || 'LIVE NOW';
+          } else {
+            displayDate = timeStr;
+          }
+
           return {
             homeTeam: homeTeamName,
             awayTeam: awayTeamName,
             homeScore: game.homeTeam.score || 0,
             awayScore: game.awayTeam.score || 0,
-            date: game.gameState === 'LIVE' || game.gameState === 'CRIT' ? (periodInfo || 'LIVE NOW') : timeStr,
+            date: displayDate,
             isFavorite: isFavoriteTeam(homeTeamName) || isFavoriteTeam(awayTeamName),
-            isLive: game.gameState === 'LIVE' || game.gameState === 'CRIT'
+            isLive: isLive,
+            isFinal: isFinal
           };
         });
 
@@ -294,7 +307,7 @@ function TodaysGames({ preferences }) {
                           {game.awayTeam}
                         </span>
                       </div>
-                      {game.isLive && game.awayScore !== undefined ? (
+                      {(game.isLive || game.isFinal) && game.awayScore !== undefined ? (
                         <span className={`team-score ${game.awayScore > game.homeScore ? 'winner' : ''}`}>
                           {game.awayScore}
                         </span>
@@ -317,7 +330,7 @@ function TodaysGames({ preferences }) {
                           {game.homeTeam}
                         </span>
                       </div>
-                      {game.isLive && game.homeScore !== undefined && (
+                      {(game.isLive || game.isFinal) && game.homeScore !== undefined && (
                         <span className={`team-score ${game.homeScore > game.awayScore ? 'winner' : ''}`}>
                           {game.homeScore}
                         </span>
