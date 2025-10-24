@@ -5,18 +5,40 @@ import './DisneyDashboard.css';
 function DisneyDashboard({ preferences }) {
   const [selectedPark, setSelectedPark] = useState('magic-kingdom');
   const [waitTimesData, setWaitTimesData] = useState({ lands: [] });
+  const [parkHours, setParkHours] = useState(null);
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
 
   const parks = {
-    'magic-kingdom': { id: 6, name: 'Magic Kingdom', icon: '🏰' },
-    'epcot': { id: 5, name: 'Epcot', icon: '🌐' },
-    'hollywood-studios': { id: 7, name: 'Hollywood Studios', icon: '🎬' },
-    'animal-kingdom': { id: 8, name: 'Animal Kingdom', icon: '🦁' }
+    'magic-kingdom': {
+      id: 6,
+      name: 'Magic Kingdom',
+      icon: '🏰',
+      entityId: '75ea578a-adc8-4116-a54d-dccb60765ef9'
+    },
+    'epcot': {
+      id: 5,
+      name: 'Epcot',
+      icon: '🌐',
+      entityId: '47f90d2c-e191-4239-a466-5892ef59a88b'
+    },
+    'hollywood-studios': {
+      id: 7,
+      name: 'Hollywood Studios',
+      icon: '🎬',
+      entityId: '288747d1-8b4f-4a64-867e-ea7c9b27bad8'
+    },
+    'animal-kingdom': {
+      id: 8,
+      name: 'Animal Kingdom',
+      icon: '🦁',
+      entityId: '1c84a229-8862-4648-9c71-378ddd2c7693'
+    }
   };
 
   useEffect(() => {
     fetchWaitTimes();
+    fetchParkHours();
   }, [selectedPark]);
 
   const fetchWaitTimes = async () => {
@@ -32,6 +54,40 @@ function DisneyDashboard({ preferences }) {
       setWaitTimesData({ lands: [] });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchParkHours = async () => {
+    try {
+      const entityId = parks[selectedPark].entityId;
+      const response = await axios.get(`https://api.themeparks.wiki/v1/entity/${entityId}/schedule`);
+
+      // Get today's date in YYYY-MM-DD format (local time)
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
+
+      // Find today's operating hours
+      const todaySchedule = response.data.schedule.find(
+        entry => entry.date === todayStr && entry.type === 'OPERATING'
+      );
+
+      if (todaySchedule) {
+        const openingTime = new Date(todaySchedule.openingTime);
+        const closingTime = new Date(todaySchedule.closingTime);
+
+        setParkHours({
+          open: openingTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+          close: closingTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+        });
+      } else {
+        setParkHours(null);
+      }
+    } catch (error) {
+      console.error('Error fetching park hours:', error);
+      setParkHours(null);
     }
   };
 
@@ -58,6 +114,11 @@ function DisneyDashboard({ preferences }) {
       <div className="dashboard-header">
         <div className="header-content">
           <h2>Disney World Wait Times</h2>
+          {parkHours && (
+            <p className="park-hours">
+              {parks[selectedPark].name} Hours: {parkHours.open} - {parkHours.close}
+            </p>
+          )}
           {lastUpdated && (
             <p className="last-updated">Last updated: {formatLastUpdated()}</p>
           )}
