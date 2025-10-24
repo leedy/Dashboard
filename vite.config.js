@@ -14,7 +14,10 @@ export default defineConfig({
         followRedirects: true,
         configure: (proxy, options) => {
           proxy.on('proxyRes', (proxyRes, req, res) => {
-            // Log proxy responses for debugging
+            // Disable caching to ensure fresh data
+            proxyRes.headers['cache-control'] = 'no-cache, no-store, must-revalidate';
+            proxyRes.headers['pragma'] = 'no-cache';
+            proxyRes.headers['expires'] = '0';
             console.log('Proxy response:', req.url, proxyRes.statusCode);
           });
         }
