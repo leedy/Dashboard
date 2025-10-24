@@ -215,16 +215,16 @@ function TodaysGames({ preferences }) {
   const fetchNFLGames = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('/api/nfl/apis/site/v2/sports/football/nfl/scoreboard');
+      // Add cache-busting
+      const cacheBuster = Date.now();
+      const response = await axios.get(`/api/nfl/apis/site/v2/sports/football/nfl/scoreboard?_=${cacheBuster}`);
       const events = response.data.events || [];
 
-      const upcomingGames = events.filter(event => {
-        const competition = event.competitions?.[0];
-        return competition?.status?.type?.completed === false;
-      }).map(event => {
+      const upcomingGames = events.map(event => {
         const competition = event.competitions[0];
         const homeTeam = competition.competitors.find(c => c.homeAway === 'home');
         const awayTeam = competition.competitors.find(c => c.homeAway === 'away');
+        const status = competition.status;
         const gameDate = new Date(event.date);
         const timeStr = gameDate.toLocaleString('en-US', {
           weekday: 'short',
@@ -233,12 +233,36 @@ function TodaysGames({ preferences }) {
           timeZoneName: 'short'
         });
 
+        // Determine game state
+        const isCompleted = status.type.completed;
+        const isInProgress = status.type.state === 'in';
+        const isFinal = isCompleted;
+        const isLive = isInProgress;
+
+        // Get game status display
+        let displayDate;
+        if (isFinal) {
+          displayDate = 'FINAL';
+        } else if (isLive) {
+          // Show quarter and time for live games
+          const period = status.period;
+          const clock = status.displayClock;
+          displayDate = `${period}Q ${clock}`;
+        } else {
+          displayDate = timeStr;
+        }
+
         return {
           homeTeam: homeTeam.team.displayName,
           awayTeam: awayTeam.team.displayName,
           homeLogo: homeTeam.team.logo,
           awayLogo: awayTeam.team.logo,
-          date: timeStr
+          homeScore: parseInt(homeTeam.score) || 0,
+          awayScore: parseInt(awayTeam.score) || 0,
+          date: displayDate,
+          isFavorite: isFavoriteTeam(homeTeam.team.displayName) || isFavoriteTeam(awayTeam.team.displayName),
+          isLive: isLive,
+          isFinal: isFinal
         };
       });
 
