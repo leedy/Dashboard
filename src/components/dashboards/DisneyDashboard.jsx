@@ -69,18 +69,26 @@ function DisneyDashboard({ preferences }) {
       const day = String(today.getDate()).padStart(2, '0');
       const todayStr = `${year}-${month}-${day}`;
 
-      // Find today's operating hours
-      const todaySchedule = response.data.schedule.find(
-        entry => entry.date === todayStr && entry.type === 'OPERATING'
+      // Find ALL schedule entries for today (including special events)
+      const todaySchedules = response.data.schedule.filter(
+        entry => entry.date === todayStr && (entry.type === 'OPERATING' || entry.type === 'TICKETED_EVENT')
       );
 
-      if (todaySchedule) {
-        const openingTime = new Date(todaySchedule.openingTime);
-        const closingTime = new Date(todaySchedule.closingTime);
+      if (todaySchedules.length > 0) {
+        // Get the earliest opening and latest closing across all entries
+        const openingTimes = todaySchedules
+          .filter(s => s.openingTime)
+          .map(s => new Date(s.openingTime));
+        const closingTimes = todaySchedules
+          .filter(s => s.closingTime)
+          .map(s => new Date(s.closingTime));
+
+        const earliestOpening = new Date(Math.min(...openingTimes));
+        const latestClosing = new Date(Math.max(...closingTimes));
 
         setParkHours({
-          open: openingTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-          close: closingTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+          open: earliestOpening.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+          close: latestClosing.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
         });
       } else {
         setParkHours(null);
