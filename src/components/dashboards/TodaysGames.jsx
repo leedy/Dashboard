@@ -81,7 +81,7 @@ function TodaysGames({ preferences }) {
       'Pittsburgh Penguins': 'PIT', 'Penguins': 'PIT', 'San Jose Sharks': 'SJS', 'Sharks': 'SJS',
       'Seattle Kraken': 'SEA', 'Kraken': 'SEA', 'St. Louis Blues': 'STL', 'Blues': 'STL',
       'Tampa Bay Lightning': 'TBL', 'Lightning': 'TBL', 'Toronto Maple Leafs': 'TOR', 'Maple Leafs': 'TOR',
-      'Utah Hockey Club': 'UTA', 'Hockey Club': 'UTA', 'Vancouver Canucks': 'VAN', 'Canucks': 'VAN',
+      'Utah Hockey Club': 'UTA', 'Hockey Club': 'UTA', 'Utah Mammoth': 'UTA', 'Mammoth': 'UTA', 'Vancouver Canucks': 'VAN', 'Canucks': 'VAN',
       'Vegas Golden Knights': 'VGK', 'Golden Knights': 'VGK', 'Washington Capitals': 'WSH', 'Capitals': 'WSH',
       'Winnipeg Jets': 'WPG', 'Jets': 'WPG'
     };
