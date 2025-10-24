@@ -22,7 +22,7 @@ function TodaysGames({ preferences }) {
     }
   }, [selectedSport]);
 
-  // Auto-refresh every 30 seconds for more responsive updates
+  // Auto-refresh every 1 minute
   useEffect(() => {
     const interval = setInterval(() => {
       if (selectedSport === 'nhl') {
@@ -30,7 +30,7 @@ function TodaysGames({ preferences }) {
       } else if (selectedSport === 'nfl') {
         fetchNFLGames();
       }
-    }, 30000); // 30000ms = 30 seconds
+    }, 60000); // 60000ms = 1 minute
 
     return () => clearInterval(interval); // Cleanup on unmount
   }, [selectedSport]);
