@@ -150,7 +150,9 @@ function TodaysGames({ preferences }) {
       const month = String(today.getMonth() + 1).padStart(2, '0');
       const day = String(today.getDate()).padStart(2, '0');
       const todayStr = `${year}-${month}-${day}`;
-      const response = await axios.get(`/api/nhl/v1/score/${todayStr}`);
+      // Add timestamp to prevent caching
+      const cacheBuster = Date.now();
+      const response = await axios.get(`/api/nhl/v1/score/${todayStr}?_=${cacheBuster}`);
 
       // Show all games for today (don't filter by state to avoid missing any)
       const upcomingGames = (response.data.games || [])
