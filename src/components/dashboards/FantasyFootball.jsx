@@ -108,19 +108,19 @@ function FantasyFootball() {
           </div>
 
           <div className="players-list">
-            {trendingAdds.slice(0, 10).map((playerId, index) => {
-              const player = players[playerId];
+            {trendingAdds.slice(0, 10).map((item, index) => {
+              const player = players[item.player_id];
               if (!player) return null;
 
               return (
-                <div key={playerId} className="player-card add-card">
+                <div key={item.player_id} className="player-card add-card">
                   <div className="player-rank">#{index + 1}</div>
 
                   <div className="player-info">
-                    {player.team && getTeamLogo(player.team) && (
+                    {player.team_abbr && getTeamLogo(player.team_abbr) && (
                       <img
-                        src={getTeamLogo(player.team)}
-                        alt={player.team}
+                        src={getTeamLogo(player.team_abbr)}
+                        alt={player.team_abbr}
                         className="team-logo"
                       />
                     )}
@@ -136,7 +136,7 @@ function FantasyFootball() {
                         </span>
                       </div>
                       <div className="player-team-info">
-                        <span className="team-name">{player.team || 'FA'}</span>
+                        <span className="team-name">{player.team_abbr || 'FA'}</span>
                         {player.injury_status && (
                           <span className="injury-status">{player.injury_status}</span>
                         )}
@@ -162,19 +162,19 @@ function FantasyFootball() {
           </div>
 
           <div className="players-list">
-            {trendingDrops.slice(0, 10).map((playerId, index) => {
-              const player = players[playerId];
+            {trendingDrops.slice(0, 10).map((item, index) => {
+              const player = players[item.player_id];
               if (!player) return null;
 
               return (
-                <div key={playerId} className="player-card drop-card">
+                <div key={item.player_id} className="player-card drop-card">
                   <div className="player-rank">#{index + 1}</div>
 
                   <div className="player-info">
-                    {player.team && getTeamLogo(player.team) && (
+                    {player.team_abbr && getTeamLogo(player.team_abbr) && (
                       <img
-                        src={getTeamLogo(player.team)}
-                        alt={player.team}
+                        src={getTeamLogo(player.team_abbr)}
+                        alt={player.team_abbr}
                         className="team-logo"
                       />
                     )}
@@ -190,7 +190,7 @@ function FantasyFootball() {
                         </span>
                       </div>
                       <div className="player-team-info">
-                        <span className="team-name">{player.team || 'FA'}</span>
+                        <span className="team-name">{player.team_abbr || 'FA'}</span>
                         {player.injury_status && (
                           <span className="injury-status">{player.injury_status}</span>
                         )}
