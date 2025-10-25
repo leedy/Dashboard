@@ -12,6 +12,7 @@ function TodaysGames({ preferences }) {
 
   const favoriteNHLTeam = preferences?.favoriteNHLTeam || { name: 'Philadelphia Flyers', abbrev: 'PHI' };
   const favoriteNFLTeam = preferences?.favoriteNFLTeam || { name: 'Philadelphia Eagles', abbrev: 'PHI' };
+  const favoriteMLBTeam = preferences?.favoriteMLBTeam || { name: 'Philadelphia Phillies', abbrev: 'PHI' };
 
   // Initial fetch when sport changes
   useEffect(() => {
@@ -19,6 +20,8 @@ function TodaysGames({ preferences }) {
       fetchNHLGames();
     } else if (selectedSport === 'nfl') {
       fetchNFLGames();
+    } else if (selectedSport === 'mlb') {
+      fetchMLBGames();
     }
   }, [selectedSport]);
 
@@ -29,6 +32,8 @@ function TodaysGames({ preferences }) {
         fetchNHLGames();
       } else if (selectedSport === 'nfl') {
         fetchNFLGames();
+      } else if (selectedSport === 'mlb') {
+        fetchMLBGames();
       }
     }, 60000); // 60000ms = 1 minute
 
@@ -53,6 +58,17 @@ function TodaysGames({ preferences }) {
     if (selectedSport === 'nfl' && favoriteNFLTeam) {
       const favNameLower = favoriteNFLTeam.name.toLowerCase();
       const favAbbrevLower = favoriteNFLTeam.abbrev.toLowerCase();
+      if (teamNameLower.includes(favNameLower) || favNameLower.includes(teamNameLower)) return true;
+      if (teamNameLower.includes(favAbbrevLower)) return true;
+      const words = favNameLower.split(' ');
+      for (const word of words) {
+        if (word.length > 3 && teamNameLower.includes(word)) return true;
+      }
+    }
+
+    if (selectedSport === 'mlb' && favoriteMLBTeam) {
+      const favNameLower = favoriteMLBTeam.name.toLowerCase();
+      const favAbbrevLower = favoriteMLBTeam.abbrev.toLowerCase();
       if (teamNameLower.includes(favNameLower) || favNameLower.includes(teamNameLower)) return true;
       if (teamNameLower.includes(favAbbrevLower)) return true;
       const words = favNameLower.split(' ');
@@ -276,6 +292,71 @@ function TodaysGames({ preferences }) {
     }
   };
 
+  const fetchMLBGames = async () => {
+    setLoading(true);
+    try {
+      // Add cache-busting
+      const cacheBuster = Date.now();
+      const response = await axios.get(`/api/mlb/apis/site/v2/sports/baseball/mlb/scoreboard?_=${cacheBuster}`);
+      const events = response.data.events || [];
+
+      const upcomingGames = events.map(event => {
+        const competition = event.competitions[0];
+        const homeTeam = competition.competitors.find(c => c.homeAway === 'home');
+        const awayTeam = competition.competitors.find(c => c.homeAway === 'away');
+        const status = competition.status;
+        const gameDate = new Date(event.date);
+        const timeStr = gameDate.toLocaleString('en-US', {
+          weekday: 'short',
+          hour: 'numeric',
+          minute: '2-digit',
+          timeZoneName: 'short'
+        });
+
+        // Determine game state
+        const isCompleted = status.type.completed;
+        const isInProgress = status.type.state === 'in';
+        const isFinal = isCompleted;
+        const isLive = isInProgress;
+
+        // Get game status display
+        let displayDate;
+        if (isFinal) {
+          displayDate = 'FINAL';
+        } else if (isLive) {
+          // Show inning and status for live games
+          const inning = status.period;
+          const inningState = status.type.shortDetail || '';
+          // Format like "Top 5th" or "Bot 3rd"
+          displayDate = inningState || `Inning ${inning}`;
+        } else {
+          displayDate = timeStr;
+        }
+
+        return {
+          homeTeam: homeTeam.team.displayName,
+          awayTeam: awayTeam.team.displayName,
+          homeLogo: homeTeam.team.logo,
+          awayLogo: awayTeam.team.logo,
+          homeScore: parseInt(homeTeam.score) || 0,
+          awayScore: parseInt(awayTeam.score) || 0,
+          date: displayDate,
+          isFavorite: isFavoriteTeam(homeTeam.team.displayName) || isFavoriteTeam(awayTeam.team.displayName),
+          isLive: isLive,
+          isFinal: isFinal
+        };
+      });
+
+      setGamesData(upcomingGames.length > 0 ? upcomingGames : [{ homeTeam: 'No games scheduled', awayTeam: '', date: '' }]);
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.error('Error fetching MLB games:', error);
+      setGamesData([{ homeTeam: 'Error loading data', awayTeam: '', date: error.message }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const formatLastUpdated = () => {
     if (!lastUpdated) return '';
     return lastUpdated.toLocaleTimeString('en-US', {
@@ -307,12 +388,18 @@ function TodaysGames({ preferences }) {
           >
             NFL
           </button>
+          <button
+            className={`sport-btn ${selectedSport === 'mlb' ? 'active' : ''}`}
+            onClick={() => setSelectedSport('mlb')}
+          >
+            MLB
+          </button>
         </div>
       </div>
 
       {loading ? (
         <div className="loading-container">
-          <p>Loading {selectedSport === 'nhl' ? 'NHL' : 'NFL'} games...</p>
+          <p>Loading {selectedSport === 'nhl' ? 'NHL' : selectedSport === 'nfl' ? 'NFL' : 'MLB'} games...</p>
         </div>
       ) : (
         <div className="dashboard-content">
@@ -327,7 +414,7 @@ function TodaysGames({ preferences }) {
                         {selectedSport === 'nhl' && getTeamLogo(game.awayTeam) && (
                           <img src={getTeamLogo(game.awayTeam)} alt={game.awayTeam} className="team-logo" />
                         )}
-                        {selectedSport === 'nfl' && game.awayLogo && (
+                        {(selectedSport === 'nfl' || selectedSport === 'mlb') && game.awayLogo && (
                           <img src={game.awayLogo} alt={game.awayTeam} className="team-logo" />
                         )}
                         <span
@@ -350,7 +437,7 @@ function TodaysGames({ preferences }) {
                         {selectedSport === 'nhl' && getTeamLogo(game.homeTeam) && (
                           <img src={getTeamLogo(game.homeTeam)} alt={game.homeTeam} className="team-logo" />
                         )}
-                        {selectedSport === 'nfl' && game.homeLogo && (
+                        {(selectedSport === 'nfl' || selectedSport === 'mlb') && game.homeLogo && (
                           <img src={game.homeLogo} alt={game.homeTeam} className="team-logo" />
                         )}
                         <span

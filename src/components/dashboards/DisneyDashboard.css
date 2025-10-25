@@ -11,8 +11,13 @@
 .disney-dashboard .header-content {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 1.5rem;
+  gap: 2rem;
+}
+
+.disney-dashboard .header-left {
+  flex: 1;
 }
 
 .disney-dashboard h2 {
@@ -32,6 +37,129 @@
   color: rgba(255, 255, 255, 0.8);
   font-size: 0.9rem;
   margin: 0.3rem 0 0 0;
+}
+
+.disney-dashboard .park-closed-banner {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  margin: 0.75rem 0;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+  animation: pulse-banner 2s infinite;
+  display: inline-block;
+}
+
+.disney-dashboard .park-closed-text {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  letter-spacing: 1px;
+}
+
+@keyframes pulse-banner {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* Crowd Level Indicator */
+.disney-dashboard .crowd-level-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.disney-dashboard .crowd-level-badge {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 180px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.disney-dashboard .crowd-level-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.disney-dashboard .crowd-level-value {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.disney-dashboard .crowd-level-detail {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Crowd Level Colors */
+.disney-dashboard .crowd-low {
+  background: linear-gradient(135deg, rgba(46, 213, 115, 0.3), rgba(46, 213, 115, 0.2));
+  border-color: rgba(46, 213, 115, 0.6);
+}
+
+.disney-dashboard .crowd-moderate {
+  background: linear-gradient(135deg, rgba(255, 234, 167, 0.3), rgba(255, 234, 167, 0.2));
+  border-color: rgba(255, 234, 167, 0.6);
+}
+
+.disney-dashboard .crowd-high {
+  background: linear-gradient(135deg, rgba(255, 159, 67, 0.3), rgba(255, 159, 67, 0.2));
+  border-color: rgba(255, 159, 67, 0.6);
+}
+
+.disney-dashboard .crowd-very-high {
+  background: linear-gradient(135deg, rgba(238, 82, 83, 0.3), rgba(238, 82, 83, 0.2));
+  border-color: rgba(238, 82, 83, 0.6);
+}
+
+.disney-dashboard .view-toggle {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+}
+
+.disney-dashboard .toggle-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  font-weight: 600;
+  min-width: 150px;
+}
+
+.disney-dashboard .toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.disney-dashboard .toggle-btn.active {
+  background: rgba(255, 255, 255, 0.95);
+  color: #667eea;
+  border-color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .disney-dashboard .park-selector {
@@ -86,6 +214,18 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
+}
+
+/* Two-column sorted view for "By Wait Time" mode */
+.disney-dashboard .rides-sorted-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 1.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .disney-dashboard .land-section {
@@ -250,12 +390,60 @@
   font-size: 1.5rem;
 }
 
+/* Crowd Level Legend */
+.disney-dashboard .crowd-level-legend {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.disney-dashboard .crowd-level-legend h4 {
+  color: white;
+  font-size: 1.2rem;
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+}
+
+.disney-dashboard .legend-items {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.disney-dashboard .legend-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.disney-dashboard .legend-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: white;
+  text-align: center;
+  min-width: 100px;
+  border: 2px solid transparent;
+}
+
+.disney-dashboard .legend-text {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.85rem;
+  text-align: center;
+  line-height: 1.3;
+}
+
 .disney-dashboard .info-box {
   background: rgba(255, 255, 255, 0.1);
   border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: 10px;
   padding: 1rem;
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 .disney-dashboard .info-box p {
@@ -276,7 +464,15 @@
     grid-template-columns: 1fr;
   }
 
+  .disney-dashboard .rides-sorted-grid {
+    grid-template-columns: 1fr;
+  }
+
   .disney-dashboard .park-selector {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .disney-dashboard .legend-items {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -290,9 +486,42 @@
     font-size: 2rem;
   }
 
+  .disney-dashboard .header-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .disney-dashboard .crowd-level-container {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .disney-dashboard .crowd-level-badge {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .disney-dashboard .view-toggle {
+    gap: 0.5rem;
+  }
+
+  .disney-dashboard .toggle-btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    min-width: 120px;
+  }
+
   .disney-dashboard .park-selector {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
+  }
+
+  .disney-dashboard .legend-items {
+    grid-template-columns: 1fr;
+  }
+
+  .disney-dashboard .legend-badge {
+    min-width: 120px;
   }
 
   .disney-dashboard .park-btn {
@@ -338,5 +567,14 @@
   .disney-dashboard .header-content {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .disney-dashboard .crowd-level-badge {
+    padding: 0.75rem 1rem;
+    min-width: 150px;
+  }
+
+  .disney-dashboard .crowd-level-value {
+    font-size: 1.25rem;
   }
 }

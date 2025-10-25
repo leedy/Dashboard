@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const DEFAULT_PREFERENCES = {
   favoriteNHLTeam: {
@@ -8,6 +9,10 @@ const DEFAULT_PREFERENCES = {
   favoriteNFLTeam: {
     abbrev: 'PHI',
     name: 'Philadelphia Eagles'
+  },
+  favoriteMLBTeam: {
+    abbrev: 'PHI',
+    name: 'Philadelphia Phillies'
   },
   weatherLocation: {
     zipcode: '17042',
@@ -19,102 +24,126 @@ const DEFAULT_PREFERENCES = {
     name: 'New Year',
     date: '2026-01-01'
   },
-  defaultDashboard: 'sports',
+  defaultDashboard: 'todays-games',
   displaySettings: {
     autoRotate: false,
+    rotateInterval: 30,
     refreshInterval: 60000
   }
 };
 
-const STORAGE_KEY = 'dashboard_preferences';
-
 /**
  * Custom hook for managing user preferences
- * Uses localStorage for persistence, designed to be easily migrated to API backend later
+ * Uses MongoDB backend for persistence via API
  */
 export const usePreferences = () => {
-  const [preferences, setPreferences] = useState(() => {
-    // Load preferences from localStorage on initial mount
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        return { ...DEFAULT_PREFERENCES, ...JSON.parse(stored) };
-      }
-    } catch (error) {
-      console.error('Error loading preferences:', error);
-    }
-    return DEFAULT_PREFERENCES;
-  });
+  const [preferences, setPreferences] = useState(DEFAULT_PREFERENCES);
+  const [loading, setLoading] = useState(true);
 
-  // Save preferences to localStorage whenever they change
+  // Load preferences from backend on initial mount
   useEffect(() => {
+    const fetchPreferences = async () => {
+      try {
+        const response = await axios.get('/api/preferences');
+        setPreferences(response.data);
+      } catch (error) {
+        console.error('Error loading preferences from backend:', error);
+        // Fall back to default preferences if backend is unavailable
+        setPreferences(DEFAULT_PREFERENCES);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPreferences();
+  }, []);
+
+  // Save preferences to backend
+  const savePreferences = async (newPreferences) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
+      const response = await axios.put('/api/preferences', newPreferences);
+      setPreferences(response.data);
     } catch (error) {
-      console.error('Error saving preferences:', error);
+      console.error('Error saving preferences to backend:', error);
+      // Still update local state even if backend save fails
+      setPreferences(newPreferences);
     }
-  }, [preferences]);
+  };
 
   // Update individual preference sections
-  const updatePreferences = (updates) => {
-    setPreferences(prev => ({
-      ...prev,
+  const updatePreferences = async (updates) => {
+    const updated = {
+      ...preferences,
       ...updates
-    }));
+    };
+    await savePreferences(updated);
   };
 
-  const updateFavoriteNHLTeam = (team) => {
-    setPreferences(prev => ({
-      ...prev,
+  const updateFavoriteNHLTeam = async (team) => {
+    const updated = {
+      ...preferences,
       favoriteNHLTeam: team
-    }));
+    };
+    await savePreferences(updated);
   };
 
-  const updateFavoriteNFLTeam = (team) => {
-    setPreferences(prev => ({
-      ...prev,
+  const updateFavoriteNFLTeam = async (team) => {
+    const updated = {
+      ...preferences,
       favoriteNFLTeam: team
-    }));
+    };
+    await savePreferences(updated);
   };
 
-  const updateWeatherLocation = (location) => {
-    setPreferences(prev => ({
-      ...prev,
+  const updateWeatherLocation = async (location) => {
+    const updated = {
+      ...preferences,
       weatherLocation: location
-    }));
+    };
+    await savePreferences(updated);
   };
 
-  const updateDefaultDashboard = (dashboard) => {
-    setPreferences(prev => ({
-      ...prev,
+  const updateDefaultDashboard = async (dashboard) => {
+    const updated = {
+      ...preferences,
       defaultDashboard: dashboard
-    }));
+    };
+    await savePreferences(updated);
   };
 
-  const updateDisplaySettings = (settings) => {
-    setPreferences(prev => ({
-      ...prev,
+  const updateDisplaySettings = async (settings) => {
+    const updated = {
+      ...preferences,
       displaySettings: {
-        ...prev.displaySettings,
+        ...preferences.displaySettings,
         ...settings
       }
-    }));
+    };
+    await savePreferences(updated);
   };
 
-  const updateCountdownEvent = (event) => {
-    setPreferences(prev => ({
-      ...prev,
+  const updateCountdownEvent = async (event) => {
+    const updated = {
+      ...preferences,
       countdownEvent: event
-    }));
+    };
+    await savePreferences(updated);
   };
 
   // Reset to defaults
-  const resetPreferences = () => {
-    setPreferences(DEFAULT_PREFERENCES);
+  const resetPreferences = async () => {
+    try {
+      const response = await axios.post('/api/preferences/reset');
+      setPreferences(response.data);
+    } catch (error) {
+      console.error('Error resetting preferences:', error);
+      setPreferences(DEFAULT_PREFERENCES);
+    }
   };
 
   return {
     preferences,
+    loading,
     updatePreferences,
     updateFavoriteNHLTeam,
     updateFavoriteNFLTeam,

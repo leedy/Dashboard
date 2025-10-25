@@ -165,10 +165,16 @@ function Settings({ preferences, onSave, onCancel }) {
   return (
     <div className="settings-page">
       <div className="settings-container">
-        <h2>Settings</h2>
+        <div className="settings-header">
+          <h2>Settings</h2>
+          <p className="settings-subtitle">Customize your dashboard experience</p>
+        </div>
 
-        {/* Favorite Teams Section */}
-        <div className="settings-section">
+        <div className="settings-grid">
+          {/* Left Column */}
+          <div>
+            {/* Favorite Teams Section */}
+            <div className="settings-section">
           <h3>Favorite Teams</h3>
 
           <div className="setting-item">
@@ -200,10 +206,10 @@ function Settings({ preferences, onSave, onCancel }) {
               ))}
             </select>
           </div>
-        </div>
+            </div>
 
-        {/* Weather Location Section */}
-        <div className="settings-section">
+            {/* Weather Location Section */}
+            <div className="settings-section">
           <h3>Weather Location</h3>
 
           <div className="setting-item">
@@ -222,10 +228,10 @@ function Settings({ preferences, onSave, onCancel }) {
               <span className="zipcode-lookup">{localPrefs.weatherLocation.city}</span>
             )}
           </div>
-        </div>
+            </div>
 
-        {/* Countdown Event Section */}
-        <div className="settings-section">
+            {/* Countdown Event Section */}
+            <div className="settings-section">
           <h3>Countdown Event</h3>
 
           <div className="setting-item">
@@ -260,73 +266,80 @@ function Settings({ preferences, onSave, onCancel }) {
               }))}
             />
           </div>
-        </div>
+            </div>
+          </div>
 
-        {/* Default Dashboard Section */}
-        <div className="settings-section">
+          {/* Right Column */}
+          <div>
+            {/* Default Dashboard Section */}
+            <div className="settings-section">
           <h3>Default Dashboard</h3>
 
-          <div className="setting-item radio-group">
-            <label>
+          <div className="setting-item">
+            <label htmlFor="default-dashboard">Dashboard to Show on Startup</label>
+            <select
+              id="default-dashboard"
+              value={localPrefs.defaultDashboard === 'sports' ? 'todays-games' : localPrefs.defaultDashboard}
+              onChange={handleDefaultDashboardChange}
+            >
+              <option value="todays-games">Today's Games</option>
+              <option value="standings">Standings</option>
+              <option value="weather">Weather</option>
+              <option value="countdown">Countdown</option>
+              <option value="disney">Disney Info</option>
+              <option value="movies">Movies</option>
+              <option value="iss-tracker">ISS Tracker</option>
+              <option value="fantasy-football">Fantasy Football</option>
+            </select>
+          </div>
+            </div>
+
+            {/* Display Settings Section */}
+            <div className="settings-section">
+          <h3>Display Settings</h3>
+
+          <div className="setting-item">
+            <label htmlFor="auto-rotate" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
               <input
-                type="radio"
-                name="defaultDashboard"
-                value="todays-games"
-                checked={localPrefs.defaultDashboard === 'todays-games' || localPrefs.defaultDashboard === 'sports'}
-                onChange={handleDefaultDashboardChange}
+                id="auto-rotate"
+                type="checkbox"
+                checked={localPrefs.displaySettings?.autoRotate || false}
+                onChange={(e) => setLocalPrefs(prev => ({
+                  ...prev,
+                  displaySettings: {
+                    ...prev.displaySettings,
+                    autoRotate: e.target.checked
+                  }
+                }))}
+                style={{ width: 'auto', cursor: 'pointer' }}
               />
-              <span>Today's Games</span>
+              <span>Enable Auto-Rotate Dashboards</span>
             </label>
-            <label>
-              <input
-                type="radio"
-                name="defaultDashboard"
-                value="standings"
-                checked={localPrefs.defaultDashboard === 'standings'}
-                onChange={handleDefaultDashboardChange}
-              />
-              <span>Standings</span>
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="defaultDashboard"
-                value="weather"
-                checked={localPrefs.defaultDashboard === 'weather'}
-                onChange={handleDefaultDashboardChange}
-              />
-              <span>Weather</span>
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="defaultDashboard"
-                value="countdown"
-                checked={localPrefs.defaultDashboard === 'countdown'}
-                onChange={handleDefaultDashboardChange}
-              />
-              <span>Countdown</span>
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="defaultDashboard"
-                value="disney"
-                checked={localPrefs.defaultDashboard === 'disney'}
-                onChange={handleDefaultDashboardChange}
-              />
-              <span>Disney Info</span>
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="defaultDashboard"
-                value="movies"
-                checked={localPrefs.defaultDashboard === 'movies'}
-                onChange={handleDefaultDashboardChange}
-              />
-              <span>Movies</span>
-            </label>
+          </div>
+
+          <div className="setting-item">
+            <label htmlFor="rotate-interval">Rotation Interval (seconds)</label>
+            <input
+              id="rotate-interval"
+              type="number"
+              min="5"
+              max="300"
+              value={localPrefs.displaySettings?.rotateInterval || 30}
+              onChange={(e) => setLocalPrefs(prev => ({
+                ...prev,
+                displaySettings: {
+                  ...prev.displaySettings,
+                  rotateInterval: parseInt(e.target.value) || 30
+                }
+              }))}
+              placeholder="Enter seconds (5-300)"
+              disabled={!localPrefs.displaySettings?.autoRotate}
+            />
+            <small style={{ color: '#888', fontSize: '0.85rem', marginTop: '0.25rem', display: 'block' }}>
+              How long to show each dashboard before rotating to the next
+            </small>
+          </div>
+            </div>
           </div>
         </div>
 

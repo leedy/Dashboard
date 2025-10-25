@@ -1,6 +1,6 @@
 # Dashboard App
 
-A modern, responsive dashboard application built with React and Vite. This app provides multiple real-time dashboard views displaying live sports data, theme park wait times, and entertainment information - perfect for a TV display or home dashboard.
+A modern, responsive dashboard application built with React and Vite. This app provides multiple real-time dashboard views displaying live sports data (NHL, NFL, MLB), theme park wait times, and entertainment information - perfect for a TV display or home dashboard.
 
 ## Features
 
@@ -17,12 +17,26 @@ A modern, responsive dashboard application built with React and Vite. This app p
 - **Live Updates**: Game scores refresh every 60 seconds
 - **Favorite Team Highlighting**: Your favorite team is visually highlighted in the games list
 
+### ⚾ MLB Dashboard
+- **Today's Games**: Live MLB games with real-time scores and inning information
+- **Live Game Status**: Shows current inning (e.g., "Top 5th", "Bot 3rd") for games in progress
+- **Team Logos**: Full team logo support from ESPN
+- **Auto-Refresh**: Game data updates every 60 seconds automatically
+- **Favorite Team Highlighting**: Your favorite team is visually highlighted in the games list
+
 ### 🏰 Disney World Dashboard
 - **Live Wait Times**: Real-time ride wait times for all Disney World parks
 - **Park Hours**: Operating hours including special ticketed events (Halloween parties, etc.)
 - **Four Parks**: Magic Kingdom, Epcot, Hollywood Studios, and Animal Kingdom
 - **Visual Indicators**: Color-coded wait times (green for walk-on, red for long waits)
-- **By Land**: Wait times organized by themed lands within each park
+- **Crowd Level Indicator**: Real-time crowd level calculation based on average wait times across all open rides
+  - 🟢 **Low** (avg < 20 min) - Great time to visit!
+  - 🟡 **Moderate** (avg 20-35 min) - Typical crowds
+  - 🟠 **High** (avg 35-50 min) - Busy day
+  - 🔴 **Very High** (avg > 50 min) - Very crowded
+- **Dual View Modes**:
+  - **By Land**: Wait times organized by themed lands within each park (original view)
+  - **By Wait Time**: All rides sorted by longest wait first in a two-column layout
 
 ### 🎬 Upcoming Movies Dashboard
 - **Theatrical Releases**: Upcoming movie releases with posters and release dates
@@ -41,6 +55,7 @@ A modern, responsive dashboard application built with React and Vite. This app p
 
 - Node.js (version 16 or higher)
 - npm or yarn
+- MongoDB server (local or remote network access)
 
 ### Installation
 
@@ -49,21 +64,192 @@ A modern, responsive dashboard application built with React and Vite. This app p
 cd dashboard-app
 ```
 
-2. Install dependencies:
+2. Install frontend dependencies:
 ```bash
 npm install
 ```
 
+3. Install backend dependencies:
+```bash
+cd server
+npm install
+cd ..
+```
+
+### Configuration
+
+#### MongoDB Configuration (Backend)
+
+1. Create a `.env` file in the `server/` directory by copying the template:
+```bash
+cd server
+cp .env.template .env
+```
+
+2. Edit `server/.env` with your MongoDB connection details:
+```env
+# MongoDB Configuration
+MONGO_HOST=192.168.1.100      # Your MongoDB server IP (or localhost)
+MONGO_PORT=27017              # MongoDB port (default: 27017)
+MONGO_USERNAME=your_username  # Your MongoDB username
+MONGO_PASSWORD=your_password  # Your MongoDB password
+MONGO_DATABASE=dashboard      # Database name
+
+# Backend Server Configuration
+BACKEND_PORT=3001             # Backend server port
+```
+
+**Note**: The MongoDB configuration is stored in `server/.env` (backend), not in the root directory.
+
+#### TMDb API Configuration (Frontend - Optional)
+
+Set up TMDb API key for the Movies dashboard by creating a `.env.local` file in the root directory:
+
+```bash
+# Copy the template
+cp .env.local.template .env.local
+```
+
+Then edit `.env.local`:
+```env
+VITE_TMDB_API_KEY=your_api_key_here
+```
+
+Get your free API key at: https://www.themoviedb.org/settings/api
+
 ### Running Locally
 
-Start the development server:
+You have **three options** for running the application:
+
+#### Option 1: Run Both Servers Together (Recommended for Development)
+This runs both the frontend and backend simultaneously in one command:
+```bash
+npm run dev:all
+```
+- Frontend will be available at `http://localhost:5173/` (or 5174 if 5173 is busy)
+- Backend will run on `http://localhost:3001`
+- Both servers run in the same terminal window
+
+#### Option 2: Run Servers Separately (More Control)
+Run each server in its own terminal window for better visibility and control:
+
+**Terminal 1 - Start the Backend Server:**
+```bash
+cd server
+npm run dev
+```
+This starts the Express backend server on `http://localhost:3001` with MongoDB connection.
+
+**Terminal 2 - Start the Frontend Server:**
 ```bash
 npm run dev
 ```
+This starts the Vite frontend development server on `http://localhost:5173/`.
 
-The app will be available at `http://localhost:5173/`
+#### Option 3: Production Mode
+For testing production builds:
 
-**Note**: The development server includes proxy configuration for CORS handling. API requests to NHL, NFL, Disney, and TMDb are automatically proxied.
+**Terminal 1 - Start Backend:**
+```bash
+cd server
+npm start
+```
+
+**Terminal 2 - Build and Preview Frontend:**
+```bash
+npm run build
+npm run preview
+```
+
+### How It Works
+
+- **Frontend (Vite + React)**: Runs on port 5173/5174 and serves the user interface
+- **Backend (Express + Node.js)**: Runs on port 3001 and handles:
+  - MongoDB database operations for preferences/settings
+  - Proxying external API requests (NHL, NFL, MLB, Disney, TMDb)
+  - CORS handling
+- **MongoDB**: Stores user preferences and settings persistently
+- **Proxy**: Frontend proxies all `/api` requests to the backend server
+
+**Note**: Both the frontend and backend servers must be running for the app to work properly.
+
+### Important: MongoDB Connection
+
+**⚠️ The `npm run dev:all` command does NOT install or start MongoDB!**
+
+When you run the application, here's what actually happens:
+
+```
+Your Computer                    Your MongoDB Server (e.g., Unraid)
+┌─────────────────────────┐      ┌──────────────────────────────┐
+│                         │      │                              │
+│  Frontend (Vite)        │      │                              │
+│  Port: 5173/5174        │      │                              │
+│         ↓               │      │                              │
+│  Backend (Express)      │──────┼─────> MongoDB                │
+│  Port: 3001             │      │       Port: 27017            │
+│                         │      │       IP: 192.168.1.100      │
+│  What npm run dev:all   │      │                              │
+│  actually starts ↑      │      │  Must already be running!    │
+│                         │      │                              │
+└─────────────────────────┘      └──────────────────────────────┘
+```
+
+**What `npm run dev:all` Actually Does:**
+- ✅ Starts the frontend server (Vite) on your computer
+- ✅ Starts the backend server (Express/Node.js) on your computer
+- ❌ **Does NOT** install or start MongoDB
+- ❌ **Does NOT** create a local database
+
+**What You Need:**
+- A MongoDB server must be **already running** and accessible at the IP address specified in `server/.env`
+- The MongoDB server can be on:
+  - Your local network (like an Unraid server at `192.168.1.100`)
+  - Your local computer (if you install MongoDB locally)
+  - A cloud service (like MongoDB Atlas)
+
+### Network Access Requirements
+
+**When Using a Network MongoDB Server (e.g., Unraid):**
+
+✅ **Works:** When you're on the same network as your MongoDB server
+```
+You're home → Same WiFi → Can reach 192.168.1.100 → ✅ App works
+```
+
+❌ **Doesn't Work:** When you're away from home
+```
+You're at coffee shop → Different network → Can't reach 192.168.1.100 → ❌ App fails
+```
+
+### Options for Remote Access
+
+If you need to use the app when away from your home network:
+
+**Option 1: Install MongoDB Locally**
+Install MongoDB on your laptop for offline use:
+```bash
+# macOS with Homebrew
+brew install mongodb-community
+brew services start mongodb-community
+
+# Update server/.env to use localhost
+MONGO_HOST=localhost
+```
+
+**Option 2: VPN to Your Home Network**
+Use a VPN (like Tailscale or WireGuard) to access your home network remotely. With VPN connected, your MongoDB server IP is always reachable.
+
+**Option 3: MongoDB Atlas (Cloud Database)**
+Use a free MongoDB Atlas cluster accessible from anywhere:
+- Sign up at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+- Create a free cluster
+- Update `server/.env` with the Atlas connection string (you'll need to modify the connection format)
+
+**Option 4: Dual Configuration**
+Keep two `server/.env` files and swap them:
+- `server/.env.home` - Points to your network MongoDB server
+- `server/.env.remote` - Points to localhost or cloud MongoDB
 
 ### Building for Production
 
@@ -92,68 +278,176 @@ This app integrates with several APIs:
    - Live NFL scores and schedules
    - Team standings
 
-3. **Queue-Times API** (queue-times.com) - No API key required
+3. **ESPN MLB API** (site.api.espn.com) - No API key required
+   - Live MLB scores and schedules
+   - Team logos and information
+
+4. **Queue-Times API** (queue-times.com) - No API key required
    - Disney World wait times
 
-4. **ThemeParks.Wiki API** (api.themeparks.wiki) - No API key required
+5. **ThemeParks.Wiki API** (api.themeparks.wiki) - No API key required
    - Disney park operating hours and schedules
 
-5. **TMDb API** (api.themoviedb.org) - **Requires API key**
+6. **TMDb API** (api.themoviedb.org) - **Requires API key**
    - Movie information and posters
    - Get your free API key at: https://www.themoviedb.org/settings/api
 
 ### Setting Up TMDb API Key
 
-Create a `.env` file in the project root:
+Create a `.env.local` file in the project root (or copy from `.env.local.template`):
+```bash
+cp .env.local.template .env.local
+```
+
+Then edit it:
 ```env
 VITE_TMDB_API_KEY=your_api_key_here
 ```
 
 ## Proxy Configuration
 
-The app uses Vite's proxy feature to handle CORS issues with external APIs. Configuration is in `vite.config.js`:
+The app uses a two-tier proxy system to handle CORS and route requests:
+
+### Frontend Proxy (Vite)
+In development, Vite proxies all `/api` requests to the backend server:
 
 ```javascript
+// vite.config.js
 server: {
   proxy: {
-    '/api/nhl': {
-      target: 'https://api-web.nhle.com',
+    '/api': {
+      target: 'http://localhost:3001',  // Backend server
       changeOrigin: true,
-      rewrite: (path) => path.replace(/^\/api\/nhl/, ''),
-      configure: (proxy) => {
-        // No-cache headers to ensure fresh data
-      }
-    },
-    '/api/nfl': { /* ESPN NFL API */ },
-    '/api/queue-times': { /* Disney wait times */ }
+      secure: false,
+    }
   }
 }
 ```
+
+### Backend Proxy (Express)
+The backend server handles external API requests and MongoDB operations:
+
+```javascript
+// server/server.js
+app.use('/api/nhl', async (req, res) => {
+  // Proxies to https://api-web.nhle.com
+});
+
+app.use('/api/nfl', async (req, res) => {
+  // Proxies to https://site.api.espn.com
+});
+
+app.use('/api/mlb', async (req, res) => {
+  // Proxies to https://site.api.espn.com
+});
+
+app.use('/api/queue-times', async (req, res) => {
+  // Proxies to https://queue-times.com
+});
+
+app.use('/api/preferences', preferencesRoutes);
+  // MongoDB operations for user preferences
+```
+
+This architecture allows the backend to handle authentication, rate limiting, and data transformation in the future.
+
+## MongoDB Database
+
+### Database Schema
+
+The app uses MongoDB to store user preferences with the following schema:
+
+```javascript
+{
+  userId: 'default-user',        // User identifier (default: 'default-user')
+  favoriteNHLTeam: {
+    abbrev: 'PHI',               // Team abbreviation
+    name: 'Philadelphia Flyers'  // Full team name
+  },
+  favoriteNFLTeam: {
+    abbrev: 'PHI',
+    name: 'Philadelphia Eagles'
+  },
+  favoriteMLBTeam: {
+    abbrev: 'PHI',
+    name: 'Philadelphia Phillies'
+  },
+  weatherLocation: {
+    zipcode: '17042',
+    city: 'Lebanon, PA',
+    latitude: 40.34093,
+    longitude: -76.41135
+  },
+  countdownEvent: {
+    name: 'New Year',
+    date: '2026-01-01'
+  },
+  defaultDashboard: 'todays-games',  // Default dashboard on load
+  displaySettings: {
+    autoRotate: false,                // Auto-rotate dashboards
+    refreshInterval: 60000            // Refresh interval in ms
+  },
+  createdAt: Date,                    // Auto-generated timestamp
+  updatedAt: Date                     // Auto-generated timestamp
+}
+```
+
+### Collections
+
+- **preferences**: Stores user preferences and settings
+  - Currently uses a single document with `userId: 'default-user'`
+  - Ready to be extended for multi-user support in the future
+
+### Benefits of MongoDB Integration
+
+- **Persistence**: Settings survive browser cache clears and page refreshes
+- **Multi-device**: Access the same preferences from different browsers/devices
+- **Scalability**: Easy to add new collections for features like:
+  - Historical game data
+  - Wait time tracking
+  - Custom dashboard layouts
+  - User authentication
 
 ## Project Structure
 
 ```
 dashboard-app/
-├── src/
+├── server/                       # Backend server
+│   ├── config/
+│   │   └── database.js          # MongoDB connection configuration
+│   ├── models/
+│   │   └── Preferences.js       # Mongoose schema for user preferences
+│   ├── routes/
+│   │   └── preferences.js       # API routes for preferences
+│   ├── server.js                # Express server entry point
+│   ├── package.json             # Backend dependencies
+│   ├── .env                     # Backend environment variables (MongoDB config)
+│   └── .env.template            # Template for backend environment variables
+├── src/                         # Frontend
 │   ├── components/
-│   │   ├── dashboards/           # Dashboard components
-│   │   │   ├── TodaysGames.jsx   # NHL/NFL live games
-│   │   │   ├── Standings.jsx     # NHL/NFL standings
+│   │   ├── dashboards/          # Dashboard components
+│   │   │   ├── TodaysGames.jsx  # NHL/NFL/MLB live games
+│   │   │   ├── Standings.jsx    # NHL/NFL standings
 │   │   │   ├── DisneyDashboard.jsx
-│   │   │   ├── UpcomingMovies.jsx
-│   │   │   ├── PlayerStats.jsx   # NHL player stats modal
-│   │   │   └── *.css             # Component styles
-│   │   └── layout/               # Layout components
-│   │       ├── Layout.jsx
-│   │       └── Layout.css
-│   ├── App.jsx                   # Main app component
+│   │   │   ├── MoviesDashboard.jsx
+│   │   │   ├── PlayerStats.jsx  # NHL player stats modal
+│   │   │   └── *.css            # Component styles
+│   │   ├── layout/              # Layout components
+│   │   │   ├── Layout.jsx
+│   │   │   └── Layout.css
+│   │   └── settings/            # Settings components
+│   │       └── Settings.jsx
+│   ├── hooks/
+│   │   └── usePreferences.js    # Custom hook for MongoDB preferences
+│   ├── App.jsx                  # Main app component
 │   ├── App.css
-│   ├── index.css                 # Global styles
-│   └── main.jsx                  # App entry point
-├── public/                       # Static assets
-├── vite.config.js               # Vite configuration with proxies
-├── .env                         # Environment variables (API keys)
-└── package.json
+│   ├── index.css                # Global styles
+│   └── main.jsx                 # App entry point
+├── public/                      # Static assets
+├── vite.config.js              # Vite configuration (proxies to backend)
+├── .env.local                  # Frontend environment variables (TMDb API key)
+├── .env.local.template         # Template for frontend environment variables
+└── package.json                # Frontend dependencies
 ```
 
 ## Key Implementation Details
@@ -205,6 +499,24 @@ const todaySchedules = scheduleData.filter(
 
 const latestClosing = new Date(Math.max(...closingTimes));
 ```
+
+### Real-Time Crowd Level Calculation
+
+The Disney dashboard calculates live crowd levels based on current wait times:
+
+```javascript
+// Calculate average wait time across all open rides
+const openRides = allRides.filter(ride => ride.is_open);
+const averageWaitTime = totalWaitTime / openRides.length;
+
+// Categorize into crowd levels
+if (averageWaitTime < 20) return 'Low';
+else if (averageWaitTime < 35) return 'Moderate';
+else if (averageWaitTime < 50) return 'High';
+else return 'Very High';
+```
+
+This provides an instant, data-driven assessment of current park congestion without requiring third-party crowd prediction APIs.
 
 ## Adding New Dashboards
 
@@ -265,23 +577,32 @@ case 'weather':
 
 ## Technologies Used
 
+### Frontend
 - **React 19** - UI library with hooks
 - **Vite 7** - Build tool and dev server
 - **Axios** - HTTP client for API requests
 - **CSS3** - Modern styling with flexbox and grid
 - **ESLint** - Code quality and linting
 
+### Backend
+- **Node.js** - JavaScript runtime
+- **Express** - Web application framework
+- **MongoDB** - NoSQL database for data persistence
+- **Mongoose** - MongoDB object modeling
+- **CORS** - Cross-origin resource sharing middleware
+- **dotenv** - Environment variable management
+
 ## API Data Sources
 
 - [NHL API](https://api-web.nhle.com) - Official NHL data
-- [ESPN API](https://site.api.espn.com) - NFL scores and standings
+- [ESPN API](https://site.api.espn.com) - NFL and MLB scores and standings
 - [Queue-Times](https://queue-times.com) - Disney wait times
 - [ThemeParks.Wiki](https://api.themeparks.wiki) - Theme park schedules
 - [TMDb](https://www.themoviedb.org) - Movie database
 
 ## Future Enhancement Ideas
 
-- NBA and MLB integration
+- NBA integration
 - Weather dashboard with forecasts and radar
 - Universal Studios wait times
 - Movie showtimes for local theaters

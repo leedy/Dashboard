@@ -8,6 +8,8 @@ function Layout({ children, currentDashboard, onDashboardChange }) {
     { id: 'countdown', name: 'Countdown', available: true },
     { id: 'disney', name: 'Disney Info', available: true },
     { id: 'movies', name: 'Movies', available: true },
+    { id: 'iss-tracker', name: 'ISS Tracker', available: true },
+    { id: 'fantasy-football', name: 'Fantasy', available: true },
   ];
 
   return (

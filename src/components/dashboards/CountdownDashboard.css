@@ -15,6 +15,24 @@
   right: 50%;
   position: relative;
   width: 100vw;
+  transition: background 0.5s ease;
+}
+
+/* Dynamic Theme Colors */
+.countdown-dashboard.theme-far {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.countdown-dashboard.theme-approaching {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.countdown-dashboard.theme-soon {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.countdown-dashboard.theme-imminent {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
 }
 
 .countdown-container {
@@ -38,6 +56,109 @@
   margin-bottom: 2rem;
   font-weight: 500;
   animation: fadeIn 1s ease-out;
+}
+
+/* Circular Progress Indicator */
+.progress-ring-container {
+  position: relative;
+  display: inline-block;
+  margin: 2rem 0 2.5rem;
+  animation: fadeInScale 1s ease-out;
+}
+
+.progress-ring {
+  transform: rotate(0deg);
+  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.2));
+}
+
+.progress-ring-circle-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.2);
+}
+
+.progress-ring-circle {
+  fill: none;
+  stroke: white;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.progress-percentage {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.progress-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+
+/* Stats Panel */
+.stats-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  animation: fadeIn 1.2s ease-out;
+}
+
+.stat-item {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 1.5rem 2rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.stat-content {
+  flex: 1;
+  text-align: left;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.25rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
 }
 
 .countdown-grid {
@@ -124,6 +245,50 @@
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
+/* Milestone Badges */
+.milestone-badges {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  animation: fadeIn 1.5s ease-out;
+}
+
+.milestone-badge {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  animation: slideInBounce 0.6s ease-out;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.milestone-badge.milestone-50 {
+  background: rgba(255, 215, 0, 0.3);
+  border-color: rgba(255, 215, 0, 0.6);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.milestone-badge.milestone-75 {
+  background: rgba(255, 165, 0, 0.3);
+  border-color: rgba(255, 165, 0, 0.6);
+  box-shadow: 0 0 20px rgba(255, 165, 0, 0.3);
+}
+
+.milestone-badge.milestone-90 {
+  background: rgba(255, 69, 0, 0.3);
+  border-color: rgba(255, 69, 0, 0.6);
+  box-shadow: 0 0 20px rgba(255, 69, 0, 0.4);
+  animation: pulse 2s infinite;
+}
+
 /* Event Passed State */
 .event-passed {
   background: rgba(255, 255, 255, 0.15);
@@ -132,12 +297,45 @@
   padding: 4rem 3rem;
   border: 2px solid rgba(255, 255, 255, 0.2);
   animation: fadeInUp 0.8s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.celebration-container {
+  position: relative;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
 }
 
 .passed-icon {
   font-size: 6rem;
-  margin-bottom: 1.5rem;
   animation: bounce 1s infinite;
+  z-index: 2;
+}
+
+.confetti {
+  font-size: 3rem;
+  position: absolute;
+  animation: confettiFall 3s infinite ease-in;
+  opacity: 0.8;
+}
+
+.confetti:nth-child(2) {
+  left: 20%;
+  animation-delay: 0.5s;
+}
+
+.confetti:nth-child(3) {
+  right: 20%;
+  animation-delay: 1s;
+}
+
+.confetti:nth-child(4) {
+  left: 50%;
+  animation-delay: 1.5s;
 }
 
 .event-passed h2 {
@@ -145,11 +343,19 @@
   color: white;
   margin: 0 0 1rem 0;
   font-weight: 700;
+  animation: slideInBounce 1s ease-out;
 }
 
-.event-passed p {
-  font-size: 1.3rem;
-  color: rgba(255, 255, 255, 0.9);
+.celebration-text {
+  font-size: 1.5rem;
+  color: white;
+  margin: 0 0 1.5rem 0;
+  font-weight: 600;
+}
+
+.settings-hint {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
   margin: 0;
 }
 
@@ -205,6 +411,53 @@
   }
 }
 
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInBounce {
+  0% {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  60% {
+    transform: translateX(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(-100px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(400px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .countdown-dashboard {
@@ -217,7 +470,52 @@
 
   .event-date {
     font-size: 1.2rem;
-    margin-bottom: 3rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .progress-ring-container {
+    margin: 1.5rem 0 2rem;
+  }
+
+  .progress-ring {
+    width: 160px;
+    height: 160px;
+  }
+
+  .progress-percentage {
+    font-size: 2rem;
+  }
+
+  .stats-panel {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-item {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .stat-icon {
+    font-size: 2rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+  }
+
+  .milestone-badges {
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .milestone-badge {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
   }
 
   .countdown-grid {
@@ -244,6 +542,10 @@
   .countdown-summary strong {
     font-size: 1.6rem;
   }
+
+  .celebration-container {
+    gap: 1rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -253,6 +555,50 @@
 
   .event-date {
     font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .progress-ring-container {
+    margin: 1rem 0 1.5rem;
+  }
+
+  .progress-ring {
+    width: 140px;
+    height: 140px;
+  }
+
+  .progress-percentage {
+    font-size: 1.8rem;
+  }
+
+  .progress-label {
+    font-size: 0.8rem;
+  }
+
+  .stats-panel {
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-item {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .stat-icon {
+    font-size: 1.8rem;
+  }
+
+  .stat-value {
+    font-size: 1.3rem;
+  }
+
+  .milestone-badges {
+    gap: 0.5rem;
+  }
+
+  .milestone-badge {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
   }
 
   .countdown-number {
@@ -275,15 +621,28 @@
     padding: 3rem 2rem;
   }
 
+  .celebration-container {
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
   .passed-icon {
     font-size: 4rem;
+  }
+
+  .confetti {
+    font-size: 2rem;
   }
 
   .event-passed h2 {
     font-size: 2rem;
   }
 
-  .event-passed p {
-    font-size: 1.1rem;
+  .celebration-text {
+    font-size: 1.2rem;
+  }
+
+  .settings-hint {
+    font-size: 1rem;
   }
 }
