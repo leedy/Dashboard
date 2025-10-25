@@ -235,7 +235,7 @@ function PhotoManagement() {
             <div key={photo._id} className="photo-card">
               <div className="photo-thumbnail">
                 <img
-                  src={`/api/photos/${photo._id}`}
+                  src={photo.base64Data}
                   alt={photo.filename}
                   loading="lazy"
                 />

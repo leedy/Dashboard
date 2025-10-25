@@ -85,9 +85,8 @@ router.get('/', async (req, res) => {
 
     const query = category ? { category } : {};
 
-    // Get photos without base64 data for listing (metadata only)
+    // Get photos with base64 data (needed for thumbnails)
     const photos = await Photo.find(query)
-      .select('-base64Data')
       .sort({ uploadDate: -1 });
 
     res.json(photos);
