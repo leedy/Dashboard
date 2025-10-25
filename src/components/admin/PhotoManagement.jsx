@@ -16,6 +16,7 @@ function PhotoManagement() {
   const [error, setError] = useState(null);
   const [uploadError, setUploadError] = useState(null);
   const [uploadProgress, setUploadProgress] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     fetchPhotos(activeCategory);
@@ -35,8 +36,7 @@ function PhotoManagement() {
     }
   };
 
-  const handleFileSelect = async (event) => {
-    const files = Array.from(event.target.files);
+  const processFiles = async (files) => {
     if (files.length === 0) return;
 
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
@@ -113,9 +113,6 @@ function PhotoManagement() {
         await fetchPhotos(activeCategory);
         setUploadProgress([]);
       }, 2000);
-
-      // Clear file input
-      event.target.value = '';
     } catch (err) {
       console.error('Error uploading photos:', err);
       setUploadError(err.response?.data?.error || 'Failed to upload photos');
@@ -123,6 +120,42 @@ function PhotoManagement() {
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleFileSelect = async (event) => {
+    const files = Array.from(event.target.files);
+    await processFiles(files);
+    // Clear file input
+    event.target.value = '';
+  };
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only set dragging to false if we're leaving the drop zone entirely
+    if (e.currentTarget === e.target) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    await processFiles(files);
   };
 
   const handleDelete = async (photoId, filename) => {
@@ -181,7 +214,13 @@ function PhotoManagement() {
       </div>
 
       {/* Upload Section */}
-      <div className="upload-section">
+      <div
+        className={`upload-section ${isDragging ? 'dragging' : ''}`}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
         <label htmlFor="photo-upload" className="upload-button">
           {uploading ? '⏳ Uploading...' : '📤 Upload Photos'}
           <input
@@ -194,9 +233,10 @@ function PhotoManagement() {
             style={{ display: 'none' }}
           />
         </label>
+        {isDragging && <div className="drop-overlay">Drop photos here</div>}
         {uploadError && <div className="upload-error">{uploadError}</div>}
         <div className="upload-info">
-          <small>Supported formats: JPG, PNG, GIF, WebP | Max size: 10MB per file | Select multiple files</small>
+          <small>Supported formats: JPG, PNG, GIF, WebP | Max size: 10MB per file | Drag & drop or select multiple files</small>
         </div>
 
         {/* Upload Progress */}
