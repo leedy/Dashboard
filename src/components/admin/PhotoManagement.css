@@ -101,6 +101,62 @@
   color: #888;
 }
 
+.upload-progress {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+}
+
+.upload-progress h4 {
+  margin: 0 0 1rem 0;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.progress-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  border-left: 3px solid #888;
+}
+
+.progress-item.uploading {
+  border-left-color: #3498db;
+}
+
+.progress-item.success {
+  border-left-color: #27ae60;
+}
+
+.progress-item.failed {
+  border-left-color: #e74c3c;
+}
+
+.progress-filename {
+  color: #fff;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60%;
+}
+
+.progress-status {
+  color: #aaa;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
 .loading-message,
 .error-message,
 .empty-message {

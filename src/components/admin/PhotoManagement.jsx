@@ -15,6 +15,7 @@ function PhotoManagement() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
   const [uploadError, setUploadError] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState([]);
 
   useEffect(() => {
     fetchPhotos(activeCategory);
@@ -35,44 +36,90 @@ function PhotoManagement() {
   };
 
   const handleFileSelect = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
 
-    // Validate file type
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      setUploadError('Invalid file type. Only JPG, PNG, GIF, and WebP are allowed.');
-      return;
+    const maxSize = 10 * 1024 * 1024; // 10MB
+
+    // Validate all files first
+    const invalidFiles = [];
+    const validFiles = [];
+
+    for (const file of files) {
+      if (!allowedTypes.includes(file.type)) {
+        invalidFiles.push(`${file.name}: Invalid file type`);
+      } else if (file.size > maxSize) {
+        invalidFiles.push(`${file.name}: File too large (max 10MB)`);
+      } else {
+        validFiles.push(file);
+      }
     }
 
-    // Validate file size (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      setUploadError('File too large. Maximum size is 10MB.');
-      return;
+    if (invalidFiles.length > 0) {
+      setUploadError(invalidFiles.join(', '));
+      if (validFiles.length === 0) return;
+    } else {
+      setUploadError(null);
     }
 
-    setUploadError(null);
+    // Initialize progress tracking
+    const initialProgress = validFiles.map(file => ({
+      filename: file.name,
+      status: 'uploading'
+    }));
+    setUploadProgress(initialProgress);
     setUploading(true);
 
     try {
       const formData = new FormData();
-      formData.append('photo', file);
+      validFiles.forEach(file => {
+        formData.append('photos', file);
+      });
       formData.append('category', activeCategory);
 
-      await axios.post('/api/photos/upload', formData, {
+      const response = await axios.post('/api/photos/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
-      // Refresh photo list
-      await fetchPhotos(activeCategory);
+      // Update progress based on results
+      const updatedProgress = validFiles.map(file => {
+        const success = response.data.success?.find(p => p.filename === file.name);
+        const failed = response.data.failed?.find(p => p.filename === file.name);
+
+        if (success) {
+          return { filename: file.name, status: 'success' };
+        } else if (failed) {
+          return { filename: file.name, status: 'failed', error: failed.error };
+        } else {
+          return { filename: file.name, status: 'success' };
+        }
+      });
+
+      setUploadProgress(updatedProgress);
+
+      // Show summary
+      const successCount = response.data.success?.length || 0;
+      const failedCount = response.data.failed?.length || 0;
+
+      if (failedCount > 0) {
+        setUploadError(`Uploaded ${successCount} of ${validFiles.length} files. ${failedCount} failed.`);
+      }
+
+      // Refresh photo list after a brief delay to show results
+      setTimeout(async () => {
+        await fetchPhotos(activeCategory);
+        setUploadProgress([]);
+      }, 2000);
 
       // Clear file input
       event.target.value = '';
     } catch (err) {
-      console.error('Error uploading photo:', err);
-      setUploadError(err.response?.data?.error || 'Failed to upload photo');
+      console.error('Error uploading photos:', err);
+      setUploadError(err.response?.data?.error || 'Failed to upload photos');
+      setUploadProgress([]);
     } finally {
       setUploading(false);
     }
@@ -136,20 +183,40 @@ function PhotoManagement() {
       {/* Upload Section */}
       <div className="upload-section">
         <label htmlFor="photo-upload" className="upload-button">
-          {uploading ? '⏳ Uploading...' : '📤 Upload Photo'}
+          {uploading ? '⏳ Uploading...' : '📤 Upload Photos'}
           <input
             id="photo-upload"
             type="file"
             accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
             onChange={handleFileSelect}
             disabled={uploading}
+            multiple
             style={{ display: 'none' }}
           />
         </label>
         {uploadError && <div className="upload-error">{uploadError}</div>}
         <div className="upload-info">
-          <small>Supported formats: JPG, PNG, GIF, WebP | Max size: 10MB</small>
+          <small>Supported formats: JPG, PNG, GIF, WebP | Max size: 10MB per file | Select multiple files</small>
         </div>
+
+        {/* Upload Progress */}
+        {uploadProgress.length > 0 && (
+          <div className="upload-progress">
+            <h4>Upload Progress:</h4>
+            <div className="progress-list">
+              {uploadProgress.map((item, index) => (
+                <div key={index} className={`progress-item ${item.status}`}>
+                  <span className="progress-filename">{item.filename}</span>
+                  <span className="progress-status">
+                    {item.status === 'uploading' && '⏳ Uploading...'}
+                    {item.status === 'success' && '✅ Success'}
+                    {item.status === 'failed' && `❌ Failed: ${item.error || 'Unknown error'}`}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Photos Grid */}

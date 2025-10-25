@@ -21,11 +21,11 @@ const upload = multer({
   }
 });
 
-// Upload photo
-router.post('/upload', upload.single('photo'), async (req, res) => {
+// Upload photos (supports multiple files)
+router.post('/upload', upload.array('photos', 20), async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: 'No files uploaded' });
     }
 
     const { category } = req.body;
@@ -34,28 +34,47 @@ router.post('/upload', upload.single('photo'), async (req, res) => {
       return res.status(400).json({ error: 'Invalid category' });
     }
 
-    // Convert buffer to base64 data URI
-    const base64Data = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    const results = {
+      success: [],
+      failed: []
+    };
 
-    // Create photo document
-    const photo = new Photo({
-      category,
-      filename: req.file.originalname,
-      base64Data,
-      contentType: req.file.mimetype,
-      fileSize: req.file.size
-    });
+    // Process each file
+    for (const file of req.files) {
+      try {
+        // Convert buffer to base64 data URI
+        const base64Data = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
 
-    await photo.save();
+        // Create photo document
+        const photo = new Photo({
+          category,
+          filename: file.originalname,
+          base64Data,
+          contentType: file.mimetype,
+          fileSize: file.size
+        });
 
-    // Return photo without the full base64 data (to reduce response size)
-    const photoResponse = photo.toObject();
-    delete photoResponse.base64Data;
+        await photo.save();
 
-    res.status(201).json(photoResponse);
+        // Add to success array without base64 data
+        const photoResponse = photo.toObject();
+        delete photoResponse.base64Data;
+        results.success.push(photoResponse);
+      } catch (error) {
+        console.error(`Error uploading ${file.originalname}:`, error);
+        results.failed.push({
+          filename: file.originalname,
+          error: error.message
+        });
+      }
+    }
+
+    // Return results
+    const statusCode = results.failed.length === 0 ? 201 : (results.success.length === 0 ? 500 : 207);
+    res.status(statusCode).json(results);
   } catch (error) {
-    console.error('Error uploading photo:', error);
-    res.status(500).json({ error: 'Failed to upload photo', details: error.message });
+    console.error('Error uploading photos:', error);
+    res.status(500).json({ error: 'Failed to upload photos', details: error.message });
   }
 });
 
