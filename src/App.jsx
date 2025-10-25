@@ -7,7 +7,6 @@ import CountdownDashboard from './components/dashboards/CountdownDashboard'
 import DisneyDashboard from './components/dashboards/DisneyDashboard'
 import MoviesDashboard from './components/dashboards/MoviesDashboard'
 import ISSTracker from './components/dashboards/ISSTracker'
-import FantasyFootball from './components/dashboards/FantasyFootball'
 import PhotoSlideshow from './components/dashboards/PhotoSlideshow'
 import EventSlideshow from './components/dashboards/EventSlideshow'
 import Admin from './components/admin/Admin'
@@ -35,7 +34,6 @@ function App() {
     'disney',
     'movies',
     'iss-tracker',
-    'fantasy-football',
     'family-photos',
     'event-slides'
   ];
@@ -91,8 +89,6 @@ function App() {
         return <MoviesDashboard preferences={preferences} />
       case 'iss-tracker':
         return <ISSTracker />
-      case 'fantasy-football':
-        return <FantasyFootball />
       case 'family-photos':
         return <PhotoSlideshow />
       case 'event-slides':

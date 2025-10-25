@@ -87,22 +87,6 @@ app.use('/api/queue-times', async (req, res) => {
   }
 });
 
-// Sleeper API proxy (Fantasy Football)
-app.use('/api/sleeper', async (req, res) => {
-  try {
-    // Remove /api/sleeper from the path
-    const path = req.url.replace('/api/sleeper', '');
-    const queryString = Object.keys(req.query).length > 0 ? `?${new URLSearchParams(req.query)}` : '';
-    const targetUrl = `https://api.sleeper.app${path}${queryString}`;
-    console.log('Sleeper Proxy:', targetUrl);
-    const response = await axios.get(targetUrl);
-    res.json(response.data);
-  } catch (error) {
-    console.error('Sleeper API proxy error:', error.message);
-    res.status(error.response?.status || 500).json({ error: 'Sleeper API request failed' });
-  }
-});
-
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
