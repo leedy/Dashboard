@@ -19,14 +19,14 @@ function FantasyFootball() {
   const fetchFantasyData = async () => {
     try {
       // Fetch all players data first
-      const playersResponse = await axios.get('http://localhost:3001/api/sleeper/v1/players/nfl');
+      const playersResponse = await axios.get('/api/sleeper/v1/players/nfl');
       setPlayers(playersResponse.data);
 
       // Fetch trending players
-      const trendingResponse = await axios.get('http://localhost:3001/api/sleeper/v1/players/nfl/trending/add?lookback_hours=24&limit=10');
+      const trendingResponse = await axios.get('/api/sleeper/v1/players/nfl/trending/add?lookback_hours=24&limit=10');
       setTrendingAdds(trendingResponse.data);
 
-      const dropsResponse = await axios.get('http://localhost:3001/api/sleeper/v1/players/nfl/trending/drop?lookback_hours=24&limit=10');
+      const dropsResponse = await axios.get('/api/sleeper/v1/players/nfl/trending/drop?lookback_hours=24&limit=10');
       setTrendingDrops(dropsResponse.data);
 
       setError(null);
