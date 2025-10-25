@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const connectDB = require('./config/database');
 const preferencesRoutes = require('./routes/preferences');
+const photosRoutes = require('./routes/photos');
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3001;
@@ -14,10 +15,12 @@ connectDB();
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Increase limit for base64 images
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // API Routes
 app.use('/api/preferences', preferencesRoutes);
+app.use('/api/photos', photosRoutes);
 
 // Proxy routes for external APIs
 // NHL API proxy

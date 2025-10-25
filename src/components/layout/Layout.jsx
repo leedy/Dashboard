@@ -10,6 +10,8 @@ function Layout({ children, currentDashboard, onDashboardChange }) {
     { id: 'movies', name: 'Movies', available: true },
     { id: 'iss-tracker', name: 'ISS Tracker', available: true },
     { id: 'fantasy-football', name: 'Fantasy', available: true },
+    { id: 'family-photos', name: 'Family Photos', available: true },
+    { id: 'event-slides', name: 'Event Slides', available: true },
   ];
 
   return (
@@ -28,10 +30,10 @@ function Layout({ children, currentDashboard, onDashboardChange }) {
             </button>
           ))}
           <button
-            className={`nav-button settings-button ${currentDashboard === 'settings' ? 'active' : ''}`}
-            onClick={() => onDashboardChange('settings')}
+            className={`nav-button settings-button ${currentDashboard === 'admin' ? 'active' : ''}`}
+            onClick={() => onDashboardChange('admin')}
           >
-            ⚙️ Settings
+            ⚙️ Admin
           </button>
         </nav>
       </header>

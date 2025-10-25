@@ -8,7 +8,9 @@ import DisneyDashboard from './components/dashboards/DisneyDashboard'
 import MoviesDashboard from './components/dashboards/MoviesDashboard'
 import ISSTracker from './components/dashboards/ISSTracker'
 import FantasyFootball from './components/dashboards/FantasyFootball'
-import Settings from './components/settings/Settings'
+import PhotoSlideshow from './components/dashboards/PhotoSlideshow'
+import EventSlideshow from './components/dashboards/EventSlideshow'
+import Admin from './components/admin/Admin'
 import usePreferences from './hooks/usePreferences'
 import './App.css'
 
@@ -24,7 +26,7 @@ function App() {
 
   const [currentDashboard, setCurrentDashboard] = useState(preferences.defaultDashboard)
 
-  // Define available dashboards for rotation (excluding settings)
+  // Define available dashboards for rotation (excluding admin)
   const rotatableDashboards = [
     'todays-games',
     'standings',
@@ -33,7 +35,9 @@ function App() {
     'disney',
     'movies',
     'iss-tracker',
-    'fantasy-football'
+    'fantasy-football',
+    'family-photos',
+    'event-slides'
   ];
 
   // Update current dashboard when default preference changes
@@ -43,7 +47,7 @@ function App() {
 
   // Auto-rotate dashboards
   useEffect(() => {
-    if (!preferences.displaySettings?.autoRotate || currentDashboard === 'settings') {
+    if (!preferences.displaySettings?.autoRotate || currentDashboard === 'admin') {
       return;
     }
 
@@ -89,9 +93,22 @@ function App() {
         return <ISSTracker />
       case 'fantasy-football':
         return <FantasyFootball />
-      case 'settings':
+      case 'family-photos':
+        return <PhotoSlideshow />
+      case 'event-slides':
+        return <EventSlideshow />
+      case 'admin':
         return (
-          <Settings
+          <Admin
+            preferences={preferences}
+            onSave={handleSaveSettings}
+            onCancel={handleCancelSettings}
+          />
+        )
+      case 'settings':
+        // Backward compatibility - redirect to admin
+        return (
+          <Admin
             preferences={preferences}
             onSave={handleSaveSettings}
             onCancel={handleCancelSettings}
