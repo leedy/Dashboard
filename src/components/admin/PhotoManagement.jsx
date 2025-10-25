@@ -45,9 +45,9 @@ function PhotoManagement() {
       return;
     }
 
-    // Validate file size (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setUploadError('File too large. Maximum size is 5MB.');
+    // Validate file size (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError('File too large. Maximum size is 10MB.');
       return;
     }
 
@@ -148,7 +148,7 @@ function PhotoManagement() {
         </label>
         {uploadError && <div className="upload-error">{uploadError}</div>}
         <div className="upload-info">
-          <small>Supported formats: JPG, PNG, GIF, WebP | Max size: 5MB</small>
+          <small>Supported formats: JPG, PNG, GIF, WebP | Max size: 10MB</small>
         </div>
       </div>
 
