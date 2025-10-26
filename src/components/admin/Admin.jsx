@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import AdminSettings from './AdminSettings';
 import PhotoManagement from './PhotoManagement';
+import DisneyRideSelection from './DisneyRideSelection';
 import './Admin.css';
 
 function Admin({ preferences, onSave, onCancel }) {
@@ -28,6 +29,12 @@ function Admin({ preferences, onSave, onCancel }) {
         >
           Photo Management
         </button>
+        <button
+          className={`admin-tab ${activeTab === 'disney' ? 'active' : ''}`}
+          onClick={() => setActiveTab('disney')}
+        >
+          Disney Settings
+        </button>
       </div>
 
       <div className="admin-content">
@@ -40,6 +47,12 @@ function Admin({ preferences, onSave, onCancel }) {
         )}
         {activeTab === 'photos' && (
           <PhotoManagement />
+        )}
+        {activeTab === 'disney' && (
+          <DisneyRideSelection
+            preferences={preferences}
+            onSave={onSave}
+          />
         )}
       </div>
     </div>

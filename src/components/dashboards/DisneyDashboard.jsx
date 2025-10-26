@@ -171,11 +171,14 @@ function DisneyDashboard({ preferences }) {
       return null;
     }
 
+    const excludedRides = preferences.disneyExcludedRides || [];
+
     const openRides = [];
     waitTimesData.lands.forEach(land => {
       if (land.rides) {
         land.rides.forEach(ride => {
-          if (ride.is_open) {
+          // Include only open rides that are not in the excluded list
+          if (ride.is_open && !excludedRides.includes(ride.id)) {
             openRides.push(ride);
           }
         });
