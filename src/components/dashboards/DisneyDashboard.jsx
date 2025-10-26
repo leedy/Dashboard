@@ -8,7 +8,7 @@ function DisneyDashboard({ preferences }) {
   const [parkHours, setParkHours] = useState(null);
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
-  const [viewMode, setViewMode] = useState('by-land'); // 'by-land' or 'by-wait'
+  const [viewMode, setViewMode] = useState('by-wait'); // 'by-land' or 'by-wait'
 
   const parks = {
     'magic-kingdom': {
@@ -137,11 +137,15 @@ function DisneyDashboard({ preferences }) {
     }
 
     const parkOpen = isParkOpen();
+    const excludedRides = preferences.disneyExcludedRides || [];
     const allRides = [];
     waitTimesData.lands.forEach(land => {
       if (land.rides) {
         land.rides.forEach(ride => {
-          allRides.push(ride);
+          // Only include rides that are not in the excluded list
+          if (!excludedRides.includes(ride.id)) {
+            allRides.push(ride);
+          }
         });
       }
     });
@@ -227,15 +231,6 @@ function DisneyDashboard({ preferences }) {
               <p className="last-updated">Last updated: {formatLastUpdated()}</p>
             )}
           </div>
-          {crowdLevel && (
-            <div className="crowd-level-container">
-              <div className={`crowd-level-badge crowd-${crowdLevel.color}`}>
-                <span className="crowd-level-label">Current Crowd Level</span>
-                <span className="crowd-level-value">{crowdLevel.level}</span>
-                <span className="crowd-level-detail">Avg Wait: {crowdLevel.avgWait} min</span>
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="view-toggle">
@@ -253,17 +248,28 @@ function DisneyDashboard({ preferences }) {
           </button>
         </div>
 
-        <div className="park-selector">
-          {Object.entries(parks).map(([key, park]) => (
-            <button
-              key={key}
-              className={`park-btn ${selectedPark === key ? 'active' : ''}`}
-              onClick={() => setSelectedPark(key)}
-            >
-              <span className="park-icon">{park.icon}</span>
-              <span className="park-name">{park.name}</span>
-            </button>
-          ))}
+        <div className="park-selector-row">
+          <div className="park-selector">
+            {Object.entries(parks).map(([key, park]) => (
+              <button
+                key={key}
+                className={`park-btn ${selectedPark === key ? 'active' : ''}`}
+                onClick={() => setSelectedPark(key)}
+              >
+                <span className="park-icon">{park.icon}</span>
+                <span className="park-name">{park.name}</span>
+              </button>
+            ))}
+          </div>
+          {crowdLevel && (
+            <div className="crowd-level-container">
+              <div className={`crowd-level-badge crowd-${crowdLevel.color}`}>
+                <span className="crowd-level-label">Current Crowd Level</span>
+                <span className="crowd-level-value">{crowdLevel.level}</span>
+                <span className="crowd-level-detail">Avg Wait: {crowdLevel.avgWait} min</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -279,11 +285,18 @@ function DisneyDashboard({ preferences }) {
               <div className="lands-grid">
                 {waitTimesData.lands.map((land) => {
                   const parkOpen = isParkOpen();
+                  const excludedRides = preferences.disneyExcludedRides || [];
+                  // Filter to only show included rides
+                  const includedRides = land.rides ? land.rides.filter(ride => !excludedRides.includes(ride.id)) : [];
+
+                  // Only show the land section if it has included rides
+                  if (includedRides.length === 0) return null;
+
                   return (
                     <div key={land.id} className="land-section">
                       <h3 className="land-name">{land.name}</h3>
                       <div className="rides-list">
-                        {land.rides && land.rides.map((ride) => {
+                        {includedRides.map((ride) => {
                           const rideIsOpen = parkOpen && ride.is_open;
                           return (
                             <div

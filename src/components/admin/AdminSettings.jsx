@@ -287,7 +287,6 @@ function AdminSettings({ preferences, onSave, onCancel }) {
                 <option value="countdown">Countdown</option>
                 <option value="disney">Disney Info</option>
                 <option value="movies">Movies</option>
-                <option value="iss-tracker">ISS Tracker</option>
                 <option value="fantasy-football">Fantasy Football</option>
               </select>
             </div>

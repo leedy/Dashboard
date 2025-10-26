@@ -23,13 +23,60 @@ router.get('/:sport', async (req, res) => {
     // Check if we have cached data for today
     let cacheEntry = await GameCache.findOne({ sport, date: today });
 
+    // Helper function to check if any games are live
+    const hasLiveGames = (data, sportType) => {
+      if (sportType === 'nhl') {
+        const games = data.games || [];
+        return games.some(game => game.gameState === 'LIVE' || game.gameState === 'CRIT');
+      } else if (sportType === 'nfl' || sportType === 'mlb') {
+        const events = data.events || [];
+        return events.some(event => event.competitions[0].status.type.state === 'in');
+      }
+      return false;
+    };
+
+    // Helper function to check if all games are final
+    const allGamesFinal = (data, sportType) => {
+      if (sportType === 'nhl') {
+        const games = data.games || [];
+        if (games.length === 0) return true;
+        return games.every(game => game.gameState === 'FINAL' || game.gameState === 'OFF');
+      } else if (sportType === 'nfl' || sportType === 'mlb') {
+        const events = data.events || [];
+        if (events.length === 0) return true;
+        return events.every(event => event.competitions[0].status.type.completed);
+      }
+      return false;
+    };
+
+    const now = new Date();
+
     if (cacheEntry) {
-      console.log(`Returning cached ${sport} games from ${cacheEntry.lastUpdated}`);
-      return res.json({
-        data: cacheEntry.data,
-        cached: true,
-        lastUpdated: cacheEntry.lastUpdated
-      });
+      const cacheAge = (now - new Date(cacheEntry.lastUpdated)) / 1000 / 60; // age in minutes
+
+      // Determine cache TTL based on game states
+      let CACHE_TTL_MINUTES;
+      const hasLive = hasLiveGames(cacheEntry.data, sport);
+      const allFinal = allGamesFinal(cacheEntry.data, sport);
+
+      if (allFinal) {
+        CACHE_TTL_MINUTES = 60; // All games final: cache for 1 hour (no need to keep checking)
+      } else if (hasLive) {
+        CACHE_TTL_MINUTES = 1; // Live games: refresh every 1 minute for real-time updates
+      } else {
+        CACHE_TTL_MINUTES = 30; // Games scheduled but not started: refresh every 30 minutes
+      }
+
+      if (cacheAge < CACHE_TTL_MINUTES) {
+        console.log(`Returning cached ${sport} games from ${cacheEntry.lastUpdated} (${Math.round(cacheAge)} min old) - ${allFinal ? 'all final' : hasLive ? 'has live games' : 'pre-game'}`);
+        return res.json({
+          data: cacheEntry.data,
+          cached: true,
+          lastUpdated: cacheEntry.lastUpdated
+        });
+      } else {
+        console.log(`Cache expired for ${sport} (${Math.round(cacheAge)} min old), fetching fresh data`);
+      }
     }
 
     // No cache found, fetch from external API
@@ -49,16 +96,24 @@ router.get('/:sport', async (req, res) => {
       return res.status(400).json({ error: 'Invalid sport' });
     }
 
-    // Save to cache
-    cacheEntry = new GameCache({
-      sport,
-      date: today,
-      data: apiData,
-      lastUpdated: new Date()
-    });
-    await cacheEntry.save();
-
-    console.log(`Cached ${sport} games for ${today}`);
+    // Save to cache (update if exists, create if new)
+    if (cacheEntry) {
+      // Update existing cache entry
+      cacheEntry.data = apiData;
+      cacheEntry.lastUpdated = new Date();
+      await cacheEntry.save();
+      console.log(`Updated cached ${sport} games for ${today}`);
+    } else {
+      // Create new cache entry
+      cacheEntry = new GameCache({
+        sport,
+        date: today,
+        data: apiData,
+        lastUpdated: new Date()
+      });
+      await cacheEntry.save();
+      console.log(`Cached ${sport} games for ${today}`);
+    }
 
     res.json({
       data: apiData,

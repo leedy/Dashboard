@@ -6,7 +6,6 @@ import WeatherDashboard from './components/dashboards/WeatherDashboard'
 import CountdownDashboard from './components/dashboards/CountdownDashboard'
 import DisneyDashboard from './components/dashboards/DisneyDashboard'
 import MoviesDashboard from './components/dashboards/MoviesDashboard'
-import ISSTracker from './components/dashboards/ISSTracker'
 import PhotoSlideshow from './components/dashboards/PhotoSlideshow'
 import EventSlideshow from './components/dashboards/EventSlideshow'
 import Admin from './components/admin/Admin'
@@ -33,7 +32,6 @@ function App() {
     'countdown',
     'disney',
     'movies',
-    'iss-tracker',
     'family-photos',
     'event-slides'
   ];
@@ -87,8 +85,6 @@ function App() {
         return <DisneyDashboard preferences={preferences} />
       case 'movies':
         return <MoviesDashboard preferences={preferences} />
-      case 'iss-tracker':
-        return <ISSTracker />
       case 'family-photos':
         return <PhotoSlideshow />
       case 'event-slides':
