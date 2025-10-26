@@ -15,6 +15,7 @@ function DisneyRideSelection({ preferences, onSave }) {
   const [selectedPark, setSelectedPark] = useState('magic-kingdom');
   const [excludedRides, setExcludedRides] = useState(preferences.disneyExcludedRides || []);
   const [saving, setSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState(null);
 
   useEffect(() => {
     fetchAllRides();
@@ -93,14 +94,18 @@ function DisneyRideSelection({ preferences, onSave }) {
 
   const handleSave = async () => {
     setSaving(true);
+    setSaveMessage(null);
     try {
       const updatedPreferences = {
         ...preferences,
         disneyExcludedRides: excludedRides
       };
       await onSave(updatedPreferences);
+      setSaveMessage({ type: 'success', text: 'Settings saved successfully!' });
+      setTimeout(() => setSaveMessage(null), 3000);
     } catch (error) {
       console.error('Error saving ride selections:', error);
+      setSaveMessage({ type: 'error', text: 'Failed to save settings. Please try again.' });
     } finally {
       setSaving(false);
     }
@@ -179,6 +184,11 @@ function DisneyRideSelection({ preferences, onSave }) {
           </div>
 
           <div className="ride-selection-actions">
+            {saveMessage && (
+              <div className={`save-message ${saveMessage.type}`}>
+                {saveMessage.text}
+              </div>
+            )}
             <button
               className="save-button"
               onClick={handleSave}

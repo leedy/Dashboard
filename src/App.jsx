@@ -64,9 +64,9 @@ function App() {
     return () => clearInterval(intervalId);
   }, [preferences.displaySettings?.autoRotate, preferences.displaySettings?.rotateInterval, currentDashboard]);
 
-  const handleSaveSettings = (newPreferences) => {
-    updatePreferences(newPreferences);
-    setCurrentDashboard('todays-games'); // Return to today's games after saving
+  const handleSaveSettings = async (newPreferences) => {
+    await updatePreferences(newPreferences);
+    // Don't auto-navigate away - let user stay in admin panel after saving
   };
 
   const handleCancelSettings = () => {

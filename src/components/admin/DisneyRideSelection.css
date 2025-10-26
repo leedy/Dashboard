@@ -194,9 +194,30 @@
 
 .ride-selection-actions {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
   padding-top: 1rem;
   border-top: 2px solid #333;
+}
+
+.save-message {
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.save-message.success {
+  background: rgba(39, 174, 96, 0.2);
+  color: #27ae60;
+  border: 2px solid #27ae60;
+}
+
+.save-message.error {
+  background: rgba(231, 76, 60, 0.2);
+  color: #e74c3c;
+  border: 2px solid #e74c3c;
 }
 
 .save-button {
