@@ -30,7 +30,8 @@ const DEFAULT_PREFERENCES = {
     rotateInterval: 30,
     refreshInterval: 60000
   },
-  disneyExcludedRides: []
+  disneyExcludedRides: [],
+  disneyKnownRides: []
 };
 
 /**

@@ -12,24 +12,34 @@ const PARKS = {
 function DisneyRideSelection({ preferences, onSave }) {
   const [allRides, setAllRides] = useState({});
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedPark, setSelectedPark] = useState('magic-kingdom');
   const [excludedRides, setExcludedRides] = useState(preferences.disneyExcludedRides || []);
+  const [knownRides, setKnownRides] = useState(preferences.disneyKnownRides || []);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState(null);
+  const [newRidesDetected, setNewRidesDetected] = useState(0);
 
   useEffect(() => {
     fetchAllRides();
   }, []);
 
-  // Sync excludedRides with preferences when they change
+  // Sync excludedRides and knownRides with preferences when they change
   useEffect(() => {
     setExcludedRides(preferences.disneyExcludedRides || []);
+    setKnownRides(preferences.disneyKnownRides || []);
   }, [preferences]);
 
-  const fetchAllRides = async () => {
-    setLoading(true);
+  const fetchAllRides = async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+
     try {
       const ridesData = {};
+      const allCurrentRideIds = [];
 
       for (const [parkKey, park] of Object.entries(PARKS)) {
         const response = await axios.get(`/api/queue-times/parks/${park.id}/queue_times.json`);
@@ -45,6 +55,7 @@ function DisneyRideSelection({ preferences, onSave }) {
                   landName: land.name,
                   parkKey: parkKey
                 });
+                allCurrentRideIds.push(ride.id);
               });
             }
           });
@@ -54,10 +65,57 @@ function DisneyRideSelection({ preferences, onSave }) {
       }
 
       setAllRides(ridesData);
+
+      // Detect new rides (rides in API but not in knownRides)
+      const newRides = allCurrentRideIds.filter(id => !knownRides.includes(id));
+
+      if (newRides.length > 0) {
+        setNewRidesDetected(newRides.length);
+
+        // Auto-exclude new rides and update known rides
+        const updatedExcluded = [...new Set([...excludedRides, ...newRides])];
+        const updatedKnown = [...new Set([...knownRides, ...allCurrentRideIds])];
+
+        setExcludedRides(updatedExcluded);
+        setKnownRides(updatedKnown);
+
+        // Auto-save the updated preferences
+        const updatedPreferences = {
+          ...preferences,
+          disneyExcludedRides: updatedExcluded,
+          disneyKnownRides: updatedKnown
+        };
+
+        await onSave(updatedPreferences);
+
+        setSaveMessage({
+          type: 'success',
+          text: `Found ${newRides.length} new attraction(s) - automatically excluded from crowd calculations`
+        });
+        setTimeout(() => {
+          setSaveMessage(null);
+          setNewRidesDetected(0);
+        }, 5000);
+      } else if (isRefresh) {
+        // Just update known rides to include current state
+        const updatedKnown = [...new Set([...knownRides, ...allCurrentRideIds])];
+        if (updatedKnown.length !== knownRides.length) {
+          setKnownRides(updatedKnown);
+          await onSave({
+            ...preferences,
+            disneyKnownRides: updatedKnown
+          });
+        }
+
+        setSaveMessage({ type: 'success', text: 'Attraction list refreshed - no new attractions found' });
+        setTimeout(() => setSaveMessage(null), 3000);
+      }
     } catch (error) {
       console.error('Error fetching rides:', error);
+      setSaveMessage({ type: 'error', text: 'Failed to fetch attractions. Please try again.' });
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -103,7 +161,8 @@ function DisneyRideSelection({ preferences, onSave }) {
     try {
       const updatedPreferences = {
         ...preferences,
-        disneyExcludedRides: excludedRides
+        disneyExcludedRides: excludedRides,
+        disneyKnownRides: knownRides
       };
       await onSave(updatedPreferences);
       setSaveMessage({ type: 'success', text: 'Settings saved successfully!' });
@@ -114,6 +173,10 @@ function DisneyRideSelection({ preferences, onSave }) {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    await fetchAllRides(true);
   };
 
   const currentParkRides = allRides[selectedPark] || [];
@@ -147,8 +210,19 @@ function DisneyRideSelection({ preferences, onSave }) {
           <div className="ride-selection-controls">
             <div className="selection-stats">
               {includedCount} of {totalCount} attractions included
+              {newRidesDetected > 0 && (
+                <span className="new-rides-badge">+{newRidesDetected} new</span>
+              )}
             </div>
             <div className="bulk-actions">
+              <button
+                className="refresh-btn"
+                onClick={handleRefresh}
+                disabled={refreshing}
+                title="Refresh attraction list from Disney API"
+              >
+                {refreshing ? '🔄 Refreshing...' : '🔄 Refresh List'}
+              </button>
               <button className="bulk-btn" onClick={() => toggleAllInPark(true)}>
                 Include All
               </button>

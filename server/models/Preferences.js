@@ -41,6 +41,10 @@ const preferencesSchema = new mongoose.Schema({
   disneyExcludedRides: {
     type: [Number],
     default: []
+  },
+  disneyKnownRides: {
+    type: [Number],
+    default: []
   }
 }, {
   timestamps: true
