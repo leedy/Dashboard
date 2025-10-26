@@ -23,6 +23,7 @@ router.get('/', async (req, res) => {
 // Update preferences for the default user
 router.put('/', async (req, res) => {
   try {
+    console.log('Updating preferences with:', JSON.stringify(req.body, null, 2));
     let preferences = await Preferences.findOne({ userId: 'default-user' });
 
     if (!preferences) {
@@ -37,6 +38,7 @@ router.put('/', async (req, res) => {
     }
 
     await preferences.save();
+    console.log('Preferences saved successfully');
     res.json(preferences);
   } catch (error) {
     console.error('Error updating preferences:', error);

@@ -21,6 +21,11 @@ function DisneyRideSelection({ preferences, onSave }) {
     fetchAllRides();
   }, []);
 
+  // Sync excludedRides with preferences when they change
+  useEffect(() => {
+    setExcludedRides(preferences.disneyExcludedRides || []);
+  }, [preferences]);
+
   const fetchAllRides = async () => {
     setLoading(true);
     try {
