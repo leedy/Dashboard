@@ -6,6 +6,7 @@ require('dotenv').config();
 const connectDB = require('./config/database');
 const preferencesRoutes = require('./routes/preferences');
 const photosRoutes = require('./routes/photos');
+const gameCacheRoutes = require('./routes/gameCache');
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3001;
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ limit: '20mb', extended: true }));
 // API Routes
 app.use('/api/preferences', preferencesRoutes);
 app.use('/api/photos', photosRoutes);
+app.use('/api/games', gameCacheRoutes);
 
 // Proxy routes for external APIs
 // NHL API proxy

@@ -160,18 +160,12 @@ function TodaysGames({ preferences }) {
   const fetchNHLGames = async () => {
     setLoading(true);
     try {
-      const today = new Date();
-      // Use local date, not UTC, to avoid date shifting issues
-      const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const day = String(today.getDate()).padStart(2, '0');
-      const todayStr = `${year}-${month}-${day}`;
-      // Add timestamp to prevent caching
-      const cacheBuster = Date.now();
-      const response = await axios.get(`/api/nhl/v1/score/${todayStr}?_=${cacheBuster}`);
+      // Use cached game data endpoint
+      const response = await axios.get(`/api/games/nhl`);
+      const apiData = response.data.data; // Extract actual game data from cache response
 
       // Show all games for today (don't filter by state to avoid missing any)
-      const upcomingGames = (response.data.games || [])
+      const upcomingGames = (apiData.games || [])
         .map(game => {
           const homeTeamName = game.homeTeam.name.default || game.homeTeam.abbrev;
           const awayTeamName = game.awayTeam.name.default || game.awayTeam.abbrev;
@@ -219,7 +213,7 @@ function TodaysGames({ preferences }) {
         });
 
       setGamesData(upcomingGames.length > 0 ? upcomingGames : [{ homeTeam: 'No games scheduled', awayTeam: '', date: '' }]);
-      setLastUpdated(new Date());
+      setLastUpdated(new Date(response.data.lastUpdated));
     } catch (error) {
       console.error('Error fetching NHL games:', error);
       setGamesData([{ homeTeam: 'Error loading data', awayTeam: '', date: error.message }]);
@@ -231,10 +225,10 @@ function TodaysGames({ preferences }) {
   const fetchNFLGames = async () => {
     setLoading(true);
     try {
-      // Add cache-busting
-      const cacheBuster = Date.now();
-      const response = await axios.get(`/api/nfl/apis/site/v2/sports/football/nfl/scoreboard?_=${cacheBuster}`);
-      const events = response.data.events || [];
+      // Use cached game data endpoint
+      const response = await axios.get(`/api/games/nfl`);
+      const apiData = response.data.data; // Extract actual game data from cache response
+      const events = apiData.events || [];
 
       const upcomingGames = events.map(event => {
         const competition = event.competitions[0];
@@ -283,7 +277,7 @@ function TodaysGames({ preferences }) {
       });
 
       setGamesData(upcomingGames.length > 0 ? upcomingGames : [{ homeTeam: 'No games scheduled', awayTeam: '', date: '' }]);
-      setLastUpdated(new Date());
+      setLastUpdated(new Date(response.data.lastUpdated));
     } catch (error) {
       console.error('Error fetching NFL games:', error);
       setGamesData([{ homeTeam: 'Error loading data', awayTeam: '', date: error.message }]);
@@ -295,10 +289,10 @@ function TodaysGames({ preferences }) {
   const fetchMLBGames = async () => {
     setLoading(true);
     try {
-      // Add cache-busting
-      const cacheBuster = Date.now();
-      const response = await axios.get(`/api/mlb/apis/site/v2/sports/baseball/mlb/scoreboard?_=${cacheBuster}`);
-      const events = response.data.events || [];
+      // Use cached game data endpoint
+      const response = await axios.get(`/api/games/mlb`);
+      const apiData = response.data.data; // Extract actual game data from cache response
+      const events = apiData.events || [];
 
       const upcomingGames = events.map(event => {
         const competition = event.competitions[0];
@@ -348,7 +342,7 @@ function TodaysGames({ preferences }) {
       });
 
       setGamesData(upcomingGames.length > 0 ? upcomingGames : [{ homeTeam: 'No games scheduled', awayTeam: '', date: '' }]);
-      setLastUpdated(new Date());
+      setLastUpdated(new Date(response.data.lastUpdated));
     } catch (error) {
       console.error('Error fetching MLB games:', error);
       setGamesData([{ homeTeam: 'Error loading data', awayTeam: '', date: error.message }]);
