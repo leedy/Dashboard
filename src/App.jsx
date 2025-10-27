@@ -87,7 +87,10 @@ function App() {
         const currentSubIndex = currentDashboardConfig.subSections.indexOf(currentSubSection);
         const isLastSubSection = currentSubIndex === currentDashboardConfig.subSections.length - 1;
 
-        if (currentSubSection === null || isLastSubSection) {
+        if (currentSubSection === null) {
+          // Initialize to first sub-section if not set
+          setCurrentSubSection(currentDashboardConfig.subSections[0]);
+        } else if (isLastSubSection) {
           // Move to next dashboard and set its first sub-section (if any)
           const nextDashboardIndex = (currentDashboardIndex + 1) % dashboardRotation.length;
           const nextDashboard = dashboardRotation[nextDashboardIndex];
