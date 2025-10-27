@@ -12,6 +12,15 @@ const getTodayDate = () => {
   return `${year}-${month}-${day}`;
 };
 
+// Helper to get today's date in YYYYMMDD format (for ESPN API)
+const getESPNDateFormat = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}${month}${day}`;
+};
+
 // Get cached games or fetch from external API
 router.get('/:sport', async (req, res) => {
   try {
@@ -87,10 +96,12 @@ router.get('/:sport', async (req, res) => {
       const response = await axios.get(`https://api-web.nhle.com/v1/score/${today}`);
       apiData = response.data;
     } else if (sport === 'nfl') {
-      const response = await axios.get(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard`);
+      const espnDate = getESPNDateFormat();
+      const response = await axios.get(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=${espnDate}`);
       apiData = response.data;
     } else if (sport === 'mlb') {
-      const response = await axios.get(`https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard`);
+      const espnDate = getESPNDateFormat();
+      const response = await axios.get(`https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=${espnDate}`);
       apiData = response.data;
     } else {
       return res.status(400).json({ error: 'Invalid sport' });
@@ -143,10 +154,12 @@ router.post('/:sport/refresh', async (req, res) => {
       const response = await axios.get(`https://api-web.nhle.com/v1/score/${today}`);
       apiData = response.data;
     } else if (sport === 'nfl') {
-      const response = await axios.get(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard`);
+      const espnDate = getESPNDateFormat();
+      const response = await axios.get(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=${espnDate}`);
       apiData = response.data;
     } else if (sport === 'mlb') {
-      const response = await axios.get(`https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard`);
+      const espnDate = getESPNDateFormat();
+      const response = await axios.get(`https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=${espnDate}`);
       apiData = response.data;
     } else {
       return res.status(400).json({ error: 'Invalid sport' });
