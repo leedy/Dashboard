@@ -373,7 +373,7 @@ chmod +x ~/start-dashboard.sh
 
 ```bash
 # Edit lightdm config
-sudo nano /etc/lightdm/lightdm.conf
+
 ```
 
 Find the `[Seat:*]` section and add this line:
@@ -478,7 +478,13 @@ sudo systemctl stop dashboard-frontend
 
 ### Update Dashboard Code
 
+When you make changes on your development machine and push them to GitHub, here's how to update your Pi:
+
+**Manual Update:**
 ```bash
+# SSH into your Pi
+ssh your_username@raspberrypi.local
+
 # Navigate to repository
 cd ~/Dashboard
 
@@ -492,6 +498,54 @@ npm run build
 sudo systemctl restart dashboard-backend
 sudo systemctl restart dashboard-frontend
 ```
+
+**Create an Update Script (Recommended):**
+
+Make updates easier by creating a dedicated update script:
+
+```bash
+# Create the update script
+nano ~/update-dashboard.sh
+```
+
+Paste this content:
+```bash
+#!/bin/bash
+
+echo "Updating Dashboard from GitHub..."
+cd ~/Dashboard
+
+echo "Pulling latest changes..."
+git pull
+
+echo "Rebuilding frontend..."
+npm run build
+
+echo "Restarting services..."
+sudo systemctl restart dashboard-backend
+sudo systemctl restart dashboard-frontend
+
+echo "Update complete! Dashboard restarted."
+echo "Changes will appear in the browser automatically."
+```
+
+Save with `Ctrl+X`, `Y`, `Enter`, then make it executable:
+
+```bash
+chmod +x ~/update-dashboard.sh
+```
+
+**Now you can update with one command:**
+```bash
+~/update-dashboard.sh
+```
+
+**Update Workflow:**
+1. Make changes on your development machine
+2. Commit and push to GitHub
+3. SSH into your Pi: `ssh your_username@192.168.1.X`
+4. Run: `~/update-dashboard.sh`
+5. Done! The dashboard updates automatically
 
 ### Exit Kiosk Mode
 
