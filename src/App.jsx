@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import axios from 'axios'
 import Layout from './components/layout/Layout'
 import TodaysGames from './components/dashboards/TodaysGames'
 import Standings from './components/dashboards/Standings'
@@ -24,9 +25,34 @@ function App() {
 
   const [currentDashboard, setCurrentDashboard] = useState(preferences.defaultDashboard)
   const [currentSubSection, setCurrentSubSection] = useState(null)
+  const [photoCounts, setPhotoCounts] = useState({
+    'family-photos': 0,
+    'event-slides': 0
+  })
+
+  // Check photo counts on mount
+  useEffect(() => {
+    const checkPhotoCounts = async () => {
+      try {
+        const [familyResponse, eventResponse] = await Promise.all([
+          axios.get('/api/photos?category=family-photos'),
+          axios.get('/api/photos?category=event-slides')
+        ]);
+
+        setPhotoCounts({
+          'family-photos': familyResponse.data.length,
+          'event-slides': eventResponse.data.length
+        });
+      } catch (error) {
+        console.error('Error checking photo counts:', error);
+      }
+    };
+
+    checkPhotoCounts();
+  }, []);
 
   // Define available dashboards with their sub-sections for rotation
-  const dashboardRotation = [
+  const allDashboards = [
     {
       dashboard: 'todays-games',
       subSections: ['nhl', 'nfl', 'mlb']
@@ -53,13 +79,23 @@ function App() {
     },
     {
       dashboard: 'family-photos',
-      subSections: null
+      subSections: null,
+      requiresPhotos: true
     },
     {
       dashboard: 'event-slides',
-      subSections: null
+      subSections: null,
+      requiresPhotos: true
     }
   ];
+
+  // Filter dashboards based on photo availability
+  const dashboardRotation = allDashboards.filter(dash => {
+    if (dash.requiresPhotos) {
+      return photoCounts[dash.dashboard] > 0;
+    }
+    return true;
+  });
 
   // Legacy array for backward compatibility
   const rotatableDashboards = dashboardRotation.map(d => d.dashboard);
@@ -171,6 +207,7 @@ function App() {
     <Layout
       currentDashboard={currentDashboard}
       onDashboardChange={setCurrentDashboard}
+      photoCounts={photoCounts}
     >
       {renderDashboard()}
     </Layout>

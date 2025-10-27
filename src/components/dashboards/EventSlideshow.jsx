@@ -13,6 +13,17 @@ function EventSlideshow() {
     fetchPhotos();
   }, []);
 
+  // Preload images for smoother transitions
+  useEffect(() => {
+    if (photos.length === 0) return;
+
+    // Preload all images
+    photos.forEach(photo => {
+      const img = new Image();
+      img.src = photo.base64Data;
+    });
+  }, [photos]);
+
   useEffect(() => {
     if (photos.length === 0) return;
 
@@ -38,14 +49,8 @@ function EventSlideshow() {
         return;
       }
 
-      // Fetch full photo data for each photo
-      const photoPromises = response.data.map(photo =>
-        axios.get(`/api/photos/${photo._id}`)
-      );
-      const photoResponses = await Promise.all(photoPromises);
-      const fullPhotos = photoResponses.map(res => res.data);
-
-      setPhotos(fullPhotos);
+      // API already returns full photos with base64 data - no need for individual requests!
+      setPhotos(response.data);
       setLoading(false);
     } catch (err) {
       console.error('Error fetching event slides:', err);
