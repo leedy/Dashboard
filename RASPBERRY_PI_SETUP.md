@@ -110,8 +110,8 @@ cd ~
 # Clone the Dashboard repository
 git clone https://github.com/leedy/Dashboard.git
 
-# Navigate to the app directory
-cd Dashboard/dashboard-app
+# Navigate to the repository
+cd Dashboard
 ```
 
 ---
@@ -122,7 +122,7 @@ cd Dashboard/dashboard-app
 
 ```bash
 # Navigate to server directory
-cd ~/Dashboard/dashboard-app/server
+cd ~/Dashboard/server
 
 # Create .env file from template
 cp .env.template .env
@@ -157,7 +157,7 @@ BACKEND_PORT=3001
 
 ```bash
 # Navigate back to app root
-cd ~/Dashboard/dashboard-app
+cd ~/Dashboard
 
 # Create frontend .env file
 cp .env.local.template .env.local
@@ -179,14 +179,14 @@ VITE_TMDB_API_KEY=your_api_key_here
 
 ```bash
 # Install frontend dependencies
-cd ~/Dashboard/dashboard-app
+cd ~/Dashboard
 npm install
 
 # Build the frontend for production
 npm run build
 
 # Install backend dependencies
-cd ~/Dashboard/dashboard-app/server
+cd ~/Dashboard/server
 npm install
 ```
 
@@ -200,11 +200,11 @@ Before setting up auto-start, test that everything works:
 
 ```bash
 # Terminal 1: Start backend
-cd ~/Dashboard/dashboard-app/server
+cd ~/Dashboard/server
 node server.js
 
 # Terminal 2 (open new terminal): Start frontend
-cd ~/Dashboard/dashboard-app
+cd ~/Dashboard
 npm run preview -- --host 0.0.0.0
 ```
 
@@ -231,7 +231,7 @@ After=network.target
 [Service]
 Type=simple
 User=pi
-WorkingDirectory=/home/pi/Dashboard/dashboard-app/server
+WorkingDirectory=/home/pi/Dashboard/server
 ExecStart=/usr/bin/node server.js
 Restart=on-failure
 RestartSec=10
@@ -258,7 +258,7 @@ After=network.target dashboard-backend.service
 [Service]
 Type=simple
 User=pi
-WorkingDirectory=/home/pi/Dashboard/dashboard-app
+WorkingDirectory=/home/pi/Dashboard
 ExecStart=/usr/bin/npm run preview -- --host 0.0.0.0
 Restart=on-failure
 RestartSec=10
@@ -480,7 +480,7 @@ sudo systemctl stop dashboard-frontend
 
 ```bash
 # Navigate to repository
-cd ~/Dashboard/dashboard-app
+cd ~/Dashboard
 
 # Pull latest changes from GitHub
 git pull
@@ -548,7 +548,7 @@ telnet 192.168.1.100 27017  # Test if port is accessible
 
 **Check environment variables:**
 ```bash
-cat ~/Dashboard/dashboard-app/server/.env
+cat ~/Dashboard/server/.env
 ```
 
 ### Chromium Doesn't Start in Kiosk Mode
@@ -599,7 +599,7 @@ htop  # (install with: sudo apt install htop)
 **Reduce refresh intervals:**
 Edit the frontend code to increase auto-refresh intervals:
 ```bash
-nano ~/Dashboard/dashboard-app/src/components/dashboards/TodaysGames.jsx
+nano ~/Dashboard/src/components/dashboards/TodaysGames.jsx
 # Change line 38: 60000 (1 minute) to 120000 (2 minutes)
 ```
 
@@ -761,8 +761,8 @@ After setup, create a backup:
 
 ```bash
 # Backup environment files
-cp ~/Dashboard/dashboard-app/server/.env ~/dashboard-backup.env
-cp ~/Dashboard/dashboard-app/.env.local ~/dashboard-backup-frontend.env
+cp ~/Dashboard/server/.env ~/dashboard-backup.env
+cp ~/Dashboard/.env.local ~/dashboard-backup-frontend.env
 
 # Or backup entire SD card using Raspberry Pi Imager
 # (Image > Create from SD card)
@@ -773,7 +773,7 @@ cp ~/Dashboard/dashboard-app/.env.local ~/dashboard-backup-frontend.env
 ## Support & Updates
 
 - **GitHub Repository:** https://github.com/leedy/Dashboard
-- **Update dashboard:** `cd ~/Dashboard/dashboard-app && git pull && npm run build`
+- **Update dashboard:** `cd ~/Dashboard && git pull && npm run build`
 - **Issues:** Check logs with `sudo journalctl -u dashboard-backend -f`
 
 ---
