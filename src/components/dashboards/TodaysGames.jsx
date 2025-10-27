@@ -3,12 +3,19 @@ import axios from 'axios';
 import './SportsDashboard.css';
 import PlayerStats from './PlayerStats';
 
-function TodaysGames({ preferences }) {
+function TodaysGames({ preferences, activeSport }) {
   const [selectedSport, setSelectedSport] = useState('nhl');
   const [gamesData, setGamesData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(null); // { abbrev: 'PHI', name: 'Philadelphia Flyers' }
+
+  // Update selected sport when activeSport prop changes (during auto-rotation)
+  useEffect(() => {
+    if (activeSport) {
+      setSelectedSport(activeSport);
+    }
+  }, [activeSport]);
 
   const favoriteNHLTeam = preferences?.favoriteNHLTeam || { name: 'Philadelphia Flyers', abbrev: 'PHI' };
   const favoriteNFLTeam = preferences?.favoriteNFLTeam || { name: 'Philadelphia Eagles', abbrev: 'PHI' };

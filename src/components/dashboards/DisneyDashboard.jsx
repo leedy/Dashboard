@@ -2,13 +2,20 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './DisneyDashboard.css';
 
-function DisneyDashboard({ preferences }) {
+function DisneyDashboard({ preferences, activePark }) {
   const [selectedPark, setSelectedPark] = useState('magic-kingdom');
   const [waitTimesData, setWaitTimesData] = useState({ lands: [] });
   const [parkHours, setParkHours] = useState(null);
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [viewMode, setViewMode] = useState('by-wait'); // 'by-land' or 'by-wait'
+
+  // Update selected park when activePark prop changes (during auto-rotation)
+  useEffect(() => {
+    if (activePark) {
+      setSelectedPark(activePark);
+    }
+  }, [activePark]);
 
   const parks = {
     'magic-kingdom': {

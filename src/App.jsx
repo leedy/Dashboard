@@ -23,25 +23,53 @@ function App() {
   } = usePreferences();
 
   const [currentDashboard, setCurrentDashboard] = useState(preferences.defaultDashboard)
+  const [currentSubSection, setCurrentSubSection] = useState(null)
 
-  // Define available dashboards for rotation (excluding admin)
-  const rotatableDashboards = [
-    'todays-games',
-    'standings',
-    'weather',
-    'countdown',
-    'disney',
-    'movies',
-    'family-photos',
-    'event-slides'
+  // Define available dashboards with their sub-sections for rotation
+  const dashboardRotation = [
+    {
+      dashboard: 'todays-games',
+      subSections: ['nhl', 'nfl', 'mlb']
+    },
+    {
+      dashboard: 'standings',
+      subSections: null
+    },
+    {
+      dashboard: 'weather',
+      subSections: null
+    },
+    {
+      dashboard: 'countdown',
+      subSections: null
+    },
+    {
+      dashboard: 'disney',
+      subSections: ['magic-kingdom', 'epcot', 'hollywood-studios', 'animal-kingdom']
+    },
+    {
+      dashboard: 'movies',
+      subSections: null
+    },
+    {
+      dashboard: 'family-photos',
+      subSections: null
+    },
+    {
+      dashboard: 'event-slides',
+      subSections: null
+    }
   ];
+
+  // Legacy array for backward compatibility
+  const rotatableDashboards = dashboardRotation.map(d => d.dashboard);
 
   // Update current dashboard when default preference changes
   useEffect(() => {
     setCurrentDashboard(preferences.defaultDashboard);
   }, [preferences.defaultDashboard]);
 
-  // Auto-rotate dashboards
+  // Auto-rotate dashboards with sub-section support
   useEffect(() => {
     if (!preferences.displaySettings?.autoRotate || currentDashboard === 'admin') {
       return;
@@ -50,17 +78,39 @@ function App() {
     const rotateInterval = (preferences.displaySettings?.rotateInterval || 30) * 1000; // Convert to milliseconds
 
     const intervalId = setInterval(() => {
-      setCurrentDashboard(current => {
-        // Find current index in rotatable dashboards
-        const currentIndex = rotatableDashboards.indexOf(current);
-        // Move to next dashboard, or wrap to first if at end
-        const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % rotatableDashboards.length;
-        return rotatableDashboards[nextIndex];
-      });
+      // Find current dashboard config
+      const currentDashboardIndex = dashboardRotation.findIndex(d => d.dashboard === currentDashboard);
+      const currentDashboardConfig = dashboardRotation[currentDashboardIndex];
+
+      // Check if current dashboard has sub-sections
+      if (currentDashboardConfig?.subSections && currentDashboardConfig.subSections.length > 0) {
+        const currentSubIndex = currentDashboardConfig.subSections.indexOf(currentSubSection);
+        const isLastSubSection = currentSubIndex === currentDashboardConfig.subSections.length - 1;
+
+        if (currentSubSection === null || isLastSubSection) {
+          // Move to next dashboard and set its first sub-section (if any)
+          const nextDashboardIndex = (currentDashboardIndex + 1) % dashboardRotation.length;
+          const nextDashboard = dashboardRotation[nextDashboardIndex];
+
+          setCurrentDashboard(nextDashboard.dashboard);
+          setCurrentSubSection(nextDashboard.subSections ? nextDashboard.subSections[0] : null);
+        } else {
+          // Move to next sub-section in current dashboard
+          const nextSubIndex = currentSubIndex === -1 ? 0 : currentSubIndex + 1;
+          setCurrentSubSection(currentDashboardConfig.subSections[nextSubIndex]);
+        }
+      } else {
+        // No sub-sections, just move to next dashboard
+        const nextDashboardIndex = (currentDashboardIndex + 1) % dashboardRotation.length;
+        const nextDashboard = dashboardRotation[nextDashboardIndex];
+
+        setCurrentDashboard(nextDashboard.dashboard);
+        setCurrentSubSection(nextDashboard.subSections ? nextDashboard.subSections[0] : null);
+      }
     }, rotateInterval);
 
     return () => clearInterval(intervalId);
-  }, [preferences.displaySettings?.autoRotate, preferences.displaySettings?.rotateInterval, currentDashboard]);
+  }, [preferences.displaySettings?.autoRotate, preferences.displaySettings?.rotateInterval, currentDashboard, currentSubSection]);
 
   const handleSaveSettings = async (newPreferences) => {
     await updatePreferences(newPreferences);
@@ -74,7 +124,7 @@ function App() {
   const renderDashboard = () => {
     switch (currentDashboard) {
       case 'todays-games':
-        return <TodaysGames preferences={preferences} />
+        return <TodaysGames preferences={preferences} activeSport={currentSubSection} />
       case 'standings':
         return <Standings preferences={preferences} />
       case 'weather':
@@ -82,7 +132,7 @@ function App() {
       case 'countdown':
         return <CountdownDashboard preferences={preferences} />
       case 'disney':
-        return <DisneyDashboard preferences={preferences} />
+        return <DisneyDashboard preferences={preferences} activePark={currentSubSection} />
       case 'movies':
         return <MoviesDashboard preferences={preferences} />
       case 'family-photos':
