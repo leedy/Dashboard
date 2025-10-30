@@ -1,0 +1,224 @@
+.upcoming-games-dashboard {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  color: #e0e0e0;
+}
+
+.upcoming-games-dashboard .dashboard-header {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.upcoming-games-dashboard .dashboard-header h2 {
+  margin: 0 0 10px 0;
+  font-size: 2rem;
+  color: #ffffff;
+}
+
+.upcoming-games-dashboard .subtitle {
+  margin: 0;
+  font-size: 1rem;
+  color: #888;
+}
+
+.loading-container,
+.error-container,
+.no-games {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2rem;
+  color: #999;
+}
+
+.error-container {
+  color: #ff6b6b;
+}
+
+.dashboard-content {
+  padding: 20px 0;
+}
+
+.upcoming-games-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+  padding: 0 10px;
+}
+
+.upcoming-game-card {
+  background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #333;
+}
+
+.upcoming-game-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.4);
+  border-color: #444;
+}
+
+.game-date-time {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #333;
+}
+
+.game-date {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #4fc3f7;
+}
+
+.game-time {
+  font-size: 0.95rem;
+  color: #999;
+}
+
+.game-matchup {
+  margin-bottom: 15px;
+}
+
+.matchup-header {
+  margin-bottom: 12px;
+}
+
+.location-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.location-badge.home {
+  background: linear-gradient(135deg, #1976d2, #2196f3);
+  color: white;
+}
+
+.location-badge.away {
+  background: linear-gradient(135deg, #f57c00, #ff9800);
+  color: white;
+}
+
+.opponent-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.opponent-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.opponent-details {
+  flex: 1;
+}
+
+.opponent-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.opponent-abbrev {
+  font-size: 0.9rem;
+  color: #888;
+  font-weight: 500;
+}
+
+.game-info {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #333;
+  font-size: 0.9rem;
+}
+
+.game-info > div {
+  margin-bottom: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.game-info > div:last-child {
+  margin-bottom: 0;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #888;
+  min-width: 50px;
+}
+
+.venue {
+  color: #b0b0b0;
+}
+
+.broadcast {
+  color: #4fc3f7;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .upcoming-games-dashboard {
+    padding: 15px;
+  }
+
+  .upcoming-games-list {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .upcoming-game-card {
+    padding: 15px;
+  }
+
+  .opponent-logo {
+    width: 50px;
+    height: 50px;
+  }
+
+  .opponent-name {
+    font-size: 1.1rem;
+  }
+
+  .game-date {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .upcoming-games-dashboard .dashboard-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .game-date-time {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .opponent-info {
+    gap: 10px;
+  }
+
+  .opponent-logo {
+    width: 45px;
+    height: 45px;
+  }
+}

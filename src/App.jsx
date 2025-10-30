@@ -1,17 +1,20 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import axios from 'axios'
 import Layout from './components/layout/Layout'
-import TodaysGames from './components/dashboards/TodaysGames'
-import Standings from './components/dashboards/Standings'
-import WeatherDashboard from './components/dashboards/WeatherDashboard'
-import CountdownDashboard from './components/dashboards/CountdownDashboard'
-import DisneyDashboard from './components/dashboards/DisneyDashboard'
-import MoviesDashboard from './components/dashboards/MoviesDashboard'
-import PhotoSlideshow from './components/dashboards/PhotoSlideshow'
-import EventSlideshow from './components/dashboards/EventSlideshow'
-import Admin from './components/admin/Admin'
 import usePreferences from './hooks/usePreferences'
 import './App.css'
+
+// Lazy load dashboard components for better initial load performance
+const TodaysGames = lazy(() => import('./components/dashboards/TodaysGames'))
+const UpcomingGames = lazy(() => import('./components/dashboards/UpcomingGames'))
+const Standings = lazy(() => import('./components/dashboards/Standings'))
+const WeatherDashboard = lazy(() => import('./components/dashboards/WeatherDashboard'))
+const CountdownDashboard = lazy(() => import('./components/dashboards/CountdownDashboard'))
+const DisneyDashboard = lazy(() => import('./components/dashboards/DisneyDashboard'))
+const MoviesDashboard = lazy(() => import('./components/dashboards/MoviesDashboard'))
+const PhotoSlideshow = lazy(() => import('./components/dashboards/PhotoSlideshow'))
+const EventSlideshow = lazy(() => import('./components/dashboards/EventSlideshow'))
+const Admin = lazy(() => import('./components/admin/Admin'))
 
 function App() {
   const {
@@ -56,6 +59,10 @@ function App() {
     {
       dashboard: 'todays-games',
       subSections: ['nhl', 'nfl', 'mlb']
+    },
+    {
+      dashboard: 'upcoming-games',
+      subSections: null
     },
     {
       dashboard: 'standings',
@@ -164,6 +171,8 @@ function App() {
     switch (currentDashboard) {
       case 'todays-games':
         return <TodaysGames preferences={preferences} activeSport={currentSubSection} />
+      case 'upcoming-games':
+        return <UpcomingGames preferences={preferences} />
       case 'standings':
         return <Standings preferences={preferences} />
       case 'weather':
@@ -209,7 +218,20 @@ function App() {
       onDashboardChange={setCurrentDashboard}
       photoCounts={photoCounts}
     >
-      {renderDashboard()}
+      <Suspense fallback={
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          fontSize: '1.5rem',
+          color: '#666'
+        }}>
+          Loading dashboard...
+        </div>
+      }>
+        {renderDashboard()}
+      </Suspense>
     </Layout>
   )
 }
