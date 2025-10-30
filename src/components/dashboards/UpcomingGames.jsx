@@ -6,19 +6,51 @@ function UpcomingGames() {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [teamRecords, setTeamRecords] = useState({});
 
   // For now, hardcoded to Flyers (PHI)
   const teamAbbrev = 'PHI';
   const teamName = 'Philadelphia Flyers';
 
   useEffect(() => {
-    fetchUpcomingGames();
+    fetchStandingsAndGames();
   }, []);
 
-  const fetchUpcomingGames = async () => {
+  const fetchStandingsAndGames = async () => {
     setLoading(true);
     setError(null);
 
+    try {
+      // Fetch standings first
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
+      const standingsResponse = await axios.get(`/api/nhl/v1/standings/${todayStr}`);
+      const standingsData = standingsResponse.data.standings || [];
+
+      // Create a map of team abbreviation to record
+      const recordsMap = {};
+      standingsData.forEach(team => {
+        const abbrev = team.teamAbbrev?.default;
+        if (abbrev) {
+          recordsMap[abbrev] = {
+            wins: team.wins || 0,
+            losses: team.losses || 0,
+            otLosses: team.otLosses || 0
+          };
+        }
+      });
+      setTeamRecords(recordsMap);
+
+      // Now fetch games
+      await fetchUpcomingGames(recordsMap);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError('Failed to load upcoming games');
+      setLoading(false);
+    }
+  };
+
+  const fetchUpcomingGames = async (recordsMap = {}) => {
     try {
       // Get current season (e.g., 20242025)
       const now = new Date();
@@ -57,6 +89,12 @@ function UpcomingGames() {
           const isHomeGame = game.homeTeam.abbrev === teamAbbrev;
           const opponent = isHomeGame ? game.awayTeam : game.homeTeam;
 
+          // Get opponent's record from standings
+          const opponentRecord = recordsMap[opponent.abbrev];
+          const recordStr = opponentRecord
+            ? `${opponentRecord.wins}-${opponentRecord.losses}-${opponentRecord.otLosses}`
+            : '';
+
           return {
             id: game.id,
             date: gameDate,
@@ -74,6 +112,7 @@ function UpcomingGames() {
             opponent: opponent.placeName?.default || opponent.commonName?.default || opponent.abbrev,
             opponentAbbrev: opponent.abbrev,
             opponentLogo: `https://assets.nhle.com/logos/nhl/svg/${opponent.abbrev}_light.svg`,
+            record: recordStr,
             venue: game.venue?.default || '',
             gameState: game.gameState,
             tvBroadcasts: game.tvBroadcasts || []
@@ -158,13 +197,18 @@ function UpcomingGames() {
                       className="opponent-logo"
                     />
                     <div className="opponent-details">
-                      <div className="opponent-name">{game.opponent}</div>
-                      <div className="opponent-abbrev">{game.opponentAbbrev}</div>
+                      <div className="opponent-name">
+                        {game.opponent}
+                        {game.record && (
+                          <span className="opponent-record"> ({game.record})</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="game-info">
+                {/* Uncomment below to show venue and TV broadcast info */}
+                {/* <div className="game-info">
                   {game.venue && (
                     <div className="venue">
                       <span className="info-label">Venue:</span> {game.venue}
@@ -173,7 +217,7 @@ function UpcomingGames() {
                   <div className="broadcast">
                     <span className="info-label">TV:</span> {formatBroadcasts(game.tvBroadcasts)}
                   </div>
-                </div>
+                </div> */}
               </div>
             ))}
           </div>

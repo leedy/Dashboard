@@ -141,6 +141,13 @@
   font-weight: 500;
 }
 
+.opponent-record {
+  font-size: 0.95rem;
+  color: #4fc3f7;
+  font-weight: 400;
+  margin-left: 8px;
+}
+
 .game-info {
   margin-top: 15px;
   padding-top: 15px;
