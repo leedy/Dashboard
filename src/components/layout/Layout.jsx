@@ -14,7 +14,6 @@ function Layout({ children, currentDashboard, onDashboardChange, photoCounts }) 
         { id: 'todays-games', name: "Today's Games", available: true },
         { id: 'upcoming-games', name: 'Upcoming Games', available: true },
         { id: 'standings', name: 'Standings', available: true },
-        { id: 'flyers-news', name: 'Flyers News', available: true },
       ]
     },
     {
