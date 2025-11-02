@@ -182,9 +182,9 @@
 }
 
 .games-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
 }
 
 .game-item {
@@ -339,6 +339,12 @@
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+  .games-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .team-modal {
     width: 95%;
@@ -373,6 +379,16 @@
 
   .news-item {
     padding: 1rem;
+  }
+
+  .games-list {
+    grid-template-columns: 1fr;
+  }
+
+  .game-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
 }
 
