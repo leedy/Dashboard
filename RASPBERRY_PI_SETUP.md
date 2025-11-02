@@ -499,41 +499,24 @@ sudo systemctl restart dashboard-backend
 sudo systemctl restart dashboard-frontend
 ```
 
-**Create an Update Script (Recommended):**
+**Use the Update Script (Recommended):**
 
-Make updates easier by creating a dedicated update script:
-
-```bash
-# Create the update script
-nano ~/update-dashboard.sh
-```
-
-Paste this content:
-```bash
-#!/bin/bash
-
-echo "Updating Dashboard from GitHub..."
-cd ~/Dashboard
-
-echo "Pulling latest changes..."
-git pull
-
-echo "Rebuilding frontend..."
-npm run build
-
-echo "Restarting services..."
-sudo systemctl restart dashboard-backend
-sudo systemctl restart dashboard-frontend
-
-echo "Update complete! Dashboard restarted."
-echo "Changes will appear in the browser automatically."
-```
-
-Save with `Ctrl+X`, `Y`, `Enter`, then make it executable:
+An update script is included in the repository that handles everything automatically:
 
 ```bash
+# Copy the update script to your home directory
+cp ~/Dashboard/update-dashboard.sh ~/update-dashboard.sh
+
+# Make it executable (if not already)
 chmod +x ~/update-dashboard.sh
 ```
+
+The script does the following:
+1. Pulls latest changes from GitHub
+2. Installs any new frontend dependencies
+3. Rebuilds the frontend
+4. Installs any new backend dependencies
+5. Restarts both services
 
 **Now you can update with one command:**
 ```bash
