@@ -501,15 +501,7 @@ sudo systemctl restart dashboard-frontend
 
 **Use the Update Script (Recommended):**
 
-An update script is included in the repository that handles everything automatically:
-
-```bash
-# Copy the update script to your home directory
-cp ~/Dashboard/update-dashboard.sh ~/update-dashboard.sh
-
-# Make it executable (if not already)
-chmod +x ~/update-dashboard.sh
-```
+An update script is included in the repository that handles everything automatically.
 
 The script does the following:
 1. Pulls latest changes from GitHub
@@ -518,16 +510,17 @@ The script does the following:
 4. Installs any new backend dependencies
 5. Restarts both services
 
-**Now you can update with one command:**
+**Update with one command:**
 ```bash
-~/update-dashboard.sh
+cd ~/Dashboard
+./update-dashboard.sh
 ```
 
 **Update Workflow:**
 1. Make changes on your development machine
 2. Commit and push to GitHub
 3. SSH into your Pi: `ssh your_username@192.168.1.X`
-4. Run: `~/update-dashboard.sh`
+4. Run: `cd ~/Dashboard && ./update-dashboard.sh`
 5. Done! The dashboard updates automatically
 
 ### Exit Kiosk Mode

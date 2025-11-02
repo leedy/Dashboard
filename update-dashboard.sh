@@ -1,7 +1,10 @@
 #!/bin/bash
 
+# Get the directory where this script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 echo "Updating Dashboard from GitHub..."
-cd ~/Dashboard
+cd "$SCRIPT_DIR"
 
 echo "Pulling latest changes..."
 git pull
