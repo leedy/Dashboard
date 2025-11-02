@@ -73,7 +73,7 @@ router.get('/:sport', async (req, res) => {
       } else if (hasLive) {
         CACHE_TTL_MINUTES = 1; // Live games: refresh every 1 minute for real-time updates
       } else {
-        CACHE_TTL_MINUTES = 30; // Games scheduled but not started: refresh every 30 minutes
+        CACHE_TTL_MINUTES = 5; // Games scheduled but not started: refresh every 5 minutes
       }
 
       if (cacheAge < CACHE_TTL_MINUTES) {
