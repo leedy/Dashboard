@@ -76,12 +76,14 @@ function UpcomingGames() {
       const tenDaysFromNow = new Date(today);
       tenDaysFromNow.setDate(tenDaysFromNow.getDate() + 10);
 
-      // Filter for games in the next 10 days
+      // Filter for games in the next 10 days that haven't been completed
       const upcomingGames = scheduleData.games
         .filter(game => {
           const gameDate = new Date(game.startTimeUTC);
           gameDate.setHours(0, 0, 0, 0);
-          return gameDate >= today && gameDate <= tenDaysFromNow;
+          const isInDateRange = gameDate >= today && gameDate <= tenDaysFromNow;
+          const isNotCompleted = game.gameState !== 'FINAL' && game.gameState !== 'OFF';
+          return isInDateRange && isNotCompleted;
         })
         .slice(0, 10) // Limit to 10 games max
         .map(game => {

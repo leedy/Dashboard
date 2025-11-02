@@ -213,10 +213,18 @@ function TodaysGames({ preferences, activeSport }) {
             homeScore: game.homeTeam.score || 0,
             awayScore: game.awayTeam.score || 0,
             date: displayDate,
+            startTime: gameDate,
             isFavorite: isFavoriteTeam(homeTeamName) || isFavoriteTeam(awayTeamName),
             isLive: isLive,
             isFinal: isFinal
           };
+        })
+        .sort((a, b) => {
+          // Live games first
+          if (a.isLive && !b.isLive) return -1;
+          if (!a.isLive && b.isLive) return 1;
+          // Then sort by start time
+          return a.startTime - b.startTime;
         });
 
       setGamesData(upcomingGames.length > 0 ? upcomingGames : [{ homeTeam: 'No games scheduled', awayTeam: '', date: '' }]);
@@ -237,51 +245,60 @@ function TodaysGames({ preferences, activeSport }) {
       const apiData = response.data.data; // Extract actual game data from cache response
       const events = apiData.events || [];
 
-      const upcomingGames = events.map(event => {
-        const competition = event.competitions[0];
-        const homeTeam = competition.competitors.find(c => c.homeAway === 'home');
-        const awayTeam = competition.competitors.find(c => c.homeAway === 'away');
-        const status = competition.status;
-        const gameDate = new Date(event.date);
-        const timeStr = gameDate.toLocaleString('en-US', {
-          weekday: 'short',
-          hour: 'numeric',
-          minute: '2-digit',
-          timeZoneName: 'short'
+      const upcomingGames = events
+        .map(event => {
+          const competition = event.competitions[0];
+          const homeTeam = competition.competitors.find(c => c.homeAway === 'home');
+          const awayTeam = competition.competitors.find(c => c.homeAway === 'away');
+          const status = competition.status;
+          const gameDate = new Date(event.date);
+          const timeStr = gameDate.toLocaleString('en-US', {
+            weekday: 'short',
+            hour: 'numeric',
+            minute: '2-digit',
+            timeZoneName: 'short'
+          });
+
+          // Determine game state
+          const isCompleted = status.type.completed;
+          const isInProgress = status.type.state === 'in';
+          const isFinal = isCompleted;
+          const isLive = isInProgress;
+
+          // Get game status display
+          let displayDate;
+          if (isFinal) {
+            displayDate = 'FINAL';
+          } else if (isLive) {
+            // Show quarter and time for live games
+            const period = status.period;
+            const clock = status.displayClock;
+            displayDate = `${period}Q ${clock}`;
+          } else {
+            displayDate = timeStr;
+          }
+
+          return {
+            homeTeam: homeTeam.team.displayName,
+            awayTeam: awayTeam.team.displayName,
+            homeLogo: homeTeam.team.logo,
+            awayLogo: awayTeam.team.logo,
+            homeScore: parseInt(homeTeam.score) || 0,
+            awayScore: parseInt(awayTeam.score) || 0,
+            date: displayDate,
+            startTime: gameDate,
+            isFavorite: isFavoriteTeam(homeTeam.team.displayName) || isFavoriteTeam(awayTeam.team.displayName),
+            isLive: isLive,
+            isFinal: isFinal
+          };
+        })
+        .sort((a, b) => {
+          // Live games first
+          if (a.isLive && !b.isLive) return -1;
+          if (!a.isLive && b.isLive) return 1;
+          // Then sort by start time
+          return a.startTime - b.startTime;
         });
-
-        // Determine game state
-        const isCompleted = status.type.completed;
-        const isInProgress = status.type.state === 'in';
-        const isFinal = isCompleted;
-        const isLive = isInProgress;
-
-        // Get game status display
-        let displayDate;
-        if (isFinal) {
-          displayDate = 'FINAL';
-        } else if (isLive) {
-          // Show quarter and time for live games
-          const period = status.period;
-          const clock = status.displayClock;
-          displayDate = `${period}Q ${clock}`;
-        } else {
-          displayDate = timeStr;
-        }
-
-        return {
-          homeTeam: homeTeam.team.displayName,
-          awayTeam: awayTeam.team.displayName,
-          homeLogo: homeTeam.team.logo,
-          awayLogo: awayTeam.team.logo,
-          homeScore: parseInt(homeTeam.score) || 0,
-          awayScore: parseInt(awayTeam.score) || 0,
-          date: displayDate,
-          isFavorite: isFavoriteTeam(homeTeam.team.displayName) || isFavoriteTeam(awayTeam.team.displayName),
-          isLive: isLive,
-          isFinal: isFinal
-        };
-      });
 
       setGamesData(upcomingGames.length > 0 ? upcomingGames : [{ homeTeam: 'No games scheduled', awayTeam: '', date: '' }]);
       setLastUpdated(new Date(response.data.lastUpdated));
@@ -301,52 +318,61 @@ function TodaysGames({ preferences, activeSport }) {
       const apiData = response.data.data; // Extract actual game data from cache response
       const events = apiData.events || [];
 
-      const upcomingGames = events.map(event => {
-        const competition = event.competitions[0];
-        const homeTeam = competition.competitors.find(c => c.homeAway === 'home');
-        const awayTeam = competition.competitors.find(c => c.homeAway === 'away');
-        const status = competition.status;
-        const gameDate = new Date(event.date);
-        const timeStr = gameDate.toLocaleString('en-US', {
-          weekday: 'short',
-          hour: 'numeric',
-          minute: '2-digit',
-          timeZoneName: 'short'
+      const upcomingGames = events
+        .map(event => {
+          const competition = event.competitions[0];
+          const homeTeam = competition.competitors.find(c => c.homeAway === 'home');
+          const awayTeam = competition.competitors.find(c => c.homeAway === 'away');
+          const status = competition.status;
+          const gameDate = new Date(event.date);
+          const timeStr = gameDate.toLocaleString('en-US', {
+            weekday: 'short',
+            hour: 'numeric',
+            minute: '2-digit',
+            timeZoneName: 'short'
+          });
+
+          // Determine game state
+          const isCompleted = status.type.completed;
+          const isInProgress = status.type.state === 'in';
+          const isFinal = isCompleted;
+          const isLive = isInProgress;
+
+          // Get game status display
+          let displayDate;
+          if (isFinal) {
+            displayDate = 'FINAL';
+          } else if (isLive) {
+            // Show inning and status for live games
+            const inning = status.period;
+            const inningState = status.type.shortDetail || '';
+            // Format like "Top 5th" or "Bot 3rd"
+            displayDate = inningState || `Inning ${inning}`;
+          } else {
+            displayDate = timeStr;
+          }
+
+          return {
+            homeTeam: homeTeam.team.displayName,
+            awayTeam: awayTeam.team.displayName,
+            homeLogo: homeTeam.team.logo,
+            awayLogo: awayTeam.team.logo,
+            homeScore: parseInt(homeTeam.score) || 0,
+            awayScore: parseInt(awayTeam.score) || 0,
+            date: displayDate,
+            startTime: gameDate,
+            isFavorite: isFavoriteTeam(homeTeam.team.displayName) || isFavoriteTeam(awayTeam.team.displayName),
+            isLive: isLive,
+            isFinal: isFinal
+          };
+        })
+        .sort((a, b) => {
+          // Live games first
+          if (a.isLive && !b.isLive) return -1;
+          if (!a.isLive && b.isLive) return 1;
+          // Then sort by start time
+          return a.startTime - b.startTime;
         });
-
-        // Determine game state
-        const isCompleted = status.type.completed;
-        const isInProgress = status.type.state === 'in';
-        const isFinal = isCompleted;
-        const isLive = isInProgress;
-
-        // Get game status display
-        let displayDate;
-        if (isFinal) {
-          displayDate = 'FINAL';
-        } else if (isLive) {
-          // Show inning and status for live games
-          const inning = status.period;
-          const inningState = status.type.shortDetail || '';
-          // Format like "Top 5th" or "Bot 3rd"
-          displayDate = inningState || `Inning ${inning}`;
-        } else {
-          displayDate = timeStr;
-        }
-
-        return {
-          homeTeam: homeTeam.team.displayName,
-          awayTeam: awayTeam.team.displayName,
-          homeLogo: homeTeam.team.logo,
-          awayLogo: awayTeam.team.logo,
-          homeScore: parseInt(homeTeam.score) || 0,
-          awayScore: parseInt(awayTeam.score) || 0,
-          date: displayDate,
-          isFavorite: isFavoriteTeam(homeTeam.team.displayName) || isFavoriteTeam(awayTeam.team.displayName),
-          isLive: isLive,
-          isFinal: isFinal
-        };
-      });
 
       setGamesData(upcomingGames.length > 0 ? upcomingGames : [{ homeTeam: 'No games scheduled', awayTeam: '', date: '' }]);
       setLastUpdated(new Date(response.data.lastUpdated));
