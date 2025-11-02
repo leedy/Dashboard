@@ -4,6 +4,7 @@ import './Layout.css';
 function Layout({ children, currentDashboard, onDashboardChange, photoCounts }) {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [closeTimeout, setCloseTimeout] = useState(null);
 
   const dashboardCategories = [
     {
@@ -51,10 +52,32 @@ function Layout({ children, currentDashboard, onDashboardChange, photoCounts }) 
     setOpenDropdown(openDropdown === categoryName ? null : categoryName);
   };
 
+  const handleMouseEnter = (categoryName) => {
+    // Clear any pending close timeout
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+      setCloseTimeout(null);
+    }
+    setOpenDropdown(categoryName);
+  };
+
+  const handleMouseLeave = () => {
+    // Add a small delay before closing to allow moving to dropdown
+    const timeout = setTimeout(() => {
+      setOpenDropdown(null);
+    }, 150);
+    setCloseTimeout(timeout);
+  };
+
   const handleItemClick = (dashboardId) => {
     onDashboardChange(dashboardId);
     setOpenDropdown(null);
     setMobileMenuOpen(false);
+    // Clear any pending timeout
+    if (closeTimeout) {
+      clearTimeout(closeTimeout);
+      setCloseTimeout(null);
+    }
   };
 
   const toggleMobileMenu = () => {
@@ -79,8 +102,8 @@ function Layout({ children, currentDashboard, onDashboardChange, photoCounts }) 
             <div
               key={category.name}
               className="nav-dropdown"
-              onMouseEnter={() => setOpenDropdown(category.name)}
-              onMouseLeave={() => setOpenDropdown(null)}
+              onMouseEnter={() => handleMouseEnter(category.name)}
+              onMouseLeave={handleMouseLeave}
             >
               <button
                 className={`nav-button dropdown-trigger ${isActive(category.items) ? 'active' : ''}`}
@@ -90,7 +113,11 @@ function Layout({ children, currentDashboard, onDashboardChange, photoCounts }) 
                 {category.name} ▾
               </button>
               {openDropdown === category.name && (
-                <div className="dropdown-menu">
+                <div
+                  className="dropdown-menu"
+                  onMouseEnter={() => handleMouseEnter(category.name)}
+                  onMouseLeave={handleMouseLeave}
+                >
                   {category.items.map(item => (
                     <button
                       key={item.id}
