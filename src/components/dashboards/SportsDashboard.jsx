@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './SportsDashboard.css';
-import PlayerStats from './PlayerStats';
+import TeamModal from './TeamModal';
 
 function SportsDashboard({ preferences }) {
   const [selectedSport, setSelectedSport] = useState('nhl');
@@ -671,9 +671,9 @@ function SportsDashboard({ preferences }) {
         <p><strong>Note:</strong> {selectedSport === 'nhl' ? 'NHL data is live from the official NHL API! Click on any team name to see player stats.' : selectedSport === 'nfl' ? 'NFL data is live from the ESPN API!' : 'NBA and MLB are showing sample data. NHL and NFL use real live data.'}</p>
       </div>
 
-      {/* Player Stats Modal */}
+      {/* Team Modal with Stats and News */}
       {selectedTeam && (
-        <PlayerStats
+        <TeamModal
           teamAbbrev={selectedTeam.abbrev}
           teamName={selectedTeam.name}
           onClose={() => setSelectedTeam(null)}

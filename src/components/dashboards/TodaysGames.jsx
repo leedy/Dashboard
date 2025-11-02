@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './SportsDashboard.css';
-import PlayerStats from './PlayerStats';
+import TeamModal from './TeamModal';
 
 function TodaysGames({ preferences, activeSport }) {
   const [selectedSport, setSelectedSport] = useState('nhl');
@@ -489,7 +489,7 @@ function TodaysGames({ preferences, activeSport }) {
       )}
 
       {selectedTeam && (
-        <PlayerStats
+        <TeamModal
           teamAbbrev={selectedTeam.abbrev}
           teamName={selectedTeam.name}
           onClose={() => setSelectedTeam(null)}
