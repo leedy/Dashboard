@@ -232,13 +232,9 @@ function TeamModal({ teamAbbrev, teamName, onClose }) {
                         className="news-item"
                       >
                         <div className="news-item-header">
-                          <span className="news-source">{article.source}</span>
                           <span className="news-date">{formatDate(article.pubDate)}</span>
                         </div>
                         <h4 className="news-title">{article.title}</h4>
-                        {article.description && (
-                          <p className="news-description">{article.description}</p>
-                        )}
                       </a>
                     ))
                   )}
