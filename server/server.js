@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const Parser = require('rss-parser');
 require('dotenv').config();
 
 const connectDB = require('./config/database');
@@ -86,6 +87,65 @@ app.use('/api/queue-times', async (req, res) => {
   } catch (error) {
     console.error('Queue-Times API proxy error:', error.message);
     res.status(error.response?.status || 500).json({ error: 'Queue-Times API request failed' });
+  }
+});
+
+// Team news RSS feed endpoint - supports any team
+app.get('/api/news/team/:teamName', async (req, res) => {
+  try {
+    const parser = new Parser();
+    const { teamName } = req.params;
+
+    // Encode team name for URL
+    const encodedTeamName = encodeURIComponent(teamName);
+    const feedUrl = `https://news.google.com/rss/search?q=${encodedTeamName}&hl=en-US&gl=US&ceid=US:en`;
+
+    console.log(`Fetching ${teamName} news from Google News RSS`);
+    const feed = await parser.parseURL(feedUrl);
+
+    // Transform feed items to a cleaner format
+    const articles = feed.items.slice(0, 15).map(item => ({
+      title: item.title,
+      link: item.link,
+      pubDate: item.pubDate,
+      source: item.source?.name || 'Unknown',
+      description: item.contentSnippet || item.content || ''
+    }));
+
+    res.json({
+      articles,
+      lastUpdated: new Date()
+    });
+  } catch (error) {
+    console.error('News RSS feed error:', error.message);
+    res.status(500).json({ error: 'Failed to fetch news feed' });
+  }
+});
+
+// Legacy endpoint for Flyers news (backwards compatibility)
+app.get('/api/news/flyers', async (req, res) => {
+  try {
+    const parser = new Parser();
+    const feedUrl = 'https://news.google.com/rss/search?q=Philadelphia+Flyers&hl=en-US&gl=US&ceid=US:en';
+
+    console.log('Fetching Flyers news from Google News RSS');
+    const feed = await parser.parseURL(feedUrl);
+
+    const articles = feed.items.slice(0, 15).map(item => ({
+      title: item.title,
+      link: item.link,
+      pubDate: item.pubDate,
+      source: item.source?.name || 'Unknown',
+      description: item.contentSnippet || item.content || ''
+    }));
+
+    res.json({
+      articles,
+      lastUpdated: new Date()
+    });
+  } catch (error) {
+    console.error('News RSS feed error:', error.message);
+    res.status(500).json({ error: 'Failed to fetch news feed' });
   }
 });
 

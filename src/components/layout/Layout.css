@@ -17,10 +17,37 @@
   z-index: 1000;
 }
 
+/* Hamburger button - hidden on desktop */
+.hamburger-button {
+  display: none;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.hamburger-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.hamburger-icon {
+  display: block;
+  line-height: 1;
+}
+
+/* Desktop navigation */
 .nav {
   display: flex;
   gap: 1rem;
-  flex-wrap: wrap;
+  align-items: center;
+}
+
+.nav-dropdown {
+  position: relative;
 }
 
 .nav-button {
@@ -32,6 +59,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .nav-button:hover:not(.disabled) {
@@ -49,6 +77,55 @@
 .nav-button.disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.category-icon {
+  margin-right: 0.3rem;
+}
+
+/* Dropdown menu */
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  min-width: 180px;
+  z-index: 1001;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: white;
+  border: none;
+  color: #333;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.dropdown-item:hover {
+  background: #f5f5f5;
+}
+
+.dropdown-item.active {
+  background: #667eea;
+  color: white;
+}
+
+/* Mobile menu - hidden on desktop */
+.mobile-menu-overlay {
+  display: none;
+}
+
+.mobile-menu {
+  display: none;
 }
 
 .main-content {
@@ -71,6 +148,126 @@
   margin: 0;
 }
 
+/* Tablet and Mobile Styles */
+@media (max-width: 1024px) {
+  /* Show hamburger, hide desktop nav */
+  .hamburger-button {
+    display: block;
+  }
+
+  .desktop-nav {
+    display: none;
+  }
+
+  /* Mobile menu overlay */
+  .mobile-menu-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1999;
+  }
+
+  /* Mobile slide-out menu */
+  .mobile-menu {
+    display: block;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 300px;
+    max-width: 85%;
+    background: white;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
+    z-index: 2000;
+    overflow-y: auto;
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  .mobile-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+    border-bottom: 1px solid #e0e0e0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .mobile-menu-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+  }
+
+  .close-button {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+  }
+
+  .close-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .mobile-category {
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .mobile-category-header {
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    color: #667eea;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #f5f5f5;
+  }
+
+  .mobile-menu-item {
+    display: block;
+    width: 100%;
+    padding: 1rem 1.5rem 1rem 2.5rem;
+    background: white;
+    border: none;
+    color: #333;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    font-size: 1rem;
+  }
+
+  .mobile-menu-item:hover {
+    background: #f5f5f5;
+  }
+
+  .mobile-menu-item.active {
+    background: #667eea;
+    color: white;
+  }
+
+  .mobile-menu-item.admin-item {
+    padding-left: 1.5rem;
+    font-weight: 500;
+  }
+}
+
 @media (max-width: 768px) {
   .header {
     padding: 0.5rem 1rem;
@@ -80,9 +277,8 @@
     padding: 4.5rem 1rem 1rem 1rem;
   }
 
-  .nav-button {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
+  .mobile-menu {
+    width: 280px;
   }
 }
 

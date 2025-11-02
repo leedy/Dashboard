@@ -8,6 +8,7 @@ import './App.css'
 const TodaysGames = lazy(() => import('./components/dashboards/TodaysGames'))
 const UpcomingGames = lazy(() => import('./components/dashboards/UpcomingGames'))
 const Standings = lazy(() => import('./components/dashboards/Standings'))
+const FlyersNews = lazy(() => import('./components/dashboards/FlyersNews'))
 const WeatherDashboard = lazy(() => import('./components/dashboards/WeatherDashboard'))
 const CountdownDashboard = lazy(() => import('./components/dashboards/CountdownDashboard'))
 const DisneyDashboard = lazy(() => import('./components/dashboards/DisneyDashboard'))
@@ -66,6 +67,10 @@ function App() {
     },
     {
       dashboard: 'standings',
+      subSections: null
+    },
+    {
+      dashboard: 'flyers-news',
       subSections: null
     },
     {
@@ -175,6 +180,8 @@ function App() {
         return <UpcomingGames preferences={preferences} />
       case 'standings':
         return <Standings preferences={preferences} />
+      case 'flyers-news':
+        return <FlyersNews />
       case 'weather':
         return <WeatherDashboard preferences={preferences} />
       case 'countdown':
