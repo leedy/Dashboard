@@ -8,20 +8,20 @@ A modern, responsive dashboard application built with React and Vite. This app p
 - **Today's Games**: Live NHL games with real-time scores, period information, and game clock
 - **Division Standings**: Current NHL standings organized by division
 - **Player Stats**: Click any team name to view detailed player statistics including goals, assists, points, and plus/minus
-- **Auto-Refresh**: Game data updates every 60 seconds automatically
+- **Auto-Refresh**: Game data updates every 30-60 seconds during live games
 - **Team Logos**: Full team logo support including new franchises (Utah Hockey Club/Mammoth)
 
 ### 🏈 NFL Dashboard
 - **Today's Games**: Live NFL games with real-time scores, quarter, and game clock
 - **Division Standings**: Current NFL standings organized by division (AFC/NFC East, West, North, South)
-- **Live Updates**: Game scores refresh every 60 seconds
+- **Live Updates**: Game scores refresh every 30-60 seconds during live games
 - **Favorite Team Highlighting**: Your favorite team is visually highlighted in the games list
 
 ### ⚾ MLB Dashboard
 - **Today's Games**: Live MLB games with real-time scores and inning information
 - **Live Game Status**: Shows current inning (e.g., "Top 5th", "Bot 3rd") for games in progress
 - **Team Logos**: Full team logo support from ESPN
-- **Auto-Refresh**: Game data updates every 60 seconds automatically
+- **Auto-Refresh**: Game data updates every 30-60 seconds during live games
 - **Favorite Team Highlighting**: Your favorite team is visually highlighted in the games list
 
 ### 🏰 Disney World Dashboard
@@ -48,6 +48,53 @@ A modern, responsive dashboard application built with React and Vite. This app p
 - **Fixed Header Navigation**: Easy dashboard switching with always-visible navigation
 - **Space-Optimized Layout**: Maximized content area with minimal chrome
 - **Live Data**: All sports and theme park data updates in real-time
+
+## Data Refresh Strategy
+
+The dashboard uses a smart caching system to balance real-time updates with API rate limits and server load.
+
+### Sports Data (NHL, NFL, MLB)
+
+**Frontend Refresh:**
+- Requests new data every **30 seconds**
+
+**Backend Cache (Dynamic based on game state):**
+
+| Game State | Cache Duration | Why |
+|------------|----------------|-----|
+| **Live Games** | 1 minute | Fast updates for real-time scores during active games |
+| **Pre-Game** | 5 minutes | Games haven't started yet, less frequent checking needed |
+| **All Final** | 60 minutes | All games completed, no need for frequent updates |
+
+**How it works:**
+
+1. **Before games start (Pre-game):**
+   - Frontend requests every 30 seconds
+   - Backend serves cached data (refreshes every 5 minutes)
+   - **Result:** Updates visible every ~5 minutes (nothing changes frequently anyway)
+
+2. **When games start:**
+   - Within 5 minutes, backend detects games are now LIVE
+   - Switches to 1-minute cache for real-time updates
+   - **Result:** Updates visible every 30-60 seconds ✅
+
+3. **After all games finish:**
+   - Backend detects all games are FINAL
+   - Switches to 60-minute cache (scores won't change)
+   - **Result:** Minimal API calls, data still available
+
+**Typical update timing during live games:**
+- **Best case:** 30 seconds (frontend catches fresh cache)
+- **Typical:** 30-60 seconds
+- **Worst case:** 90 seconds (if timing is unlucky)
+
+**Note:** There may be a 2-5 minute delay when games first start before they're detected as "live" and begin updating frequently. This is intentional to reduce API load during the pre-game period.
+
+### Other Data Sources
+
+- **Disney Wait Times:** Updates based on Queue-Times.com API availability
+- **Weather:** Updates based on user preferences (configurable in Admin panel)
+- **Standings/Stats:** Cached appropriately based on how frequently they change
 
 ## Getting Started
 
