@@ -26,6 +26,69 @@ app.use('/api/photos', photosRoutes);
 app.use('/api/games', gameCacheRoutes);
 
 // Proxy routes for external APIs
+// Custom NHL endpoint for recent games
+app.get('/api/nhl/team/:teamAbbrev/recent-games', async (req, res) => {
+  try {
+    const { teamAbbrev } = req.params;
+    const currentDate = new Date();
+    const currentYear = currentDate.getMonth() >= 9 ? currentDate.getFullYear() : currentDate.getFullYear() - 1;
+    const seasonId = `${currentYear}${currentYear + 1}`;
+
+    console.log(`Fetching recent games for ${teamAbbrev} in season ${seasonId}`);
+
+    // Fetch team's full season schedule
+    const scheduleUrl = `https://api-web.nhle.com/v1/club-schedule-season/${teamAbbrev}/${seasonId}`;
+    const response = await axios.get(scheduleUrl);
+
+    // Filter for completed games and get last 10
+    const completedGames = response.data.games
+      .filter(game => game.gameState === 'OFF' || game.gameState === 'FINAL')
+      .sort((a, b) => new Date(b.startTimeUTC) - new Date(a.startTimeUTC))
+      .slice(0, 10);
+
+    // Format game data
+    const formattedGames = completedGames.map(game => {
+      const isHome = game.homeTeam.abbrev === teamAbbrev;
+      const teamScore = isHome ? game.homeTeam.score : game.awayTeam.score;
+      const opponentScore = isHome ? game.awayTeam.score : game.homeTeam.score;
+      const opponent = isHome ? game.awayTeam.placeName.default : game.homeTeam.placeName.default;
+
+      let result = 'loss';
+      let resultText = 'L';
+
+      if (teamScore > opponentScore) {
+        result = 'win';
+        resultText = 'W';
+      } else if (game.periodDescriptor?.periodType === 'OT' || game.periodDescriptor?.periodType === 'SO') {
+        result = 'otl';
+        resultText = 'OTL';
+      }
+
+      const gameDate = new Date(game.startTimeUTC);
+      const formattedDate = gameDate.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+
+      return {
+        date: formattedDate,
+        opponent,
+        homeAway: isHome ? 'home' : 'away',
+        teamScore,
+        opponentScore,
+        result,
+        resultText
+      };
+    });
+
+    res.json({ games: formattedGames });
+  } catch (error) {
+    console.error('Error fetching recent games:', error.message);
+    res.status(500).json({ error: 'Failed to fetch recent games' });
+  }
+});
+
 // NHL API proxy
 app.use('/api/nhl', async (req, res) => {
   try {

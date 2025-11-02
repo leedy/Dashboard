@@ -14,6 +14,10 @@ function TeamModal({ teamAbbrev, teamName, onClose }) {
   const [articles, setArticles] = useState([]);
   const [newsLoading, setNewsLoading] = useState(false);
 
+  // Recent games state
+  const [recentGames, setRecentGames] = useState([]);
+  const [gamesLoading, setGamesLoading] = useState(false);
+
   // Convert seconds to MM:SS format
   const formatTOI = (seconds) => {
     if (!seconds || seconds === 0) return '0:00';
@@ -58,6 +62,13 @@ function TeamModal({ teamAbbrev, teamName, onClose }) {
     }
   }, [activeTab]);
 
+  // Fetch recent games when games tab is active
+  useEffect(() => {
+    if (activeTab === 'games' && recentGames.length === 0) {
+      fetchRecentGames();
+    }
+  }, [activeTab]);
+
   const fetchTeamNews = async () => {
     try {
       setNewsLoading(true);
@@ -67,6 +78,18 @@ function TeamModal({ teamAbbrev, teamName, onClose }) {
     } catch (error) {
       console.error('Error fetching team news:', error);
       setNewsLoading(false);
+    }
+  };
+
+  const fetchRecentGames = async () => {
+    try {
+      setGamesLoading(true);
+      const response = await axios.get(`/api/nhl/team/${teamAbbrev}/recent-games`);
+      setRecentGames(response.data.games);
+      setGamesLoading(false);
+    } catch (error) {
+      console.error('Error fetching recent games:', error);
+      setGamesLoading(false);
     }
   };
 
@@ -117,6 +140,12 @@ function TeamModal({ teamAbbrev, teamName, onClose }) {
             onClick={() => setActiveTab('stats')}
           >
             Player Stats
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'games' ? 'active' : ''}`}
+            onClick={() => setActiveTab('games')}
+          >
+            Recent Games
           </button>
           <button
             className={`tab-button ${activeTab === 'news' ? 'active' : ''}`}
@@ -210,6 +239,37 @@ function TeamModal({ teamAbbrev, teamName, onClose }) {
                     </div>
                   </div>
                 </>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'games' && (
+            <div className="games-tab">
+              {gamesLoading ? (
+                <div className="loading-content">Loading recent games...</div>
+              ) : (
+                <div className="games-list">
+                  {recentGames.length === 0 ? (
+                    <div className="no-games">No recent games found for {teamName}</div>
+                  ) : (
+                    recentGames.map((game, index) => (
+                      <div key={index} className={`game-item ${game.result}`}>
+                        <div className="game-date">{game.date}</div>
+                        <div className="game-info">
+                          <div className="game-matchup">
+                            <span className="team-name">{game.homeAway === 'home' ? 'vs' : '@'} {game.opponent}</span>
+                          </div>
+                          <div className="game-score">
+                            <span className={`score ${game.teamScore > game.opponentScore ? 'win' : 'loss'}`}>
+                              {game.teamScore} - {game.opponentScore}
+                            </span>
+                            <span className={`result-badge ${game.result}`}>{game.resultText}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               )}
             </div>
           )}
