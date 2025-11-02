@@ -120,8 +120,11 @@ function MoviesDashboard({ preferences }) {
                 )}
                 <div className="movie-overlay">
                   <h3 className="movie-title">{movie.title}</h3>
-                  <p className="release-date">{formatReleaseDate(movie.release_date)}</p>
                 </div>
+              </div>
+              <div className="movie-info">
+                <h3 className="movie-title-main">{movie.title}</h3>
+                <p className="release-date-main">{formatReleaseDate(movie.release_date)}</p>
               </div>
             </div>
           ))}
