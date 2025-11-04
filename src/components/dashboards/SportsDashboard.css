@@ -434,93 +434,92 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .dashboard-header h2 {
-    color: #fff;
-  }
+/* Dark mode forced globally - removed media query wrapper */
+.dashboard-header h2 {
+  color: #fff;
+}
 
-  .sport-btn {
-    background: #2a2a2a;
-    border-color: #444;
-    color: #ccc;
-  }
+.sport-btn {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #ccc;
+}
 
-  .sport-btn:hover {
-    border-color: #667eea;
-    color: #667eea;
-  }
+.sport-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
 
-  .dashboard-card {
-    background: #2a2a2a;
-    color: #fff;
-  }
+.dashboard-card {
+  background: #2a2a2a;
+  color: #fff;
+}
 
-  .dashboard-card h3 {
-    color: #fff;
-  }
+.dashboard-card h3 {
+  color: #fff;
+}
 
-  .game-card {
-    background: #1a1a1a;
-  }
+.game-card {
+  background: #1a1a1a;
+}
 
-  .game-card.favorite-team {
-    background: linear-gradient(135deg, #2d1810 0%, #3d2418 100%);
-  }
+.game-card.favorite-team {
+  background: linear-gradient(135deg, #2d1810 0%, #3d2418 100%);
+}
 
-  .team-name {
-    color: #fff;
-  }
+.team-name {
+  color: #fff;
+}
 
-  .team-name.favorite {
-    color: #FF8C42;
-  }
+.team-name.favorite {
+  color: #FF8C42;
+}
 
-  .standings-table th {
-    background: #1a1a1a;
-    color: #ccc;
-  }
+.standings-table th {
+  background: #1a1a1a;
+  color: #ccc;
+}
 
-  .standings-table td {
-    color: #fff;
-    border-bottom-color: #444;
-  }
+.standings-table td {
+  color: #fff;
+  border-bottom-color: #444;
+}
 
-  .standings-table tr:hover {
-    background: #333;
-  }
+.standings-table tr:hover {
+  background: #333;
+}
 
-  .standings-table tr.favorite-team-row {
-    background: linear-gradient(135deg, #2d1810 0%, #3d2418 100%);
-  }
+.standings-table tr.favorite-team-row {
+  background: linear-gradient(135deg, #2d1810 0%, #3d2418 100%);
+}
 
-  .standings-table tr.favorite-team-row:hover {
-    background: linear-gradient(135deg, #3d2418 0%, #4d3020 100%);
-  }
+.standings-table tr.favorite-team-row:hover {
+  background: linear-gradient(135deg, #3d2418 0%, #4d3020 100%);
+}
 
-  .team-name-cell.favorite {
-    color: #FF8C42;
-  }
+.team-name-cell.favorite {
+  color: #FF8C42;
+}
 
-  .streak-cell.win-streak {
-    color: #5cb85c;
-    background: rgba(92, 184, 92, 0.15);
-  }
+.streak-cell.win-streak {
+  color: #5cb85c;
+  background: rgba(92, 184, 92, 0.15);
+}
 
-  .streak-cell.loss-streak {
-    color: #e74c3c;
-    background: rgba(231, 76, 60, 0.15);
-  }
+.streak-cell.loss-streak {
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.15);
+}
 
-  .points-cell {
-    color: #8896ff;
-  }
+.points-cell {
+  color: #8896ff;
+}
 
-  .division-section {
-    background: #1a1a1a;
-  }
+.division-section {
+  background: #1a1a1a;
+}
 
-  .division-name {
-    color: #8896ff;
-    border-bottom-color: #8896ff;
-  }
+.division-name {
+  color: #8896ff;
+  border-bottom-color: #8896ff;
 }

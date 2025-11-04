@@ -213,58 +213,56 @@
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .player-stats-modal {
-    background: #2a2a2a;
-    color: #fff;
-  }
+/* Dark mode forced globally - removed media query wrapper */
+.player-stats-modal {
+  background: #2a2a2a;
+  color: #fff;
+}
 
-  .modal-header {
-    background: #2a2a2a;
-    border-bottom-color: #667eea;
-  }
+.modal-header {
+  background: #2a2a2a;
+  border-bottom-color: #667eea;
+}
 
-  .modal-header h2 {
-    color: #fff;
-  }
+.modal-header h2 {
+  color: #fff;
+}
 
-  .stats-section h3 {
-    color: #fff;
-    border-bottom-color: #444;
-  }
+.stats-section h3 {
+  color: #fff;
+  border-bottom-color: #444;
+}
 
-  .stats-table thead {
-    background: #1a1a1a;
-  }
+.stats-table thead {
+  background: #1a1a1a;
+}
 
-  .stats-table th {
-    color: #ccc;
-    border-bottom-color: #444;
-  }
+.stats-table th {
+  color: #ccc;
+  border-bottom-color: #444;
+}
 
-  .stats-table td {
-    color: #fff;
-    border-bottom-color: #333;
-  }
+.stats-table td {
+  color: #fff;
+  border-bottom-color: #333;
+}
 
-  .stats-table tbody tr:hover {
-    background: #333;
-  }
+.stats-table tbody tr:hover {
+  background: #333;
+}
 
-  .player-name {
-    color: #fff;
-  }
+.player-name {
+  color: #fff;
+}
 
-  .points-highlight {
-    color: #8896ff;
-  }
+.points-highlight {
+  color: #8896ff;
+}
 
-  .positive {
-    color: #5cb85c;
-  }
+.positive {
+  color: #5cb85c;
+}
 
-  .negative {
-    color: #e74c3c;
-  }
+.negative {
+  color: #e74c3c;
 }

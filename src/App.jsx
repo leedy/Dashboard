@@ -2,6 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react'
 import axios from 'axios'
 import Layout from './components/layout/Layout'
 import usePreferences from './hooks/usePreferences'
+import { useAvailableSports } from './hooks/useAvailableSports'
 import './App.css'
 
 // Lazy load dashboard components for better initial load performance
@@ -32,6 +33,9 @@ function App() {
     'family-photos': 0,
     'event-slides': 0
   })
+
+  // Check which sports have games available
+  const availableSports = useAvailableSports()
 
   // Check photo counts on mount
   useEffect(() => {
@@ -96,13 +100,26 @@ function App() {
     }
   ];
 
-  // Filter dashboards based on photo availability
-  const dashboardRotation = allDashboards.filter(dash => {
-    if (dash.requiresPhotos) {
-      return photoCounts[dash.dashboard] > 0;
-    }
-    return true;
-  });
+  // Filter dashboards based on photo and sports availability
+  const dashboardRotation = allDashboards
+    .map(dash => {
+      // For todays-games, filter sub-sections based on available sports
+      if (dash.dashboard === 'todays-games' && dash.subSections) {
+        const availableSubSections = dash.subSections.filter(sport => availableSports[sport]);
+        return {
+          ...dash,
+          subSections: availableSubSections.length > 0 ? availableSubSections : dash.subSections
+        };
+      }
+      return dash;
+    })
+    .filter(dash => {
+      // Filter out dashboards that require photos but have none
+      if (dash.requiresPhotos) {
+        return photoCounts[dash.dashboard] > 0;
+      }
+      return true;
+    });
 
   // Legacy array for backward compatibility
   const rotatableDashboards = dashboardRotation.map(d => d.dashboard);
@@ -170,7 +187,7 @@ function App() {
   const renderDashboard = () => {
     switch (currentDashboard) {
       case 'todays-games':
-        return <TodaysGames preferences={preferences} activeSport={currentSubSection} />
+        return <TodaysGames preferences={preferences} activeSport={currentSubSection} availableSports={availableSports} />
       case 'upcoming-games':
         return <UpcomingGames preferences={preferences} />
       case 'standings':

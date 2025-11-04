@@ -212,42 +212,40 @@
   color: #7f8c8d;
 }
 
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-  .iss-title {
-    color: #ecf0f1;
-  }
+/* Dark mode forced globally - removed media query wrapper */
+.iss-title {
+  color: #ecf0f1;
+}
 
-  .stat-card {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
-    border-color: rgba(136, 150, 255, 0.3);
-  }
+.stat-card {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+  border-color: rgba(136, 150, 255, 0.3);
+}
 
-  .stat-card:hover {
-    border-color: rgba(136, 150, 255, 0.5);
-    box-shadow: 0 8px 30px rgba(136, 150, 255, 0.2);
-  }
+.stat-card:hover {
+  border-color: rgba(136, 150, 255, 0.5);
+  box-shadow: 0 8px 30px rgba(136, 150, 255, 0.2);
+}
 
-  .stat-value {
-    color: #ecf0f1;
-  }
+.stat-value {
+  color: #ecf0f1;
+}
 
-  .stat-detail {
-    color: #95a5a6;
-  }
+.stat-detail {
+  color: #95a5a6;
+}
 
-  .iss-info-card {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
-    border-color: rgba(136, 150, 255, 0.3);
-  }
+.iss-info-card {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+  border-color: rgba(136, 150, 255, 0.3);
+}
 
-  .iss-info-card h3 {
-    color: #ecf0f1;
-  }
+.iss-info-card h3 {
+  color: #ecf0f1;
+}
 
-  .info-value {
-    color: #ecf0f1;
-  }
+.info-value {
+  color: #ecf0f1;
 }
 
 /* Responsive Design */

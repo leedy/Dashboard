@@ -188,25 +188,23 @@
   color: #7f8c8d;
 }
 
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-  .location-name {
-    color: #ecf0f1;
-  }
+/* Dark mode forced globally - removed media query wrapper */
+.location-name {
+  color: #ecf0f1;
+}
 
-  .forecast-day-card {
-    background: #2c2c2c;
-    border-color: #3a3a3a;
-  }
+.forecast-day-card {
+  background: #2c2c2c;
+  border-color: #3a3a3a;
+}
 
-  .forecast-day-card:hover {
-    background: #333333;
-    border-color: #667eea;
-  }
+.forecast-day-card:hover {
+  background: #333333;
+  border-color: #667eea;
+}
 
-  .forecast-day {
-    color: #ecf0f1;
-  }
+.forecast-day {
+  color: #ecf0f1;
 }
 
 /* Responsive Design */
