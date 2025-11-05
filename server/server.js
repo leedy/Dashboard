@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const Parser = require('rss-parser');
+const path = require('path');
 require('dotenv').config();
 
 const connectDB = require('./config/database');
@@ -217,6 +218,22 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Backend server running on http://localhost:${PORT}`);
+// Serve static files from the React app in production
+// Check if dist folder exists (production build)
+const distPath = path.join(__dirname, '../dist');
+if (require('fs').existsSync(distPath)) {
+  app.use(express.static(distPath));
+
+  // Handle React routing - return index.html for all non-API routes
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+  console.log('Serving production build from /dist');
+} else {
+  console.log('No production build found. Run "npm run build" first or use "npm run dev:all" for development.');
+}
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Backend server running on http://0.0.0.0:${PORT}`);
+  console.log(`Accessible at http://localhost:${PORT} and http://<your-ip>:${PORT}`);
 });
