@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import './SportsDashboard.css';
 import TeamModal from './TeamModal';
@@ -11,17 +11,19 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
   const [selectedTeam, setSelectedTeam] = useState(null); // { abbrev: 'PHI', name: 'Philadelphia Flyers' }
 
   // Determine which sports have games available
-  const availableSportsList = availableSports && !availableSports.loading
-    ? ['nhl', 'nfl', 'mlb'].filter(sport => availableSports[sport])
-    : ['nhl', 'nfl', 'mlb']; // Show all while loading
+  const availableSportsList = useMemo(() => {
+    if (availableSports && !availableSports.loading) {
+      return ['nhl', 'nfl', 'mlb'].filter(sport => availableSports[sport]);
+    }
+    return ['nhl', 'nfl', 'mlb']; // Show all while loading
+  }, [availableSports?.nhl, availableSports?.nfl, availableSports?.mlb, availableSports?.loading]);
 
   // Initialize to first available sport
   useEffect(() => {
     if (availableSportsList.length > 0 && !availableSportsList.includes(selectedSport)) {
       setSelectedSport(availableSportsList[0]);
     }
-  }, [availableSportsList.join(',')]);
-
+  }, [availableSportsList, selectedSport]);
   // Update selected sport when activeSport prop changes (during auto-rotation)
   useEffect(() => {
     if (activeSport) {
