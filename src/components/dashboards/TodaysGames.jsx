@@ -181,24 +181,8 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
 
   const fetchNHLStandings = async () => {
     try {
-      const today = new Date();
-      const todayStr = today.toISOString().split('T')[0];
-      const response = await axios.get(`/api/nhl/v1/standings/${todayStr}`);
-      const standingsData = response.data.standings || [];
-
-      // Create a map of team abbreviation to record
-      const recordsMap = {};
-      standingsData.forEach(team => {
-        const abbrev = team.teamAbbrev?.default;
-        if (abbrev) {
-          recordsMap[abbrev] = {
-            wins: team.wins || 0,
-            losses: team.losses || 0,
-            otLosses: team.otLosses || 0
-          };
-        }
-      });
-      return recordsMap;
+      const response = await axios.get(`/api/standings/nhl`);
+      return response.data.data; // Return the cached standings data (already in recordsMap format)
     } catch (error) {
       console.error('Error fetching NHL standings:', error);
       return {};
@@ -207,31 +191,8 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
 
   const fetchNFLStandings = async () => {
     try {
-      const divisions = [
-        { id: 1 }, { id: 10 }, { id: 11 }, { id: 3 },
-        { id: 4 }, { id: 12 }, { id: 13 }, { id: 6 }
-      ];
-
-      const requests = divisions.map(div =>
-        axios.get(`/api/nfl/apis/v2/sports/football/nfl/standings?group=${div.id}`)
-      );
-
-      const responses = await Promise.all(requests);
-      const recordsMap = {};
-
-      responses.forEach(response => {
-        response.data.standings?.entries?.forEach(teamEntry => {
-          const teamName = teamEntry.team.displayName;
-          const stats = teamEntry.stats || [];
-          const wins = stats.find(s => s.name === 'wins')?.value || 0;
-          const losses = stats.find(s => s.name === 'losses')?.value || 0;
-          const ties = stats.find(s => s.name === 'ties')?.value || 0;
-
-          recordsMap[teamName] = { wins, losses, ties };
-        });
-      });
-
-      return recordsMap;
+      const response = await axios.get(`/api/standings/nfl`);
+      return response.data.data; // Return the cached standings data (already in recordsMap format)
     } catch (error) {
       console.error('Error fetching NFL standings:', error);
       return {};
@@ -240,28 +201,8 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
 
   const fetchMLBStandings = async () => {
     try {
-      // MLB uses divisions 5, 6, 7 for AL and 15, 16, 17 for NL
-      const divisions = [5, 6, 7, 15, 16, 17];
-
-      const requests = divisions.map(divId =>
-        axios.get(`/api/mlb/apis/v2/sports/baseball/mlb/standings?group=${divId}`)
-      );
-
-      const responses = await Promise.all(requests);
-      const recordsMap = {};
-
-      responses.forEach(response => {
-        response.data.standings?.entries?.forEach(teamEntry => {
-          const teamName = teamEntry.team.displayName;
-          const stats = teamEntry.stats || [];
-          const wins = stats.find(s => s.name === 'wins')?.value || 0;
-          const losses = stats.find(s => s.name === 'losses')?.value || 0;
-
-          recordsMap[teamName] = { wins, losses };
-        });
-      });
-
-      return recordsMap;
+      const response = await axios.get(`/api/standings/mlb`);
+      return response.data.data; // Return the cached standings data (already in recordsMap format)
     } catch (error) {
       console.error('Error fetching MLB standings:', error);
       return {};
@@ -271,12 +212,13 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
   const fetchNHLGames = async () => {
     setLoading(true);
     try {
-      // Fetch standings first to get team records
-      const recordsMap = await fetchNHLStandings();
+      // Fetch standings and games in parallel for faster loading
+      const [recordsMap, response] = await Promise.all([
+        fetchNHLStandings(),
+        axios.get(`/api/games/nhl`)
+      ]);
       setTeamRecords(recordsMap);
 
-      // Use cached game data endpoint
-      const response = await axios.get(`/api/games/nhl`);
       const apiData = response.data.data; // Extract actual game data from cache response
 
       // Show all games for today (don't filter by state to avoid missing any)
@@ -358,12 +300,13 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
   const fetchNFLGames = async () => {
     setLoading(true);
     try {
-      // Fetch standings first to get team records
-      const recordsMap = await fetchNFLStandings();
+      // Fetch standings and games in parallel for faster loading
+      const [recordsMap, response] = await Promise.all([
+        fetchNFLStandings(),
+        axios.get(`/api/games/nfl`)
+      ]);
       setTeamRecords(recordsMap);
 
-      // Use cached game data endpoint
-      const response = await axios.get(`/api/games/nfl`);
       const apiData = response.data.data; // Extract actual game data from cache response
       const events = apiData.events || [];
 
@@ -451,12 +394,13 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
   const fetchMLBGames = async () => {
     setLoading(true);
     try {
-      // Fetch standings first to get team records
-      const recordsMap = await fetchMLBStandings();
+      // Fetch standings and games in parallel for faster loading
+      const [recordsMap, response] = await Promise.all([
+        fetchMLBStandings(),
+        axios.get(`/api/games/mlb`)
+      ]);
       setTeamRecords(recordsMap);
 
-      // Use cached game data endpoint
-      const response = await axios.get(`/api/games/mlb`);
       const apiData = response.data.data; // Extract actual game data from cache response
       const events = apiData.events || [];
 

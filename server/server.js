@@ -9,6 +9,7 @@ const connectDB = require('./config/database');
 const preferencesRoutes = require('./routes/preferences');
 const photosRoutes = require('./routes/photos');
 const gameCacheRoutes = require('./routes/gameCache');
+const standingsCacheRoutes = require('./routes/standingsCache');
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3001;
@@ -25,6 +26,7 @@ app.use(express.urlencoded({ limit: '20mb', extended: true }));
 app.use('/api/preferences', preferencesRoutes);
 app.use('/api/photos', photosRoutes);
 app.use('/api/games', gameCacheRoutes);
+app.use('/api/standings', standingsCacheRoutes);
 
 // Proxy routes for external APIs
 // Custom NHL endpoint for recent games
