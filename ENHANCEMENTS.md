@@ -62,6 +62,90 @@ This document tracks potential improvements and feature additions for the Dashbo
 - More granular data than current air quality API
 - Could replace or supplement current weather dashboard
 
+#### YNAB API (You Need A Budget)
+**Purpose:** Personal budget tracking and financial management
+**API Capabilities:**
+
+**Read Access (GET):**
+- Budgets - All user budgets and details
+- Accounts - Bank accounts, credit cards, balances
+- Categories - Budget categories and allocations
+- Transactions - Full transaction history (dates, amounts, payees, categories)
+- Scheduled Transactions - Recurring transactions
+- Payees - List of all payees
+- Monthly Data - Month-by-month budget snapshots
+
+**Write Access (POST/PATCH/DELETE):**
+- Create transactions - Add new transactions programmatically
+- Update transactions - Modify existing transactions
+- Update categories - Change category budgets and goal targets
+- Update payees - Rename payees
+- Manage scheduled transactions - Create, update, delete recurring items
+
+**Special Features:**
+- Delta Requests - Only fetch changes since last request (efficient)
+- Personal Access Tokens - Easy authentication for personal projects
+- OAuth Support - Build apps others can use
+- Rate Limiting - 200 requests per hour
+- Currency in milliunits - $1.00 = 1000 milliunits (precise calculations)
+
+**Dashboard Ideas:**
+
+*Financial Overview Widget:*
+- Current account balances with trend indicators
+- Month-to-date spending by category
+- Budget vs. actual comparison with visual progress bars
+- Net worth tracking over time
+- Available to budget amount
+
+*Spending Insights:*
+- Top spending categories this month
+- Daily/weekly spending trends
+- Largest recent transactions
+- Upcoming scheduled transactions (bills due)
+- Category spending velocity (on track, over budget, under budget)
+
+*Budget Health Indicators:*
+- Categories over budget (red alerts with amounts)
+- Categories under budget (green with remaining amounts)
+- Goal progress for savings categories
+- Percentage of month elapsed vs. percentage of budget used
+
+*Visual Displays:*
+- Spending by category pie chart
+- Daily spending line graph
+- Month-over-month comparison
+- Account balance trends
+- Category budget allocation bar chart
+
+*Smart Alerts:*
+- "You've spent 80% of your Groceries budget"
+- "Rent due in 3 days ($X,XXX)"
+- "You're $200 under budget this month!"
+- Large transaction notifications (> $X threshold)
+- Unusual spending pattern detection
+
+*Quick Entry Dashboard:*
+- Add transactions without opening YNAB app
+- Categorize recent transactions
+- Approve imported transactions
+- Quick split transaction entry
+
+**Implementation Notes:**
+- Base URL: `https://api.ynab.com/v1`
+- Authentication: Personal Access Token or OAuth
+- Rate limit: 200 requests/hour
+- Official JavaScript SDK available: `npm install ynab`
+- Could create read-only dashboard or full transaction management
+- Consider caching budget data with smart refresh (similar to game/standings cache)
+
+**Privacy Considerations:**
+- Financial data is highly sensitive
+- Recommend personal use only (not multi-user shared dashboard)
+- Store API tokens securely in environment variables
+- Never log or display full account numbers
+- Consider adding PIN/password protection to financial dashboard view
+
 #### Other Interesting Public APIs
 
 **Weather & Environment:**
@@ -79,6 +163,7 @@ This document tracks potential improvements and feature additions for the Dashbo
 - **NextBus/Transit APIs** - Public transit real-time arrival
 
 **Financial:**
+- **YNAB API** - Personal budget data and transaction management (see details below)
 - **Alpha Vantage** - Stock market data, crypto, forex
 - **CoinGecko API** - Cryptocurrency prices and data
 - **Federal Reserve Economic Data (FRED)** - Economic indicators
@@ -149,11 +234,12 @@ This document tracks potential improvements and feature additions for the Dashbo
 ### Integration Priority
 
 **High Value / Easy Integration:**
-1. BreezoMeter (enhanced air quality/pollen data)
-2. Google Calendar (event integration)
-3. Package tracking (AfterShip or direct carriers)
-4. NASA APOD (daily space photo)
-5. News API (customizable news feed)
+1. YNAB API (personal budget dashboard - official SDK available)
+2. BreezoMeter (enhanced air quality/pollen data)
+3. Google Calendar (event integration)
+4. Package tracking (AfterShip or direct carriers)
+5. NASA APOD (daily space photo)
+6. News API (customizable news feed)
 
 **Medium Value / Moderate Effort:**
 1. Stocks/Crypto APIs (financial dashboard)
@@ -167,6 +253,11 @@ This document tracks potential improvements and feature additions for the Dashbo
 3. APIs requiring OAuth flows
 
 ### API Research Tasks
+- [ ] **YNAB API:** Generate Personal Access Token and test API connection
+- [ ] **YNAB API:** Install official SDK (`npm install ynab`) and explore
+- [ ] **YNAB API:** Design budget dashboard UI/UX mockup
+- [ ] **YNAB API:** Implement caching strategy for budget data (delta requests)
+- [ ] **YNAB API:** Create read-only financial overview widget prototype
 - [ ] Investigate BreezoMeter API pricing and features
 - [ ] Test BreezoMeter API with trial key
 - [ ] Compare BreezoMeter vs current Open-Meteo air quality data
