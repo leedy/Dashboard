@@ -1,14 +1,14 @@
 .weather-dashboard {
   width: 100%;
   height: calc(100vh - 140px);
-  padding: 1rem 2rem;
+  padding: 0.5rem 1rem;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
 .weather-header {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   flex-shrink: 0;
 }
 
@@ -16,7 +16,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   color: #7f8c8d;
 }
 
@@ -28,7 +28,7 @@
 .weather-content {
   display: grid;
   grid-template-rows: auto 1fr;
-  gap: 1.5rem;
+  gap: 0.75rem;
   flex: 1;
   min-height: 0;
 }
@@ -36,45 +36,45 @@
 /* Current Weather Card */
 .current-weather-card {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 20px;
-  padding: 2rem 3rem;
+  border-radius: 15px;
+  padding: 1rem 1.5rem;
   color: white;
   box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 3rem;
+  gap: 1.5rem;
 }
 
 .weather-icon-large {
-  font-size: 8rem;
+  font-size: 5rem;
   line-height: 1;
   flex-shrink: 0;
 }
 
 .current-temp {
-  font-size: 6rem;
+  font-size: 4rem;
   font-weight: 700;
   line-height: 1;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .weather-description {
-  font-size: 1.8rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.3rem;
+  margin-bottom: 0.25rem;
   font-weight: 500;
   opacity: 0.95;
 }
 
 .feels-like {
-  font-size: 1.3rem;
+  font-size: 1rem;
   opacity: 0.85;
 }
 
 .current-weather-details {
   display: flex;
-  gap: 3rem;
-  padding-left: 3rem;
+  gap: 1.5rem;
+  padding-left: 1.5rem;
   border-left: 1px solid rgba(255, 255, 255, 0.3);
 }
 
@@ -82,16 +82,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
   text-align: center;
 }
 
 .detail-icon {
-  font-size: 2rem;
+  font-size: 1.5rem;
 }
 
 .detail-value {
-  font-size: 1.3rem;
+  font-size: 1rem;
   font-weight: 600;
 }
 
@@ -106,16 +106,16 @@
 .forecast-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 1.25rem;
+  gap: 0.5rem;
   height: 100%;
   max-height: 100%;
-  padding: 0 3rem;
+  padding: 0 1rem;
 }
 
 .forecast-day-card {
   background: white;
-  border-radius: 15px;
-  padding: 1rem 1rem;
+  border-radius: 12px;
+  padding: 0.75rem 0.5rem;
   text-align: center;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
@@ -124,7 +124,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 .forecast-day-card:hover {
@@ -134,21 +134,21 @@
 }
 
 .forecast-day {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #2c3e50;
 }
 
 .forecast-icon {
-  font-size: 3.5rem;
+  font-size: 2.5rem;
   line-height: 1;
 }
 
 .forecast-temps {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  font-size: 1.5rem;
+  gap: 0.1rem;
+  font-size: 1.2rem;
 }
 
 .temp-high {
@@ -162,19 +162,19 @@
 }
 
 .forecast-details {
-  margin-top: 0.25rem;
+  margin-top: 0.1rem;
 }
 
 .forecast-precipitation {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #3498db;
   font-weight: 600;
 }
 
 .forecast-aqi {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  margin-top: 0.25rem;
+  margin-top: 0.1rem;
 }
 
 /* Loading and Error States */
