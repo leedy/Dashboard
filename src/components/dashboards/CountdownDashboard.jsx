@@ -163,12 +163,6 @@ function CountdownDashboard({ preferences }) {
                 <div className="countdown-label">Seconds</div>
               </div>
             </div>
-
-            <div className="countdown-summary">
-              <p>
-                <strong>{timeRemaining.days}</strong> {timeRemaining.days === 1 ? 'day' : 'days'} until {countdownEvent.name}
-              </p>
-            </div>
           </>
         )}
       </div>
