@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import './SportsDashboard.css';
 import TeamModal from './TeamModal';
+import GoalDetailsModal from './GoalDetailsModal';
 
 function TodaysGames({ preferences, activeSport, availableSports }) {
   const [selectedSport, setSelectedSport] = useState('nhl');
@@ -10,6 +11,7 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(null); // { abbrev: 'PHI', name: 'Philadelphia Flyers' }
   const [teamRecords, setTeamRecords] = useState({}); // Store team records by abbreviation or name
+  const [selectedGame, setSelectedGame] = useState(null); // For goal details modal
 
   // Determine which sports have games available
   const availableSportsList = useMemo(() => {
@@ -179,6 +181,19 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
     }
   };
 
+  const handleGameTimeClick = (game) => {
+    // Only for NHL games that have started or finished (have goals to show)
+    if (selectedSport !== 'nhl') return;
+    if (!game.gameId) return;
+    if (!game.isLive && !game.isFinal) return; // Only show for live or final games
+
+    setSelectedGame({
+      gameId: game.gameId,
+      homeTeam: game.homeTeam,
+      awayTeam: game.awayTeam
+    });
+  };
+
   const fetchNHLStandings = async () => {
     try {
       const response = await axios.get(`/api/standings/nhl`);
@@ -266,6 +281,7 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
           }
 
           return {
+            gameId: game.id,
             homeTeam: homeTeamName,
             awayTeam: awayTeamName,
             homeRecord: homeRecordStr,
@@ -534,7 +550,15 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
             <div className="games-list">
               {gamesData.map((game, index) => (
                 <div key={index} className={`game-card upcoming ${game.isFavorite ? 'favorite-team' : ''} ${game.isLive ? 'live-game' : ''}`}>
-                  <div className={`game-time ${game.isLive ? 'live-indicator' : ''}`}>{game.date}</div>
+                  <div
+                    className={`game-time ${game.isLive ? 'live-indicator' : ''} ${selectedSport === 'nhl' && (game.isLive || game.isFinal) && game.gameId ? 'clickable-time' : ''}`}
+                    onClick={() => handleGameTimeClick(game)}
+                    style={{
+                      cursor: selectedSport === 'nhl' && (game.isLive || game.isFinal) && game.gameId ? 'pointer' : 'default'
+                    }}
+                  >
+                    {game.date}
+                  </div>
                   <div className="game-matchup">
                     <div className="team-row">
                       <div className="team-info">
@@ -599,6 +623,15 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
           teamAbbrev={selectedTeam.abbrev}
           teamName={selectedTeam.name}
           onClose={() => setSelectedTeam(null)}
+        />
+      )}
+
+      {selectedGame && (
+        <GoalDetailsModal
+          gameId={selectedGame.gameId}
+          homeTeam={selectedGame.homeTeam}
+          awayTeam={selectedGame.awayTeam}
+          onClose={() => setSelectedGame(null)}
         />
       )}
     </div>

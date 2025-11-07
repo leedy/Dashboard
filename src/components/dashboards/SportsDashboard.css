@@ -167,6 +167,18 @@
   animation: pulse-text 1.5s ease-in-out infinite;
 }
 
+.game-time.clickable-time {
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  margin: -0.25rem -0.5rem;
+}
+
+.game-time.clickable-time:hover {
+  background: rgba(102, 126, 234, 0.15);
+  transform: scale(1.05);
+}
+
 .game-matchup {
   display: flex;
   flex-direction: column;
