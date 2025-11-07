@@ -16,7 +16,6 @@ function DisneyRideSelection({ preferences, onSave }) {
   const [selectedPark, setSelectedPark] = useState('magic-kingdom');
   const [excludedRides, setExcludedRides] = useState(preferences.disneyExcludedRides || []);
   const [knownRides, setKnownRides] = useState(preferences.disneyKnownRides || []);
-  const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState(null);
   const [newRidesDetected, setNewRidesDetected] = useState(0);
 
@@ -123,57 +122,51 @@ function DisneyRideSelection({ preferences, onSave }) {
     return excludedRides.includes(rideId);
   };
 
-  const toggleRide = (rideId) => {
-    setExcludedRides(prev => {
-      if (prev.includes(rideId)) {
-        // Remove from excluded (include in calculation)
-        return prev.filter(id => id !== rideId);
-      } else {
-        // Add to excluded (exclude from calculation)
-        return [...prev, rideId];
-      }
-    });
+  const toggleRide = async (rideId) => {
+    const updatedExcluded = excludedRides.includes(rideId)
+      ? excludedRides.filter(id => id !== rideId)
+      : [...excludedRides, rideId];
+
+    setExcludedRides(updatedExcluded);
+
+    // Auto-save
+    const updatedPreferences = {
+      ...preferences,
+      disneyExcludedRides: updatedExcluded,
+      disneyKnownRides: knownRides
+    };
+    await onSave(updatedPreferences);
   };
 
-  const toggleAllInPark = (include) => {
+  const toggleAllInPark = async (include) => {
     const parkRides = allRides[selectedPark] || [];
-    setExcludedRides(prev => {
-      const parkRideIds = parkRides.map(r => r.id);
-      if (include) {
-        // Remove all park rides from excluded list (include them)
-        return prev.filter(id => !parkRideIds.includes(id));
-      } else {
-        // Add all park rides to excluded list (exclude them)
-        const newExcluded = [...prev];
-        parkRideIds.forEach(id => {
-          if (!newExcluded.includes(id)) {
-            newExcluded.push(id);
-          }
-        });
-        return newExcluded;
-      }
-    });
+    const parkRideIds = parkRides.map(r => r.id);
+
+    let updatedExcluded;
+    if (include) {
+      // Remove all park rides from excluded list (include them)
+      updatedExcluded = excludedRides.filter(id => !parkRideIds.includes(id));
+    } else {
+      // Add all park rides to excluded list (exclude them)
+      updatedExcluded = [...excludedRides];
+      parkRideIds.forEach(id => {
+        if (!updatedExcluded.includes(id)) {
+          updatedExcluded.push(id);
+        }
+      });
+    }
+
+    setExcludedRides(updatedExcluded);
+
+    // Auto-save
+    const updatedPreferences = {
+      ...preferences,
+      disneyExcludedRides: updatedExcluded,
+      disneyKnownRides: knownRides
+    };
+    await onSave(updatedPreferences);
   };
 
-  const handleSave = async () => {
-    setSaving(true);
-    setSaveMessage(null);
-    try {
-      const updatedPreferences = {
-        ...preferences,
-        disneyExcludedRides: excludedRides,
-        disneyKnownRides: knownRides
-      };
-      await onSave(updatedPreferences);
-      setSaveMessage({ type: 'success', text: 'Settings saved successfully!' });
-      setTimeout(() => setSaveMessage(null), 3000);
-    } catch (error) {
-      console.error('Error saving ride selections:', error);
-      setSaveMessage({ type: 'error', text: 'Failed to save settings. Please try again.' });
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const handleRefresh = async () => {
     await fetchAllRides(true);
@@ -262,20 +255,11 @@ function DisneyRideSelection({ preferences, onSave }) {
             ))}
           </div>
 
-          <div className="ride-selection-actions">
-            {saveMessage && (
-              <div className={`save-message ${saveMessage.type}`}>
-                {saveMessage.text}
-              </div>
-            )}
-            <button
-              className="save-button"
-              onClick={handleSave}
-              disabled={saving}
-            >
-              {saving ? 'Saving...' : 'Save Settings'}
-            </button>
-          </div>
+          {saveMessage && (
+            <div className={`save-message ${saveMessage.type}`} style={{ marginTop: '1rem', textAlign: 'center' }}>
+              {saveMessage.text}
+            </div>
+          )}
         </>
       )}
     </div>

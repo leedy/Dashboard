@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AdminSettings.css';
 
-function AdminSettings({ preferences, onSave, onCancel }) {
+function AdminSettings({ preferences, onSave }) {
   const [localPrefs, setLocalPrefs] = useState(preferences);
   const [zipcodeLookup, setZipcodeLookup] = useState('');
   const [zipcodeError, setZipcodeError] = useState('');
@@ -85,18 +85,22 @@ function AdminSettings({ preferences, onSave, onCancel }) {
 
   const handleNHLTeamChange = (e) => {
     const team = nhlTeams.find(t => t.abbrev === e.target.value);
-    setLocalPrefs(prev => ({
-      ...prev,
+    const updatedPrefs = {
+      ...localPrefs,
       favoriteNHLTeam: team
-    }));
+    };
+    setLocalPrefs(updatedPrefs);
+    onSave(updatedPrefs);
   };
 
   const handleNFLTeamChange = (e) => {
     const team = nflTeams.find(t => t.abbrev === e.target.value);
-    setLocalPrefs(prev => ({
-      ...prev,
+    const updatedPrefs = {
+      ...localPrefs,
       favoriteNFLTeam: team
-    }));
+    };
+    setLocalPrefs(updatedPrefs);
+    onSave(updatedPrefs);
   };
 
   const handleZipcodeChange = async (e) => {
@@ -118,16 +122,18 @@ function AdminSettings({ preferences, onSave, onCancel }) {
 
         if (response.data.results && response.data.results.length > 0) {
           const result = response.data.results[0];
-          setLocalPrefs(prev => ({
-            ...prev,
+          const updatedPrefs = {
+            ...localPrefs,
             weatherLocation: {
               zipcode: zipcode,
               city: `${result.name}, ${result.admin1 || ''}`.trim(),
               latitude: result.latitude,
               longitude: result.longitude
             }
-          }));
+          };
+          setLocalPrefs(updatedPrefs);
           setZipcodeLookup(`Found: ${result.name}, ${result.admin1 || ''}`);
+          onSave(updatedPrefs);
         } else {
           setZipcodeError('Zipcode not found');
         }
@@ -136,30 +142,24 @@ function AdminSettings({ preferences, onSave, onCancel }) {
         setZipcodeError('Error looking up zipcode');
       }
     } else if (zipcode.length > 0) {
-      setLocalPrefs(prev => ({
-        ...prev,
+      const updatedPrefs = {
+        ...localPrefs,
         weatherLocation: {
-          ...prev.weatherLocation,
+          ...localPrefs.weatherLocation,
           zipcode: zipcode
         }
-      }));
+      };
+      setLocalPrefs(updatedPrefs);
     }
   };
 
   const handleDefaultDashboardChange = (e) => {
-    setLocalPrefs(prev => ({
-      ...prev,
+    const updatedPrefs = {
+      ...localPrefs,
       defaultDashboard: e.target.value
-    }));
-  };
-
-  const handleSave = () => {
-    onSave(localPrefs);
-  };
-
-  const handleCancel = () => {
-    setLocalPrefs(preferences);
-    onCancel();
+    };
+    setLocalPrefs(updatedPrefs);
+    onSave(updatedPrefs);
   };
 
   return (
@@ -239,13 +239,17 @@ function AdminSettings({ preferences, onSave, onCancel }) {
                 id="event-name"
                 type="text"
                 value={localPrefs.countdownEvent?.name || ''}
-                onChange={(e) => setLocalPrefs(prev => ({
-                  ...prev,
-                  countdownEvent: {
-                    ...prev.countdownEvent,
-                    name: e.target.value
-                  }
-                }))}
+                onChange={(e) => {
+                  const updatedPrefs = {
+                    ...localPrefs,
+                    countdownEvent: {
+                      ...localPrefs.countdownEvent,
+                      name: e.target.value
+                    }
+                  };
+                  setLocalPrefs(updatedPrefs);
+                  onSave(updatedPrefs);
+                }}
                 placeholder="Enter event name"
               />
             </div>
@@ -256,13 +260,17 @@ function AdminSettings({ preferences, onSave, onCancel }) {
                 id="event-date"
                 type="date"
                 value={localPrefs.countdownEvent?.date || ''}
-                onChange={(e) => setLocalPrefs(prev => ({
-                  ...prev,
-                  countdownEvent: {
-                    ...prev.countdownEvent,
-                    date: e.target.value
-                  }
-                }))}
+                onChange={(e) => {
+                  const updatedPrefs = {
+                    ...localPrefs,
+                    countdownEvent: {
+                      ...localPrefs.countdownEvent,
+                      date: e.target.value
+                    }
+                  };
+                  setLocalPrefs(updatedPrefs);
+                  onSave(updatedPrefs);
+                }}
               />
             </div>
           </div>
@@ -302,13 +310,17 @@ function AdminSettings({ preferences, onSave, onCancel }) {
                   id="auto-rotate"
                   type="checkbox"
                   checked={localPrefs.displaySettings?.autoRotate || false}
-                  onChange={(e) => setLocalPrefs(prev => ({
-                    ...prev,
-                    displaySettings: {
-                      ...prev.displaySettings,
-                      autoRotate: e.target.checked
-                    }
-                  }))}
+                  onChange={(e) => {
+                    const updatedPrefs = {
+                      ...localPrefs,
+                      displaySettings: {
+                        ...localPrefs.displaySettings,
+                        autoRotate: e.target.checked
+                      }
+                    };
+                    setLocalPrefs(updatedPrefs);
+                    onSave(updatedPrefs);
+                  }}
                   style={{ width: 'auto', cursor: 'pointer' }}
                 />
                 <span>Enable Auto-Rotate Dashboards</span>
@@ -323,13 +335,17 @@ function AdminSettings({ preferences, onSave, onCancel }) {
                 min="5"
                 max="300"
                 value={localPrefs.displaySettings?.rotateInterval || 30}
-                onChange={(e) => setLocalPrefs(prev => ({
-                  ...prev,
-                  displaySettings: {
-                    ...prev.displaySettings,
-                    rotateInterval: parseInt(e.target.value) || 30
-                  }
-                }))}
+                onChange={(e) => {
+                  const updatedPrefs = {
+                    ...localPrefs,
+                    displaySettings: {
+                      ...localPrefs.displaySettings,
+                      rotateInterval: parseInt(e.target.value) || 30
+                    }
+                  };
+                  setLocalPrefs(updatedPrefs);
+                  onSave(updatedPrefs);
+                }}
                 placeholder="Enter seconds (5-300)"
                 disabled={!localPrefs.displaySettings?.autoRotate}
               />
@@ -339,12 +355,6 @@ function AdminSettings({ preferences, onSave, onCancel }) {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="settings-actions">
-        <button className="btn-cancel" onClick={handleCancel}>Cancel</button>
-        <button className="btn-save" onClick={handleSave}>Save Changes</button>
       </div>
     </div>
   );

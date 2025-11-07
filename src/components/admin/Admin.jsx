@@ -42,7 +42,6 @@ function Admin({ preferences, onSave, onCancel }) {
           <AdminSettings
             preferences={preferences}
             onSave={onSave}
-            onCancel={onCancel}
           />
         )}
         {activeTab === 'photos' && (

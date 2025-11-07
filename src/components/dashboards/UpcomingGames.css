@@ -41,15 +41,15 @@
 
 .upcoming-games-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
   padding: 0 10px;
 }
 
 .upcoming-game-card {
   background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 10px;
+  padding: 14px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   border: 1px solid #333;
@@ -65,19 +65,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
-  padding-bottom: 15px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
   border-bottom: 2px solid #333;
 }
 
 .game-date {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #4fc3f7;
 }
 
 .game-time {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   color: #999;
 }
 
@@ -111,15 +111,15 @@
 .opponent-info {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 10px;
+  gap: 12px;
+  padding: 8px;
   background: rgba(255, 255, 255, 0.03);
   border-radius: 8px;
 }
 
 .opponent-logo {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   object-fit: contain;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
@@ -129,7 +129,7 @@
 }
 
 .opponent-name {
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: #ffffff;
   margin-bottom: 4px;
@@ -142,10 +142,10 @@
 }
 
 .opponent-record {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   color: #4fc3f7;
   font-weight: 400;
-  margin-left: 8px;
+  margin-left: 6px;
 }
 
 .game-info {
@@ -181,6 +181,12 @@
 }
 
 /* Responsive design */
+@media (max-width: 1200px) {
+  .upcoming-games-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .upcoming-games-dashboard {
     padding: 15px;

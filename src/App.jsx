@@ -20,11 +20,7 @@ const Admin = lazy(() => import('./components/admin/Admin'))
 function App() {
   const {
     preferences,
-    updatePreferences,
-    updateFavoriteNHLTeam,
-    updateFavoriteNFLTeam,
-    updateWeatherLocation,
-    updateDefaultDashboard
+    updatePreferences
   } = usePreferences();
 
   const [currentDashboard, setCurrentDashboard] = useState(preferences.defaultDashboard)
@@ -120,9 +116,6 @@ function App() {
       }
       return true;
     });
-
-  // Legacy array for backward compatibility
-  const rotatableDashboards = dashboardRotation.map(d => d.dashboard);
 
   // Update current dashboard when default preference changes
   useEffect(() => {
