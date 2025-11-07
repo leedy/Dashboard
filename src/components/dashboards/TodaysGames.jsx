@@ -503,11 +503,18 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
     });
   };
 
+  const getHeaderTitle = () => {
+    if (selectedSport === 'nfl') {
+      return "This Week's Games";
+    }
+    return "Today's Games";
+  };
+
   return (
     <div className="sports-dashboard">
       <div className="dashboard-header">
         <div className="header-title">
-          <h2>Today's Games</h2>
+          <h2>{getHeaderTitle()}</h2>
           {lastUpdated && (
             <p className="last-updated">Last updated: {formatLastUpdated()}</p>
           )}

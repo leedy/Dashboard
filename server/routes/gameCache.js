@@ -96,8 +96,9 @@ router.get('/:sport', async (req, res) => {
       const response = await axios.get(`https://api-web.nhle.com/v1/score/${today}`);
       apiData = response.data;
     } else if (sport === 'nfl') {
-      const espnDate = getESPNDateFormat();
-      const response = await axios.get(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=${espnDate}`);
+      // For NFL, get the full week's games instead of just today
+      // ESPN API without dates parameter returns current week's games
+      const response = await axios.get(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard`);
       apiData = response.data;
     } else if (sport === 'mlb') {
       const espnDate = getESPNDateFormat();
@@ -154,8 +155,9 @@ router.post('/:sport/refresh', async (req, res) => {
       const response = await axios.get(`https://api-web.nhle.com/v1/score/${today}`);
       apiData = response.data;
     } else if (sport === 'nfl') {
-      const espnDate = getESPNDateFormat();
-      const response = await axios.get(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=${espnDate}`);
+      // For NFL, get the full week's games instead of just today
+      // ESPN API without dates parameter returns current week's games
+      const response = await axios.get(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard`);
       apiData = response.data;
     } else if (sport === 'mlb') {
       const espnDate = getESPNDateFormat();
