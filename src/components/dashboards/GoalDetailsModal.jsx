@@ -64,10 +64,11 @@ function GoalDetailsModal({ gameId, homeTeam, awayTeam, onClose }) {
   };
 
   const formatStrength = (strength) => {
-    if (strength === 'EV') return 'Even Strength';
-    if (strength === 'PP') return 'Power Play';
-    if (strength === 'SH') return 'Short Handed';
-    if (strength === 'EN') return 'Empty Net';
+    const upperStrength = strength?.toUpperCase();
+    if (upperStrength === 'EV') return 'Even Strength';
+    if (upperStrength === 'PP') return 'Power Play';
+    if (upperStrength === 'SH') return 'Short Handed';
+    if (upperStrength === 'EN') return 'Empty Net';
     return strength;
   };
 
@@ -111,7 +112,7 @@ function GoalDetailsModal({ gameId, homeTeam, awayTeam, onClose }) {
                         <span className="season-total"> ({goal.scorerSeasonGoals})</span>
                       )}
                     </span>
-                    {goal.strength !== 'EV' && (
+                    {goal.strength && goal.strength.toUpperCase() !== 'EV' && (
                       <span className="goal-strength">({formatStrength(goal.strength)})</span>
                     )}
                   </div>
