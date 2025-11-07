@@ -155,6 +155,13 @@
   color: #fff;
 }
 
+.season-total {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #4fc3f7;
+  margin-left: 0.25rem;
+}
+
 .goal-strength {
   font-size: 0.9rem;
   color: #ffb74d;
@@ -184,6 +191,11 @@
   font-size: 0.95rem;
   color: #b0b0b0;
   font-weight: 500;
+}
+
+.assist-name .season-total {
+  font-size: 0.85rem;
+  color: #67daff;
 }
 
 /* Scrollbar styling */

@@ -36,6 +36,7 @@ function GoalDetailsModal({ gameId, homeTeam, awayTeam, onClose }) {
               scorerName: goal.name?.default || goal.firstName?.default + ' ' + goal.lastName?.default,
               scorerFirstName: goal.firstName?.default || '',
               scorerLastName: goal.lastName?.default || '',
+              scorerSeasonGoals: goal.goalsToDate || null,
               strength: goal.strength || 'EV',
               assists: goal.assists || [],
               highlightClip: goal.highlightClip || null
@@ -104,7 +105,12 @@ function GoalDetailsModal({ gameId, homeTeam, awayTeam, onClose }) {
 
                   <div className="goal-scorer">
                     <span className="goal-icon">🚨</span>
-                    <span className="scorer-name">{goal.scorerName || `${goal.scorerFirstName} ${goal.scorerLastName}`}</span>
+                    <span className="scorer-name">
+                      {goal.scorerName || `${goal.scorerFirstName} ${goal.scorerLastName}`}
+                      {goal.scorerSeasonGoals !== null && (
+                        <span className="season-total"> ({goal.scorerSeasonGoals})</span>
+                      )}
+                    </span>
                     {goal.strength !== 'EV' && (
                       <span className="goal-strength">({formatStrength(goal.strength)})</span>
                     )}
@@ -116,6 +122,9 @@ function GoalDetailsModal({ gameId, homeTeam, awayTeam, onClose }) {
                       {goal.assists.map((assist, idx) => (
                         <span key={idx} className="assist-name">
                           {assist.name?.default || `${assist.firstName?.default} ${assist.lastName?.default}`}
+                          {assist.assistsToDate !== null && assist.assistsToDate !== undefined && (
+                            <span className="season-total"> ({assist.assistsToDate})</span>
+                          )}
                           {idx < goal.assists.length - 1 ? ', ' : ''}
                         </span>
                       ))}
