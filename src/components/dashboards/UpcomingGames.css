@@ -41,7 +41,7 @@
 
 .upcoming-games-list {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
   padding: 0 10px;
 }
@@ -181,19 +181,13 @@
 }
 
 /* Responsive design */
-@media (max-width: 1200px) {
-  .upcoming-games-list {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
 @media (max-width: 768px) {
   .upcoming-games-dashboard {
     padding: 15px;
   }
 
   .upcoming-games-list {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 15px;
   }
 
