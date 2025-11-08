@@ -108,6 +108,17 @@ function AdminSettings({ preferences, onSave }) {
     setZipcodeLookup('');
     setZipcodeError('');
 
+    // Only update local state while typing, don't save partial data
+    const updatedPrefs = {
+      ...localPrefs,
+      weatherLocation: {
+        ...localPrefs.weatherLocation,
+        zipcode: zipcode
+      }
+    };
+    setLocalPrefs(updatedPrefs);
+
+    // Only lookup and save when we have a complete 5-digit zipcode
     if (zipcode.length === 5 && /^\d{5}$/.test(zipcode)) {
       // Lookup location from zipcode using Open-Meteo geocoding API
       try {
@@ -122,7 +133,7 @@ function AdminSettings({ preferences, onSave }) {
 
         if (response.data.results && response.data.results.length > 0) {
           const result = response.data.results[0];
-          const updatedPrefs = {
+          const completePrefs = {
             ...localPrefs,
             weatherLocation: {
               zipcode: zipcode,
@@ -131,9 +142,9 @@ function AdminSettings({ preferences, onSave }) {
               longitude: result.longitude
             }
           };
-          setLocalPrefs(updatedPrefs);
+          setLocalPrefs(completePrefs);
           setZipcodeLookup(`Found: ${result.name}, ${result.admin1 || ''}`);
-          onSave(updatedPrefs);
+          onSave(completePrefs);
         } else {
           setZipcodeError('Zipcode not found');
         }
@@ -141,15 +152,6 @@ function AdminSettings({ preferences, onSave }) {
         console.error('Error looking up zipcode:', error);
         setZipcodeError('Error looking up zipcode');
       }
-    } else if (zipcode.length > 0) {
-      const updatedPrefs = {
-        ...localPrefs,
-        weatherLocation: {
-          ...localPrefs.weatherLocation,
-          zipcode: zipcode
-        }
-      };
-      setLocalPrefs(updatedPrefs);
     }
   };
 
