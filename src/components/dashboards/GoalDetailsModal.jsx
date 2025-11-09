@@ -7,6 +7,12 @@ function GoalDetailsModal({ gameId, homeTeam, awayTeam, onClose }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Function to get team logo URL from abbreviation
+  const getTeamLogo = (teamAbbrev) => {
+    if (!teamAbbrev) return null;
+    return `https://assets.nhle.com/logos/nhl/svg/${teamAbbrev}_light.svg`;
+  };
+
   useEffect(() => {
     fetchGoalDetails();
   }, [gameId]);
@@ -105,7 +111,13 @@ function GoalDetailsModal({ gameId, homeTeam, awayTeam, onClose }) {
                   </div>
 
                   <div className="goal-scorer">
-                    <span className="goal-icon">🚨</span>
+                    {getTeamLogo(goal.team) && (
+                      <img
+                        src={getTeamLogo(goal.team)}
+                        alt={goal.team}
+                        className="goal-team-logo"
+                      />
+                    )}
                     <span className="scorer-name">
                       {goal.scorerName || `${goal.scorerFirstName} ${goal.scorerLastName}`}
                       {goal.scorerSeasonGoals !== null && (
