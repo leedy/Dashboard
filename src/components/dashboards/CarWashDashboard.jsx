@@ -51,14 +51,14 @@ function CarWashDashboard({ preferences }) {
     // Check next 6 days (skip today, check days 1-6)
     const next6Days = forecastData.daily.precipitation_probability_max.slice(1, 7);
 
-    // If any day has >30% chance of rain, it's a GOOD day to wash
+    // If any day has >30% chance of rain, it's a BAD day to wash
     const willRain = next6Days.some(prob => prob > 30);
 
     return {
-      isGoodDay: willRain,
+      isGoodDay: !willRain,
       reason: willRain
-        ? 'Rain is forecasted in the next 6 days. Wash your car now!'
-        : 'No rain expected for at least 6 days. Wait for rain to come.'
+        ? 'Rain is forecasted in the next 6 days. Don\'t wash - it\'ll just get dirty!'
+        : 'No rain expected for the next 6 days. Great day to wash your car!'
     };
   };
 
@@ -175,8 +175,8 @@ function CarWashDashboard({ preferences }) {
         </div>
 
         <div className="info-note">
-          <strong>How it works:</strong> If rain is expected within the next 6 days, it's a good day to wash your car (get it clean before the rain!).
-          If no rain is forecasted, wait - nature will do the rinsing for you soon enough.
+          <strong>How it works:</strong> If rain is expected within the next 6 days, it's a bad day to wash - your car will just get dirty again.
+          If no rain is forecasted, it's a great day to wash and keep your car clean!
         </div>
       </div>
     </div>
