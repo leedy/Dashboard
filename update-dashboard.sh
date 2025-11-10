@@ -20,9 +20,9 @@ cd server
 npm install
 cd ..
 
-echo "Restarting services..."
-sudo systemctl restart dashboard-backend
-sudo systemctl restart dashboard-frontend
+echo "Restarting services with PM2..."
+pm2 restart dashboard-backend
+pm2 restart dashboard-frontend
 
 echo "Update complete! Dashboard restarted."
 echo "Refresh will happen automatically in the browser."
