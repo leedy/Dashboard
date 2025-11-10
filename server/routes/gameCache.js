@@ -4,8 +4,15 @@ const axios = require('axios');
 const GameCache = require('../models/GameCache');
 
 // Helper to get today's date in YYYY-MM-DD format
-const getTodayDate = () => {
-  const today = new Date();
+// For NHL: use Eastern Time since that's where games are scheduled
+const getTodayDate = (timezone = null) => {
+  let today;
+  if (timezone) {
+    // Get date in specific timezone
+    today = new Date(new Date().toLocaleString('en-US', { timeZone: timezone }));
+  } else {
+    today = new Date();
+  }
   const year = today.getFullYear();
   const month = String(today.getMonth() + 1).padStart(2, '0');
   const day = String(today.getDate()).padStart(2, '0');
@@ -13,8 +20,14 @@ const getTodayDate = () => {
 };
 
 // Helper to get today's date in YYYYMMDD format (for ESPN API)
-const getESPNDateFormat = () => {
-  const today = new Date();
+// MLB games are also scheduled in Eastern Time
+const getESPNDateFormat = (timezone = null) => {
+  let today;
+  if (timezone) {
+    today = new Date(new Date().toLocaleString('en-US', { timeZone: timezone }));
+  } else {
+    today = new Date();
+  }
   const year = today.getFullYear();
   const month = String(today.getMonth() + 1).padStart(2, '0');
   const day = String(today.getDate()).padStart(2, '0');
@@ -25,7 +38,8 @@ const getESPNDateFormat = () => {
 router.get('/:sport', async (req, res) => {
   try {
     const { sport } = req.params;
-    const today = getTodayDate();
+    // Use Eastern Time for NHL since games are scheduled in ET
+    const today = sport === 'nhl' ? getTodayDate('America/New_York') : getTodayDate();
 
     console.log(`Game cache request for ${sport} on ${today}`);
 
@@ -101,7 +115,8 @@ router.get('/:sport', async (req, res) => {
       const response = await axios.get(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard`);
       apiData = response.data;
     } else if (sport === 'mlb') {
-      const espnDate = getESPNDateFormat();
+      // MLB games are also scheduled in Eastern Time
+      const espnDate = getESPNDateFormat('America/New_York');
       const response = await axios.get(`https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=${espnDate}`);
       apiData = response.data;
     } else {
@@ -142,7 +157,8 @@ router.get('/:sport', async (req, res) => {
 router.post('/:sport/refresh', async (req, res) => {
   try {
     const { sport } = req.params;
-    const today = getTodayDate();
+    // Use Eastern Time for NHL since games are scheduled in ET
+    const today = sport === 'nhl' ? getTodayDate('America/New_York') : getTodayDate();
 
     console.log(`Force refreshing ${sport} games for ${today}`);
 
@@ -160,7 +176,8 @@ router.post('/:sport/refresh', async (req, res) => {
       const response = await axios.get(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard`);
       apiData = response.data;
     } else if (sport === 'mlb') {
-      const espnDate = getESPNDateFormat();
+      // MLB games are also scheduled in Eastern Time
+      const espnDate = getESPNDateFormat('America/New_York');
       const response = await axios.get(`https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=${espnDate}`);
       apiData = response.data;
     } else {
