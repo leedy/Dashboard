@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import AdminSettings from './AdminSettings';
+import DashboardControls from './DashboardControls';
 import PhotoManagement from './PhotoManagement';
 import DisneyRideSelection from './DisneyRideSelection';
 import './Admin.css';
@@ -24,6 +25,12 @@ function Admin({ preferences, onSave, onCancel }) {
           Settings
         </button>
         <button
+          className={`admin-tab ${activeTab === 'dashboards' ? 'active' : ''}`}
+          onClick={() => setActiveTab('dashboards')}
+        >
+          Dashboard Controls
+        </button>
+        <button
           className={`admin-tab ${activeTab === 'photos' ? 'active' : ''}`}
           onClick={() => setActiveTab('photos')}
         >
@@ -40,6 +47,12 @@ function Admin({ preferences, onSave, onCancel }) {
       <div className="admin-content">
         {activeTab === 'settings' && (
           <AdminSettings
+            preferences={preferences}
+            onSave={onSave}
+          />
+        )}
+        {activeTab === 'dashboards' && (
+          <DashboardControls
             preferences={preferences}
             onSave={onSave}
           />
