@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const yahooFinance = require('yahoo-finance2').default;
+const YahooFinance = require('yahoo-finance2').default;
+const yahooFinance = new YahooFinance();
 
 // Cache for stock quotes (5 minute cache)
 let quotesCache = {
