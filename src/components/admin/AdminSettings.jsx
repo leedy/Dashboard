@@ -356,6 +356,35 @@ function AdminSettings({ preferences, onSave }) {
               </small>
             </div>
           </div>
+
+          {/* API Keys Section */}
+          <div className="settings-section">
+            <h3>API Keys</h3>
+
+            <div className="setting-item">
+              <label htmlFor="tmdb-api-key">TMDb API Key</label>
+              <input
+                id="tmdb-api-key"
+                type="text"
+                value={localPrefs.tmdbApiKey || ''}
+                onChange={(e) => {
+                  const updatedPrefs = {
+                    ...localPrefs,
+                    tmdbApiKey: e.target.value
+                  };
+                  setLocalPrefs(updatedPrefs);
+                  onSave(updatedPrefs);
+                }}
+                placeholder="Enter your TMDb API key"
+              />
+              <small style={{ color: '#888', fontSize: '0.85rem', marginTop: '0.25rem', display: 'block' }}>
+                Get a free API key at{' '}
+                <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener noreferrer" style={{ color: '#4fc3f7' }}>
+                  themoviedb.org/settings/api
+                </a>
+              </small>
+            </div>
+          </div>
         </div>
       </div>
     </div>

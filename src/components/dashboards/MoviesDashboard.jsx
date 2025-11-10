@@ -7,16 +7,17 @@ function MoviesDashboard({ preferences }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+  // Use API key from preferences first, fall back to environment variable
+  const TMDB_API_KEY = preferences?.tmdbApiKey || import.meta.env.VITE_TMDB_API_KEY;
   const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
 
   useEffect(() => {
     fetchUpcomingMovies();
-  }, []);
+  }, [preferences?.tmdbApiKey]);
 
   const fetchUpcomingMovies = async () => {
     if (!TMDB_API_KEY) {
-      setError('TMDb API key not configured. Please add VITE_TMDB_API_KEY to your .env.local file.');
+      setError('TMDb API key not configured. Please add your API key in the Admin panel.');
       return;
     }
 
@@ -87,9 +88,9 @@ function MoviesDashboard({ preferences }) {
               <ol>
                 <li>Sign up for a free account at <a href="https://www.themoviedb.org/signup" target="_blank" rel="noopener noreferrer">themoviedb.org</a></li>
                 <li>Get your API key from <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener noreferrer">Account Settings → API</a></li>
-                <li>Create a <code>.env.local</code> file in your project root</li>
-                <li>Add: <code>VITE_TMDB_API_KEY=your_api_key_here</code></li>
-                <li>Restart the dev server</li>
+                <li>Go to the <strong>Admin Panel</strong> in the dashboard navigation</li>
+                <li>Scroll to the <strong>API Keys</strong> section</li>
+                <li>Paste your TMDb API key and it will auto-save</li>
               </ol>
             </div>
           </div>

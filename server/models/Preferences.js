@@ -45,6 +45,10 @@ const preferencesSchema = new mongoose.Schema({
   disneyKnownRides: {
     type: [Number],
     default: []
+  },
+  tmdbApiKey: {
+    type: String,
+    default: ''
   }
 }, {
   timestamps: true
