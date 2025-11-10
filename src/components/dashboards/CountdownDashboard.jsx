@@ -136,10 +136,10 @@ function CountdownDashboard({ preferences, activeCountdown, onNavigate }) {
     <div className={`countdown-dashboard theme-${theme}`}>
       {hasMultiple && (
         <>
-          <button className="nav-button nav-previous" onClick={handlePrevious}>
+          <button className="countdown-nav-button countdown-nav-previous" onClick={handlePrevious}>
             ‹
           </button>
-          <button className="nav-button nav-next" onClick={handleNext}>
+          <button className="countdown-nav-button countdown-nav-next" onClick={handleNext}>
             ›
           </button>
         </>
