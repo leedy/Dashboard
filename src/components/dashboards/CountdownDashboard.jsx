@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './CountdownDashboard.css';
 
-function CountdownDashboard({ preferences, activeCountdown }) {
+function CountdownDashboard({ preferences, activeCountdown, onNavigate }) {
   const [timeRemaining, setTimeRemaining] = useState({
     days: 0,
     hours: 0,
@@ -15,27 +15,36 @@ function CountdownDashboard({ preferences, activeCountdown }) {
     totalHours: 0
   });
 
-  // Determine which countdown to show
-  const getCountdownEvent = () => {
-    // If activeCountdown is specified, find it in countdownEvents array
-    if (activeCountdown && preferences?.countdownEvents?.length > 0) {
-      const event = preferences.countdownEvents.find(e => e.id === activeCountdown);
-      if (event) return event;
-    }
+  // Get all countdown events and current index
+  const allCountdowns = preferences?.countdownEvents?.length > 0
+    ? preferences.countdownEvents
+    : [preferences?.countdownEvent || { name: 'New Year', date: '2026-01-01' }];
 
-    // If we have countdown events but no activeCountdown, use the first one
-    if (preferences?.countdownEvents?.length > 0) {
-      return preferences.countdownEvents[0];
-    }
+  const currentIndex = activeCountdown
+    ? allCountdowns.findIndex(e => e.id === activeCountdown)
+    : 0;
 
-    // Fall back to legacy single countdownEvent
-    return preferences?.countdownEvent || {
-      name: 'New Year',
-      date: '2026-01-01'
-    };
+  const actualIndex = currentIndex >= 0 ? currentIndex : 0;
+  const countdownEvent = allCountdowns[actualIndex];
+  const hasMultiple = allCountdowns.length > 1;
+
+  // Navigation handlers
+  const handlePrevious = () => {
+    if (!hasMultiple || !onNavigate) return;
+    const newIndex = actualIndex === 0 ? allCountdowns.length - 1 : actualIndex - 1;
+    onNavigate(allCountdowns[newIndex].id);
   };
 
-  const countdownEvent = getCountdownEvent();
+  const handleNext = () => {
+    if (!hasMultiple || !onNavigate) return;
+    const newIndex = (actualIndex + 1) % allCountdowns.length;
+    onNavigate(allCountdowns[newIndex].id);
+  };
+
+  const handleDotClick = (index) => {
+    if (!onNavigate) return;
+    onNavigate(allCountdowns[index].id);
+  };
 
   useEffect(() => {
     const calculateTimeRemaining = () => {
@@ -125,6 +134,17 @@ function CountdownDashboard({ preferences, activeCountdown }) {
 
   return (
     <div className={`countdown-dashboard theme-${theme}`}>
+      {hasMultiple && (
+        <>
+          <button className="nav-button nav-previous" onClick={handlePrevious}>
+            ‹
+          </button>
+          <button className="nav-button nav-next" onClick={handleNext}>
+            ›
+          </button>
+        </>
+      )}
+
       <div className="countdown-container">
         <h1 className="event-name">{countdownEvent.name}</h1>
         <div className="event-date">{formatDate(countdownEvent.date)}</div>
@@ -181,6 +201,19 @@ function CountdownDashboard({ preferences, activeCountdown }) {
               </div>
             </div>
           </>
+        )}
+
+        {hasMultiple && (
+          <div className="countdown-indicators">
+            {allCountdowns.map((countdown, index) => (
+              <button
+                key={countdown.id || index}
+                className={`indicator-dot ${index === actualIndex ? 'active' : ''}`}
+                onClick={() => handleDotClick(index)}
+                title={countdown.name}
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>

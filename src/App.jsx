@@ -200,6 +200,12 @@ function App() {
     setCurrentDashboard('todays-games'); // Return to today's games without saving
   };
 
+  // Handle manual navigation in countdown (and other dashboards with sub-sections)
+  // This will reset the auto-rotation timer by updating currentSubSection
+  const handleManualNavigation = (newSubSection) => {
+    setCurrentSubSection(newSubSection);
+  };
+
   // Helper to wrap dashboards with error boundaries
   const withErrorBoundary = (component, dashboardName) => (
     <ErrorBoundary dashboardName={dashboardName} autoRecover={true}>
@@ -231,7 +237,11 @@ function App() {
         );
       case 'countdown':
         return withErrorBoundary(
-          <CountdownDashboard preferences={preferences} activeCountdown={currentSubSection} />,
+          <CountdownDashboard
+            preferences={preferences}
+            activeCountdown={currentSubSection}
+            onNavigate={handleManualNavigation}
+          />,
           "Countdown"
         );
       case 'disney':
