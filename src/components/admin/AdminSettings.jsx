@@ -355,6 +355,52 @@ function AdminSettings({ preferences, onSave }) {
                 How long to show each dashboard before rotating to the next
               </small>
             </div>
+
+            <div className="setting-item">
+              <label>Dashboards to Include in Rotation</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
+                {[
+                  { id: 'todays-games', label: "Today's Games" },
+                  { id: 'upcoming-games', label: 'Upcoming Games' },
+                  { id: 'standings', label: 'Standings' },
+                  { id: 'weather', label: 'Weather' },
+                  { id: 'countdown', label: 'Countdown' },
+                  { id: 'disney', label: 'Disney Info' },
+                  { id: 'movies', label: 'Movies' },
+                  { id: 'family-photos', label: 'Family Photos' },
+                  { id: 'event-slides', label: 'Event Slides' }
+                ].map(dashboard => (
+                  <label key={dashboard.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={(localPrefs.displaySettings?.rotationDashboards || []).includes(dashboard.id)}
+                      onChange={(e) => {
+                        const currentDashboards = localPrefs.displaySettings?.rotationDashboards || [];
+                        const newDashboards = e.target.checked
+                          ? [...currentDashboards, dashboard.id]
+                          : currentDashboards.filter(d => d !== dashboard.id);
+
+                        const updatedPrefs = {
+                          ...localPrefs,
+                          displaySettings: {
+                            ...localPrefs.displaySettings,
+                            rotationDashboards: newDashboards
+                          }
+                        };
+                        setLocalPrefs(updatedPrefs);
+                        onSave(updatedPrefs);
+                      }}
+                      disabled={!localPrefs.displaySettings?.autoRotate}
+                      style={{ width: 'auto', cursor: 'pointer' }}
+                    />
+                    <span>{dashboard.label}</span>
+                  </label>
+                ))}
+              </div>
+              <small style={{ color: '#888', fontSize: '0.85rem', marginTop: '0.5rem', display: 'block' }}>
+                Select which dashboards to show during auto-rotation
+              </small>
+            </div>
           </div>
 
           {/* API Keys Section */}
