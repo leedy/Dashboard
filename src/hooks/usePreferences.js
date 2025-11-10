@@ -28,7 +28,18 @@ const DEFAULT_PREFERENCES = {
   displaySettings: {
     autoRotate: false,
     rotateInterval: 30,
-    refreshInterval: 60000
+    refreshInterval: 60000,
+    rotationDashboards: [
+      'todays-games',
+      'upcoming-games',
+      'standings',
+      'weather',
+      'countdown',
+      'disney',
+      'movies',
+      'family-photos',
+      'event-slides'
+    ]
   },
   disneyExcludedRides: [],
   disneyKnownRides: []

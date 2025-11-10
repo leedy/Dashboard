@@ -36,7 +36,21 @@ const preferencesSchema = new mongoose.Schema({
   displaySettings: {
     autoRotate: { type: Boolean, default: false },
     rotateInterval: { type: Number, default: 30 },
-    refreshInterval: { type: Number, default: 60000 }
+    refreshInterval: { type: Number, default: 60000 },
+    rotationDashboards: {
+      type: [String],
+      default: [
+        'todays-games',
+        'upcoming-games',
+        'standings',
+        'weather',
+        'countdown',
+        'disney',
+        'movies',
+        'family-photos',
+        'event-slides'
+      ]
+    }
   },
   disneyExcludedRides: {
     type: [Number],

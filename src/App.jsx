@@ -116,6 +116,14 @@ function App() {
         return photoCounts[dash.dashboard] > 0;
       }
       return true;
+    })
+    .filter(dash => {
+      // Filter based on user's rotation dashboard selections
+      const rotationDashboards = preferences.displaySettings?.rotationDashboards;
+      if (!rotationDashboards || rotationDashboards.length === 0) {
+        return true; // If no preference set, include all dashboards
+      }
+      return rotationDashboards.includes(dash.dashboard);
     });
 
   // Update current dashboard when default preference changes
@@ -167,7 +175,7 @@ function App() {
     }, rotateInterval);
 
     return () => clearInterval(intervalId);
-  }, [preferences.displaySettings?.autoRotate, preferences.displaySettings?.rotateInterval, currentDashboard, currentSubSection]);
+  }, [preferences.displaySettings?.autoRotate, preferences.displaySettings?.rotateInterval, preferences.displaySettings?.rotationDashboards, currentDashboard, currentSubSection, dashboardRotation]);
 
   const handleSaveSettings = async (newPreferences) => {
     await updatePreferences(newPreferences);
