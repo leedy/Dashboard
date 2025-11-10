@@ -70,9 +70,9 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
 
     if (selectedSport === 'nhl' && favoriteNHLTeam) {
       const favNameLower = favoriteNHLTeam.name.toLowerCase();
-      const favAbbrevLower = favoriteNHLTeam.abbrev.toLowerCase();
+      // Check for exact team name match or partial match
       if (teamNameLower.includes(favNameLower) || favNameLower.includes(teamNameLower)) return true;
-      if (teamNameLower.includes(favAbbrevLower)) return true;
+      // Check if any significant word from the team name matches
       const words = favNameLower.split(' ');
       for (const word of words) {
         if (word.length > 3 && teamNameLower.includes(word)) return true;
@@ -81,9 +81,9 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
 
     if (selectedSport === 'nfl' && favoriteNFLTeam) {
       const favNameLower = favoriteNFLTeam.name.toLowerCase();
-      const favAbbrevLower = favoriteNFLTeam.abbrev.toLowerCase();
+      // Check for exact team name match or partial match
       if (teamNameLower.includes(favNameLower) || favNameLower.includes(teamNameLower)) return true;
-      if (teamNameLower.includes(favAbbrevLower)) return true;
+      // Check if any significant word from the team name matches
       const words = favNameLower.split(' ');
       for (const word of words) {
         if (word.length > 3 && teamNameLower.includes(word)) return true;
@@ -92,9 +92,9 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
 
     if (selectedSport === 'mlb' && favoriteMLBTeam) {
       const favNameLower = favoriteMLBTeam.name.toLowerCase();
-      const favAbbrevLower = favoriteMLBTeam.abbrev.toLowerCase();
+      // Check for exact team name match or partial match
       if (teamNameLower.includes(favNameLower) || favNameLower.includes(teamNameLower)) return true;
-      if (teamNameLower.includes(favAbbrevLower)) return true;
+      // Check if any significant word from the team name matches
       const words = favNameLower.split(' ');
       for (const word of words) {
         if (word.length > 3 && teamNameLower.includes(word)) return true;
@@ -393,6 +393,9 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
           // Live games first
           if (a.isLive && !b.isLive) return -1;
           if (!a.isLive && b.isLive) return 1;
+          // Upcoming games (not final) before final games
+          if (!a.isFinal && b.isFinal) return -1;
+          if (a.isFinal && !b.isFinal) return 1;
           // Then sort by start time
           return a.startTime - b.startTime;
         });
