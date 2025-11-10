@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './CountdownDashboard.css';
 
-function CountdownDashboard({ preferences }) {
+function CountdownDashboard({ preferences, activeCountdown }) {
   const [timeRemaining, setTimeRemaining] = useState({
     days: 0,
     hours: 0,
@@ -15,10 +15,27 @@ function CountdownDashboard({ preferences }) {
     totalHours: 0
   });
 
-  const countdownEvent = preferences?.countdownEvent || {
-    name: 'New Year',
-    date: '2026-01-01'
+  // Determine which countdown to show
+  const getCountdownEvent = () => {
+    // If activeCountdown is specified, find it in countdownEvents array
+    if (activeCountdown && preferences?.countdownEvents?.length > 0) {
+      const event = preferences.countdownEvents.find(e => e.id === activeCountdown);
+      if (event) return event;
+    }
+
+    // If we have countdown events but no activeCountdown, use the first one
+    if (preferences?.countdownEvents?.length > 0) {
+      return preferences.countdownEvents[0];
+    }
+
+    // Fall back to legacy single countdownEvent
+    return preferences?.countdownEvent || {
+      name: 'New Year',
+      date: '2026-01-01'
+    };
   };
+
+  const countdownEvent = getCountdownEvent();
 
   useEffect(() => {
     const calculateTimeRemaining = () => {
@@ -122,7 +139,7 @@ function CountdownDashboard({ preferences }) {
             </div>
             <h2>This event has arrived!</h2>
             <p className="celebration-text">The moment you've been waiting for is here!</p>
-            <p className="settings-hint">Go to Settings to set a new countdown event.</p>
+            <p className="settings-hint">Go to Admin Panel to manage countdown events.</p>
           </div>
         ) : (
           <>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import AdminSettings from './AdminSettings';
 import DashboardControls from './DashboardControls';
+import CountdownManagement from './CountdownManagement';
 import PhotoManagement from './PhotoManagement';
 import DisneyRideSelection from './DisneyRideSelection';
 import './Admin.css';
@@ -31,6 +32,12 @@ function Admin({ preferences, onSave, onCancel }) {
           Dashboard Controls
         </button>
         <button
+          className={`admin-tab ${activeTab === 'countdowns' ? 'active' : ''}`}
+          onClick={() => setActiveTab('countdowns')}
+        >
+          Countdowns
+        </button>
+        <button
           className={`admin-tab ${activeTab === 'photos' ? 'active' : ''}`}
           onClick={() => setActiveTab('photos')}
         >
@@ -53,6 +60,12 @@ function Admin({ preferences, onSave, onCancel }) {
         )}
         {activeTab === 'dashboards' && (
           <DashboardControls
+            preferences={preferences}
+            onSave={onSave}
+          />
+        )}
+        {activeTab === 'countdowns' && (
+          <CountdownManagement
             preferences={preferences}
             onSave={onSave}
           />

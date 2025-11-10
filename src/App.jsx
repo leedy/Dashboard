@@ -108,6 +108,20 @@ function App() {
           subSections: availableSubSections.length > 0 ? availableSubSections : dash.subSections
         };
       }
+
+      // For countdown, populate sub-sections from countdownEvents
+      if (dash.dashboard === 'countdown') {
+        const countdownEvents = preferences.countdownEvents || [];
+        if (countdownEvents.length > 0) {
+          return {
+            ...dash,
+            subSections: countdownEvents.map(event => event.id)
+          };
+        }
+        // If no countdownEvents but legacy countdownEvent exists, use null (single countdown)
+        return dash;
+      }
+
       return dash;
     })
     .filter(dash => {
@@ -217,7 +231,7 @@ function App() {
         );
       case 'countdown':
         return withErrorBoundary(
-          <CountdownDashboard preferences={preferences} />,
+          <CountdownDashboard preferences={preferences} activeCountdown={currentSubSection} />,
           "Countdown"
         );
       case 'disney':

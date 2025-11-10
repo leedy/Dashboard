@@ -222,51 +222,6 @@ function AdminSettings({ preferences, onSave }) {
             </div>
           </div>
 
-          {/* Countdown Event Section */}
-          <div className="settings-section">
-            <h3>Countdown Event</h3>
-
-            <div className="setting-item">
-              <label htmlFor="event-name">Event Name</label>
-              <input
-                id="event-name"
-                type="text"
-                value={localPrefs.countdownEvent?.name || ''}
-                onChange={(e) => {
-                  const updatedPrefs = {
-                    ...localPrefs,
-                    countdownEvent: {
-                      ...localPrefs.countdownEvent,
-                      name: e.target.value
-                    }
-                  };
-                  setLocalPrefs(updatedPrefs);
-                  onSave(updatedPrefs);
-                }}
-                placeholder="Enter event name"
-              />
-            </div>
-
-            <div className="setting-item">
-              <label htmlFor="event-date">Event Date</label>
-              <input
-                id="event-date"
-                type="date"
-                value={localPrefs.countdownEvent?.date || ''}
-                onChange={(e) => {
-                  const updatedPrefs = {
-                    ...localPrefs,
-                    countdownEvent: {
-                      ...localPrefs.countdownEvent,
-                      date: e.target.value
-                    }
-                  };
-                  setLocalPrefs(updatedPrefs);
-                  onSave(updatedPrefs);
-                }}
-              />
-            </div>
-          </div>
         </div>
 
         {/* Right Column */}

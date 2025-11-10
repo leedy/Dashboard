@@ -29,6 +29,15 @@ const preferencesSchema = new mongoose.Schema({
     name: { type: String, default: 'New Year' },
     date: { type: String, default: '2026-01-01' }
   },
+  countdownEvents: {
+    type: [{
+      id: { type: String, required: true },
+      name: { type: String, required: true },
+      date: { type: String, required: true },
+      createdAt: { type: Date, default: Date.now }
+    }],
+    default: []
+  },
   defaultDashboard: {
     type: String,
     default: 'todays-games'
