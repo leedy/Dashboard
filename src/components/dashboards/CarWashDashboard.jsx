@@ -129,7 +129,7 @@ function CarWashDashboard({ preferences }) {
   return (
     <div className={`carwash-dashboard ${recommendation?.isGoodDay ? 'good-day' : 'bad-day'}`}>
       <div className="carwash-container">
-        <h1 className="carwash-title">Car Wash Recommendation</h1>
+        <h1 className="carwash-title">Bob's Car Wash</h1>
         <div className="location-info">{location.city || location.name}</div>
 
         {recommendation && (

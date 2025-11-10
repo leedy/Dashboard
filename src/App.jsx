@@ -243,7 +243,7 @@ function App() {
       case 'car-wash':
         return withErrorBoundary(
           <CarWashDashboard preferences={preferences} />,
-          "Car Wash"
+          "Bob's Car Wash"
         );
       case 'countdown':
         return withErrorBoundary(
