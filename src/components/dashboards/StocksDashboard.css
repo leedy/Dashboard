@@ -1,0 +1,215 @@
+.stocks-dashboard {
+  min-height: calc(100vh - 140px);
+  padding: 2rem;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+}
+
+.stocks-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.stocks-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.stocks-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 1rem 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.market-status {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+}
+
+.status-text {
+  font-weight: 600;
+}
+
+.last-update {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.indices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.index-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-left: 6px solid #ccc;
+}
+
+.index-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+}
+
+.index-card.positive {
+  border-left-color: #22c55e;
+}
+
+.index-card.negative {
+  border-left-color: #ef4444;
+}
+
+.index-card.neutral {
+  border-left-color: #94a3b8;
+}
+
+.index-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.index-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.index-symbol {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.index-price {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.index-change {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+}
+
+.change-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.change-percent {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.index-card.positive .change-value,
+.index-card.positive .change-percent {
+  color: #22c55e;
+}
+
+.index-card.negative .change-value,
+.index-card.negative .change-percent {
+  color: #ef4444;
+}
+
+.index-card.neutral .change-value,
+.index-card.neutral .change-percent {
+  color: #64748b;
+}
+
+.quote-error {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 0.9rem;
+}
+
+.loading,
+.error {
+  color: white;
+  font-size: 1.5rem;
+  padding: 3rem;
+  text-align: center;
+}
+
+.error {
+  background: rgba(239, 68, 68, 0.2);
+  border: 2px solid rgba(239, 68, 68, 0.5);
+  border-radius: 12px;
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.no-data-message {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  color: #475569;
+  font-size: 1.1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stocks-dashboard {
+    padding: 1rem;
+  }
+
+  .stocks-title {
+    font-size: 1.8rem;
+  }
+
+  .market-status {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .indices-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .index-card {
+    padding: 1.5rem;
+  }
+
+  .index-name {
+    font-size: 1.25rem;
+  }
+
+  .index-price {
+    font-size: 2rem;
+  }
+
+  .change-value {
+    font-size: 1.1rem;
+  }
+
+  .change-percent {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .indices-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

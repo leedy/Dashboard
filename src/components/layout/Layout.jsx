@@ -32,6 +32,7 @@ function Layout({ children, currentDashboard, onDashboardChange, photoCounts }) 
       items: [
         { id: 'weather', name: 'Weather', available: true },
         { id: 'car-wash', name: "Bob's Car Wash", available: true },
+        { id: 'stocks', name: 'Market Overview', available: true },
         { id: 'countdown', name: 'Countdown', available: true },
       ]
     }

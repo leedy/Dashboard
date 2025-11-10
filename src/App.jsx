@@ -15,6 +15,7 @@ const CountdownDashboard = lazy(() => import('./components/dashboards/CountdownD
 const DisneyDashboard = lazy(() => import('./components/dashboards/DisneyDashboard'))
 const MoviesDashboard = lazy(() => import('./components/dashboards/MoviesDashboard'))
 const CarWashDashboard = lazy(() => import('./components/dashboards/CarWashDashboard'))
+const StocksDashboard = lazy(() => import('./components/dashboards/StocksDashboard'))
 const PhotoSlideshow = lazy(() => import('./components/dashboards/PhotoSlideshow'))
 const EventSlideshow = lazy(() => import('./components/dashboards/EventSlideshow'))
 const Admin = lazy(() => import('./components/admin/Admin'))
@@ -76,6 +77,10 @@ function App() {
     },
     {
       dashboard: 'car-wash',
+      subSections: null
+    },
+    {
+      dashboard: 'stocks',
       subSections: null
     },
     {
@@ -244,6 +249,11 @@ function App() {
         return withErrorBoundary(
           <CarWashDashboard preferences={preferences} />,
           "Bob's Car Wash"
+        );
+      case 'stocks':
+        return withErrorBoundary(
+          <StocksDashboard />,
+          "Market Overview"
         );
       case 'countdown':
         return withErrorBoundary(
