@@ -3,6 +3,7 @@ import axios from 'axios'
 import Layout from './components/layout/Layout'
 import usePreferences from './hooks/usePreferences'
 import { useAvailableSports } from './hooks/useAvailableSports'
+import ErrorBoundary from './components/common/ErrorBoundary'
 import './App.css'
 
 // Lazy load dashboard components for better initial load performance
@@ -177,48 +178,90 @@ function App() {
     setCurrentDashboard('todays-games'); // Return to today's games without saving
   };
 
+  // Helper to wrap dashboards with error boundaries
+  const withErrorBoundary = (component, dashboardName) => (
+    <ErrorBoundary dashboardName={dashboardName} autoRecover={true}>
+      {component}
+    </ErrorBoundary>
+  );
+
   const renderDashboard = () => {
     switch (currentDashboard) {
       case 'todays-games':
-        return <TodaysGames preferences={preferences} activeSport={currentSubSection} availableSports={availableSports} />
+        return withErrorBoundary(
+          <TodaysGames preferences={preferences} activeSport={currentSubSection} availableSports={availableSports} />,
+          "Today's Games"
+        );
       case 'upcoming-games':
-        return <UpcomingGames preferences={preferences} />
+        return withErrorBoundary(
+          <UpcomingGames preferences={preferences} />,
+          "Upcoming Games"
+        );
       case 'standings':
-        return <Standings preferences={preferences} />
+        return withErrorBoundary(
+          <Standings preferences={preferences} />,
+          "Standings"
+        );
       case 'weather':
-        return <WeatherDashboard preferences={preferences} />
+        return withErrorBoundary(
+          <WeatherDashboard preferences={preferences} />,
+          "Weather"
+        );
       case 'countdown':
-        return <CountdownDashboard preferences={preferences} />
+        return withErrorBoundary(
+          <CountdownDashboard preferences={preferences} />,
+          "Countdown"
+        );
       case 'disney':
-        return <DisneyDashboard preferences={preferences} activePark={currentSubSection} />
+        return withErrorBoundary(
+          <DisneyDashboard preferences={preferences} activePark={currentSubSection} />,
+          "Disney Dashboard"
+        );
       case 'movies':
-        return <MoviesDashboard preferences={preferences} />
+        return withErrorBoundary(
+          <MoviesDashboard preferences={preferences} />,
+          "Movies"
+        );
       case 'family-photos':
-        return <PhotoSlideshow />
+        return withErrorBoundary(
+          <PhotoSlideshow />,
+          "Family Photos"
+        );
       case 'event-slides':
-        return <EventSlideshow />
+        return withErrorBoundary(
+          <EventSlideshow />,
+          "Event Slides"
+        );
       case 'admin':
-        return (
+        return withErrorBoundary(
           <Admin
             preferences={preferences}
             onSave={handleSaveSettings}
             onCancel={handleCancelSettings}
-          />
-        )
+          />,
+          "Admin Panel"
+        );
       case 'settings':
         // Backward compatibility - redirect to admin
-        return (
+        return withErrorBoundary(
           <Admin
             preferences={preferences}
             onSave={handleSaveSettings}
             onCancel={handleCancelSettings}
-          />
-        )
+          />,
+          "Settings"
+        );
       case 'sports':
         // Backward compatibility - redirect to todays-games
-        return <TodaysGames preferences={preferences} />
+        return withErrorBoundary(
+          <TodaysGames preferences={preferences} />,
+          "Sports"
+        );
       default:
-        return <TodaysGames preferences={preferences} />
+        return withErrorBoundary(
+          <TodaysGames preferences={preferences} />,
+          "Dashboard"
+        );
     }
   }
 

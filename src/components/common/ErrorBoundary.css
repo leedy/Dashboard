@@ -1,0 +1,161 @@
+.error-boundary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 2rem;
+  background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+  border-radius: 12px;
+  margin: 1rem;
+}
+
+.error-boundary-content {
+  max-width: 600px;
+  text-align: center;
+  padding: 2rem;
+  background: rgba(255, 59, 48, 0.1);
+  border: 2px solid rgba(255, 59, 48, 0.3);
+  border-radius: 12px;
+}
+
+.error-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+.error-boundary h2 {
+  color: #ff3b30;
+  font-size: 1.8rem;
+  margin: 0 0 1rem 0;
+  font-weight: 700;
+}
+
+.error-message {
+  color: #e0e0e0;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.error-count {
+  color: #ffcc00;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.error-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin: 1.5rem 0;
+}
+
+.retry-button,
+.reload-button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retry-button {
+  background: #4fc3f7;
+  color: #1a1a1a;
+}
+
+.retry-button:hover {
+  background: #67daff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 195, 247, 0.4);
+}
+
+.reload-button {
+  background: #666;
+  color: #fff;
+}
+
+.reload-button:hover {
+  background: #777;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+}
+
+.error-details {
+  margin-top: 1.5rem;
+  text-align: left;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.error-details summary {
+  cursor: pointer;
+  color: #4fc3f7;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  user-select: none;
+}
+
+.error-details summary:hover {
+  color: #67daff;
+}
+
+.error-stack {
+  color: #ff6b6b;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 1rem;
+  border-radius: 4px;
+  margin: 0.5rem 0 0 0;
+}
+
+.auto-recover-message {
+  color: #4fc3f7;
+  font-size: 0.9rem;
+  margin-top: 1.5rem;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .error-boundary-content {
+    padding: 1.5rem;
+  }
+
+  .error-boundary h2 {
+    font-size: 1.5rem;
+  }
+
+  .error-message {
+    font-size: 1rem;
+  }
+
+  .error-actions {
+    flex-direction: column;
+  }
+
+  .retry-button,
+  .reload-button {
+    width: 100%;
+  }
+}
