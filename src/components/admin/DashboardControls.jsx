@@ -87,6 +87,7 @@ function DashboardControls({ preferences, onSave }) {
               { id: 'upcoming-games', label: 'Upcoming Games', icon: '📅' },
               { id: 'standings', label: 'Standings', icon: '🏆' },
               { id: 'weather', label: 'Weather', icon: '🌤️' },
+              { id: 'car-wash', label: 'Car Wash', icon: '🚗' },
               { id: 'countdown', label: 'Countdown', icon: '⏱️' },
               { id: 'disney', label: 'Disney Info', icon: '🏰' },
               { id: 'movies', label: 'Movies', icon: '🎬' },
@@ -152,6 +153,7 @@ function DashboardControls({ preferences, onSave }) {
               <option value="upcoming-games">Upcoming Games</option>
               <option value="standings">Standings</option>
               <option value="weather">Weather</option>
+              <option value="car-wash">Car Wash</option>
               <option value="countdown">Countdown</option>
               <option value="disney">Disney Info</option>
               <option value="movies">Movies</option>

@@ -31,6 +31,7 @@ function Layout({ children, currentDashboard, onDashboardChange, photoCounts }) 
       icon: 'ℹ️',
       items: [
         { id: 'weather', name: 'Weather', available: true },
+        { id: 'car-wash', name: 'Car Wash', available: true },
         { id: 'countdown', name: 'Countdown', available: true },
       ]
     }

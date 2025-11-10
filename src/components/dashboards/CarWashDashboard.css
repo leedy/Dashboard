@@ -1,0 +1,240 @@
+.carwash-dashboard {
+  min-height: calc(100vh - 140px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem;
+  transition: background 0.5s ease;
+
+  /* Break out of parent max-width */
+  margin-left: -50vw;
+  margin-right: -50vw;
+  margin-top: -2rem;
+  margin-bottom: 0;
+  left: 50%;
+  right: 50%;
+  position: relative;
+  width: 100vw;
+}
+
+.carwash-dashboard.good-day {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.carwash-dashboard.bad-day {
+  background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+}
+
+.carwash-container {
+  max-width: 900px;
+  width: 100%;
+  text-align: center;
+}
+
+.carwash-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.location-info {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 2rem;
+}
+
+.recommendation-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  margin-bottom: 3rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.recommendation-icon {
+  font-size: 5rem;
+  margin-bottom: 1rem;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.recommendation-verdict {
+  font-size: 3rem;
+  font-weight: 800;
+  margin: 0 0 1rem 0;
+}
+
+.good-day .recommendation-verdict {
+  color: #11998e;
+}
+
+.bad-day .recommendation-verdict {
+  color: #fc4a1a;
+}
+
+.recommendation-reason {
+  font-size: 1.3rem;
+  color: #333;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.forecast-section {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.forecast-section h3 {
+  margin: 0 0 1.5rem 0;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.forecast-day {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 12px;
+  padding: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.forecast-day:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.day-name {
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.weather-icon {
+  font-size: 2.5rem;
+  margin: 0.5rem 0;
+}
+
+.temp-range {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.temp-high {
+  color: #ff6b6b;
+}
+
+.temp-low {
+  color: #4fc3f7;
+}
+
+.rain-prob {
+  font-size: 0.95rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+.rain-prob .high-rain {
+  color: #4fc3f7;
+  font-weight: 700;
+}
+
+.info-note {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 1.5rem;
+  color: #333;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.info-note strong {
+  color: #000;
+  font-weight: 700;
+}
+
+.loading,
+.error {
+  color: white;
+  font-size: 1.5rem;
+  padding: 3rem;
+  text-align: center;
+}
+
+.error {
+  background: rgba(255, 107, 107, 0.2);
+  border: 2px solid rgba(255, 107, 107, 0.5);
+  border-radius: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .carwash-dashboard {
+    padding: 1rem;
+  }
+
+  .carwash-title {
+    font-size: 1.8rem;
+  }
+
+  .recommendation-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .recommendation-icon {
+    font-size: 3.5rem;
+  }
+
+  .recommendation-verdict {
+    font-size: 2rem;
+  }
+
+  .recommendation-reason {
+    font-size: 1.1rem;
+  }
+
+  .forecast-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+
+  .forecast-day {
+    padding: 0.75rem;
+  }
+
+  .weather-icon {
+    font-size: 2rem;
+  }
+
+  .temp-range {
+    font-size: 0.95rem;
+  }
+
+  .rain-prob {
+    font-size: 0.85rem;
+  }
+}
