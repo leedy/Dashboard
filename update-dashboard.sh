@@ -10,13 +10,15 @@ echo "Pulling latest changes..."
 git pull
 
 echo "Installing frontend dependencies..."
+cd frontend
 npm install
 
 echo "Rebuilding frontend..."
 npm run build
+cd ..
 
 echo "Installing backend dependencies..."
-cd server
+cd backend
 npm install
 cd ..
 

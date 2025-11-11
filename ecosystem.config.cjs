@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'dashboard-backend',
-      cwd: '/home/leedy/Dashboard/server',
+      cwd: '/home/leedy/Dashboard/backend',
       script: 'server.js',
       env: {
         NODE_ENV: 'production',
@@ -13,7 +13,7 @@ module.exports = {
     },
     {
       name: 'dashboard-frontend',
-      cwd: '/home/leedy/Dashboard',
+      cwd: '/home/leedy/Dashboard/frontend',
       script: 'npm',
       args: 'run dev',
       env: {

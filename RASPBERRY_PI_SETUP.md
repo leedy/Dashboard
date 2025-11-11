@@ -578,7 +578,7 @@ telnet 192.168.1.100 27017  # Test if port is accessible
 
 **Check environment variables:**
 ```bash
-cat ~/Dashboard/server/.env
+cat ~/Dashboard/backend/.env
 ```
 
 ### Chromium Doesn't Start in Kiosk Mode
@@ -791,8 +791,8 @@ After setup, create a backup:
 
 ```bash
 # Backup environment files
-cp ~/Dashboard/server/.env ~/dashboard-backup.env
-cp ~/Dashboard/.env.local ~/dashboard-backup-frontend.env
+cp ~/Dashboard/backend/.env ~/dashboard-backup.env
+cp ~/Dashboard/frontend/.env.local ~/dashboard-backup-frontend.env
 
 # Or backup entire SD card using Raspberry Pi Imager
 # (Image > Create from SD card)

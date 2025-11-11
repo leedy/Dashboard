@@ -5,14 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:backend": "cd server && npm run dev",
+    "dev:backend": "cd ../backend && npm run dev",
     "dev:all": "concurrently \"npm run dev\" \"npm run dev:backend\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview --host",
-    "start": "cd server && node server.js",
+    "start": "cd ../backend && node server.js",
     "prod": "npm run build && npm run start",
-    "server:install": "cd server && npm install"
+    "server:install": "cd ../backend && npm install"
   },
   "dependencies": {
     "axios": "^1.12.2",

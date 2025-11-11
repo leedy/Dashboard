@@ -226,7 +226,7 @@ app.get('/health', (req, res) => {
 
 // Serve static files from the React app in production
 // Check if dist folder exists (production build)
-const distPath = path.join(__dirname, '../dist');
+const distPath = path.join(__dirname, '../frontend/dist');
 if (require('fs').existsSync(distPath)) {
   app.use(express.static(distPath));
 
