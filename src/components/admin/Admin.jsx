@@ -4,6 +4,7 @@ import DashboardControls from './DashboardControls';
 import CountdownManagement from './CountdownManagement';
 import PhotoManagement from './PhotoManagement';
 import DisneyRideSelection from './DisneyRideSelection';
+import UsageAnalytics from './UsageAnalytics';
 import './Admin.css';
 
 function Admin({ preferences, onSave, onCancel }) {
@@ -49,6 +50,12 @@ function Admin({ preferences, onSave, onCancel }) {
         >
           Disney Settings
         </button>
+        <button
+          className={`admin-tab ${activeTab === 'analytics' ? 'active' : ''}`}
+          onClick={() => setActiveTab('analytics')}
+        >
+          Usage Analytics
+        </button>
       </div>
 
       <div className="admin-content">
@@ -78,6 +85,9 @@ function Admin({ preferences, onSave, onCancel }) {
             preferences={preferences}
             onSave={onSave}
           />
+        )}
+        {activeTab === 'analytics' && (
+          <UsageAnalytics />
         )}
       </div>
     </div>

@@ -4,6 +4,7 @@ import Layout from './components/layout/Layout'
 import usePreferences from './hooks/usePreferences'
 import { useAvailableSports } from './hooks/useAvailableSports'
 import ErrorBoundary from './components/common/ErrorBoundary'
+import { useDashboardTracking, usePageLoadTracking } from './hooks/useUsageTracking'
 import './App.css'
 
 // Lazy load dashboard components for better initial load performance
@@ -35,6 +36,15 @@ function App() {
 
   // Check which sports have games available
   const availableSports = useAvailableSports()
+
+  // Track page loads
+  usePageLoadTracking();
+
+  // Track dashboard views
+  useDashboardTracking(currentDashboard, {
+    subSection: currentSubSection,
+    autoRotate: preferences.displaySettings?.autoRotate
+  });
 
   // Check photo counts on mount
   useEffect(() => {
