@@ -182,6 +182,9 @@ router.get('/analytics/sessions', async (req, res) => {
     const sessions = await UsageEvent.aggregate([
       { $match: { timestamp: { $gte: startDate } } },
       {
+        $sort: { timestamp: 1 }  // Sort by timestamp ascending before grouping
+      },
+      {
         $group: {
           _id: '$sessionId',
           userId: { $first: '$userId' },
@@ -189,7 +192,7 @@ router.get('/analytics/sessions', async (req, res) => {
           lastSeen: { $max: '$timestamp' },
           eventCount: { $sum: 1 },
           dashboards: { $addToSet: '$dashboardId' },
-          ipAddress: { $first: '$ipAddress' }
+          ipAddress: { $last: '$ipAddress' }  // Use last (most recent) IP instead of first
         }
       },
       { $sort: { lastSeen: -1 } }
