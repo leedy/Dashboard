@@ -12,6 +12,7 @@ const gameCacheRoutes = require('./routes/gameCache');
 const standingsCacheRoutes = require('./routes/standingsCache');
 const stocksRoutes = require('./routes/stocks');
 const usageRoutes = require('./routes/usage');
+const adminAuthRoutes = require('./routes/adminAuth');
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3001;
@@ -31,6 +32,7 @@ app.use('/api/games', gameCacheRoutes);
 app.use('/api/standings', standingsCacheRoutes);
 app.use('/api/stocks', stocksRoutes);
 app.use('/api/usage', usageRoutes);
+app.use('/api/admin/auth', adminAuthRoutes);
 
 // Proxy routes for external APIs
 // Custom NHL endpoint for recent games

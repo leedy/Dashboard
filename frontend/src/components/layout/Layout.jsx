@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './Layout.css';
 
-function Layout({ children, currentDashboard, onDashboardChange, photoCounts }) {
+function Layout({ children, currentDashboard, onDashboardChange, onAdminAccess, photoCounts }) {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [closeTimeout, setCloseTimeout] = useState(null);
@@ -134,7 +134,16 @@ function Layout({ children, currentDashboard, onDashboardChange, photoCounts }) 
           ))}
           <button
             className={`nav-button settings-button ${currentDashboard === 'admin' ? 'active' : ''}`}
-            onClick={() => handleItemClick('admin')}
+            onClick={() => {
+              if (onAdminAccess) {
+                onAdminAccess();
+                setOpenDropdown(null);
+                if (closeTimeout) {
+                  clearTimeout(closeTimeout);
+                  setCloseTimeout(null);
+                }
+              }
+            }}
           >
             ⚙️ Admin
           </button>
@@ -169,7 +178,12 @@ function Layout({ children, currentDashboard, onDashboardChange, photoCounts }) 
               <div className="mobile-category">
                 <button
                   className={`mobile-menu-item admin-item ${currentDashboard === 'admin' ? 'active' : ''}`}
-                  onClick={() => handleItemClick('admin')}
+                  onClick={() => {
+                    if (onAdminAccess) {
+                      onAdminAccess();
+                      setMobileMenuOpen(false);
+                    }
+                  }}
                 >
                   ⚙️ Admin
                 </button>

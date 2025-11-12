@@ -20,6 +20,7 @@ const StocksDashboard = lazy(() => import('./components/dashboards/StocksDashboa
 const PhotoSlideshow = lazy(() => import('./components/dashboards/PhotoSlideshow'))
 const EventSlideshow = lazy(() => import('./components/dashboards/EventSlideshow'))
 const Admin = lazy(() => import('./components/admin/Admin'))
+const AdminLogin = lazy(() => import('./components/admin/AdminLogin'))
 
 function App() {
   const {
@@ -33,6 +34,8 @@ function App() {
     'family-photos': 0,
     'event-slides': 0
   })
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false)
+  const [showAdminLogin, setShowAdminLogin] = useState(false)
 
   // Check which sports have games available
   const availableSports = useAvailableSports()
@@ -65,6 +68,38 @@ function App() {
     };
 
     checkPhotoCounts();
+  }, []);
+
+  // Check admin authentication on mount
+  useEffect(() => {
+    const checkAdminAuth = async () => {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        setIsAdminAuthenticated(false);
+        return;
+      }
+
+      try {
+        const response = await axios.get('/api/admin/auth/verify', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.data.valid) {
+          setIsAdminAuthenticated(true);
+        } else {
+          setIsAdminAuthenticated(false);
+          localStorage.removeItem('adminToken');
+        }
+      } catch (error) {
+        console.error('Admin token verification failed:', error);
+        setIsAdminAuthenticated(false);
+        localStorage.removeItem('adminToken');
+      }
+    };
+
+    checkAdminAuth();
   }, []);
 
   // Define available dashboards with their sub-sections for rotation
@@ -220,6 +255,30 @@ function App() {
     setCurrentDashboard('todays-games'); // Return to today's games without saving
   };
 
+  const handleAdminAccess = () => {
+    if (isAdminAuthenticated) {
+      setCurrentDashboard('admin');
+    } else {
+      setShowAdminLogin(true);
+    }
+  };
+
+  const handleAdminLoginSuccess = () => {
+    setIsAdminAuthenticated(true);
+    setShowAdminLogin(false);
+    setCurrentDashboard('admin');
+  };
+
+  const handleAdminLoginCancel = () => {
+    setShowAdminLogin(false);
+  };
+
+  const handleAdminLogout = () => {
+    localStorage.removeItem('adminToken');
+    setIsAdminAuthenticated(false);
+    setCurrentDashboard('todays-games');
+  };
+
   // Handle manual navigation in countdown (and other dashboards with sub-sections)
   // This will reset the auto-rotation timer by updating currentSubSection
   const handleManualNavigation = (newSubSection) => {
@@ -295,21 +354,32 @@ function App() {
           "Event Slides"
         );
       case 'admin':
+        if (!isAdminAuthenticated) {
+          // If somehow they get here without auth, redirect to todays-games
+          setCurrentDashboard('todays-games');
+          return null;
+        }
         return withErrorBoundary(
           <Admin
             preferences={preferences}
             onSave={handleSaveSettings}
             onCancel={handleCancelSettings}
+            onLogout={handleAdminLogout}
           />,
           "Admin Panel"
         );
       case 'settings':
-        // Backward compatibility - redirect to admin
+        // Backward compatibility - redirect to admin with auth check
+        if (!isAdminAuthenticated) {
+          setCurrentDashboard('todays-games');
+          return null;
+        }
         return withErrorBoundary(
           <Admin
             preferences={preferences}
             onSave={handleSaveSettings}
             onCancel={handleCancelSettings}
+            onLogout={handleAdminLogout}
           />,
           "Settings"
         );
@@ -328,26 +398,37 @@ function App() {
   }
 
   return (
-    <Layout
-      currentDashboard={currentDashboard}
-      onDashboardChange={setCurrentDashboard}
-      photoCounts={photoCounts}
-    >
-      <Suspense fallback={
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          fontSize: '1.5rem',
-          color: '#666'
-        }}>
-          Loading dashboard...
-        </div>
-      }>
-        {renderDashboard()}
-      </Suspense>
-    </Layout>
+    <>
+      <Layout
+        currentDashboard={currentDashboard}
+        onDashboardChange={setCurrentDashboard}
+        onAdminAccess={handleAdminAccess}
+        photoCounts={photoCounts}
+      >
+        <Suspense fallback={
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh',
+            fontSize: '1.5rem',
+            color: '#666'
+          }}>
+            Loading dashboard...
+          </div>
+        }>
+          {renderDashboard()}
+        </Suspense>
+      </Layout>
+      {showAdminLogin && (
+        <Suspense fallback={null}>
+          <AdminLogin
+            onLoginSuccess={handleAdminLoginSuccess}
+            onCancel={handleAdminLoginCancel}
+          />
+        </Suspense>
+      )}
+    </>
   )
 }
 

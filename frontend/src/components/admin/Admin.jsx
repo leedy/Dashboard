@@ -7,16 +7,23 @@ import DisneyRideSelection from './DisneyRideSelection';
 import UsageAnalytics from './UsageAnalytics';
 import './Admin.css';
 
-function Admin({ preferences, onSave, onCancel }) {
+function Admin({ preferences, onSave, onCancel, onLogout }) {
   const [activeTab, setActiveTab] = useState('settings');
 
   return (
     <div className="admin-container">
       <div className="admin-header">
         <h1>Admin Panel</h1>
-        <button className="admin-close-button" onClick={onCancel}>
-          ✕ Close
-        </button>
+        <div className="admin-header-actions">
+          {onLogout && (
+            <button className="admin-logout-button" onClick={onLogout}>
+              🚪 Logout
+            </button>
+          )}
+          <button className="admin-close-button" onClick={onCancel}>
+            ✕ Close
+          </button>
+        </div>
       </div>
 
       <div className="admin-tabs">
