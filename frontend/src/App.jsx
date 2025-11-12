@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import axios from 'axios'
 import Layout from './components/layout/Layout'
 import usePreferences from './hooks/usePreferences'
@@ -200,6 +200,10 @@ function App() {
     setCurrentDashboard(preferences.defaultDashboard);
   }, [preferences.defaultDashboard]);
 
+  // Ref to store rotation interval ID for resetting
+  const rotationIntervalRef = useRef(null);
+  const rotationTimeoutRef = useRef(null);
+
   // Auto-rotate dashboards with sub-section support
   useEffect(() => {
     if (!preferences.displaySettings?.autoRotate || currentDashboard === 'admin') {
@@ -208,7 +212,7 @@ function App() {
 
     const rotateInterval = (preferences.displaySettings?.rotateInterval || 30) * 1000; // Convert to milliseconds
 
-    const intervalId = setInterval(() => {
+    const rotateToNext = () => {
       // Find current dashboard config
       const currentDashboardIndex = dashboardRotation.findIndex(d => d.dashboard === currentDashboard);
       const currentDashboardConfig = dashboardRotation[currentDashboardIndex];
@@ -241,10 +245,86 @@ function App() {
         setCurrentDashboard(nextDashboard.dashboard);
         setCurrentSubSection(nextDashboard.subSections ? nextDashboard.subSections[0] : null);
       }
-    }, rotateInterval);
+    };
 
-    return () => clearInterval(intervalId);
+    // Start rotation timer
+    const intervalId = setInterval(rotateToNext, rotateInterval);
+    rotationIntervalRef.current = intervalId;
+
+    return () => {
+      clearInterval(intervalId);
+      rotationIntervalRef.current = null;
+    };
   }, [preferences.displaySettings?.autoRotate, preferences.displaySettings?.rotateInterval, preferences.displaySettings?.rotationDashboards, currentDashboard, currentSubSection, dashboardRotation]);
+
+  // Reset rotation timer on user interaction
+  useEffect(() => {
+    if (!preferences.displaySettings?.autoRotate || currentDashboard === 'admin') {
+      return;
+    }
+
+    const resetRotationTimer = () => {
+      // Clear existing interval
+      if (rotationIntervalRef.current) {
+        clearInterval(rotationIntervalRef.current);
+      }
+
+      // Clear any pending timeout
+      if (rotationTimeoutRef.current) {
+        clearTimeout(rotationTimeoutRef.current);
+      }
+
+      // Set a short timeout to restart the interval
+      // This debounces rapid clicks
+      rotationTimeoutRef.current = setTimeout(() => {
+        const rotateInterval = (preferences.displaySettings?.rotateInterval || 30) * 1000;
+
+        const rotateToNext = () => {
+          const currentDashboardIndex = dashboardRotation.findIndex(d => d.dashboard === currentDashboard);
+          const currentDashboardConfig = dashboardRotation[currentDashboardIndex];
+
+          if (currentDashboardConfig?.subSections && currentDashboardConfig.subSections.length > 0) {
+            const currentSubIndex = currentDashboardConfig.subSections.indexOf(currentSubSection);
+            const isLastSubSection = currentSubIndex === currentDashboardConfig.subSections.length - 1;
+
+            if (currentSubSection === null) {
+              setCurrentSubSection(currentDashboardConfig.subSections[0]);
+            } else if (isLastSubSection) {
+              const nextDashboardIndex = (currentDashboardIndex + 1) % dashboardRotation.length;
+              const nextDashboard = dashboardRotation[nextDashboardIndex];
+              setCurrentDashboard(nextDashboard.dashboard);
+              setCurrentSubSection(nextDashboard.subSections ? nextDashboard.subSections[0] : null);
+            } else {
+              const nextSubIndex = currentSubIndex === -1 ? 0 : currentSubIndex + 1;
+              setCurrentSubSection(currentDashboardConfig.subSections[nextSubIndex]);
+            }
+          } else {
+            const nextDashboardIndex = (currentDashboardIndex + 1) % dashboardRotation.length;
+            const nextDashboard = dashboardRotation[nextDashboardIndex];
+            setCurrentDashboard(nextDashboard.dashboard);
+            setCurrentSubSection(nextDashboard.subSections ? nextDashboard.subSections[0] : null);
+          }
+        };
+
+        const newIntervalId = setInterval(rotateToNext, rotateInterval);
+        rotationIntervalRef.current = newIntervalId;
+      }, 300); // 300ms debounce
+    };
+
+    // Add event listeners for user interaction
+    document.addEventListener('click', resetRotationTimer);
+    document.addEventListener('touchstart', resetRotationTimer);
+    document.addEventListener('keydown', resetRotationTimer);
+
+    return () => {
+      document.removeEventListener('click', resetRotationTimer);
+      document.removeEventListener('touchstart', resetRotationTimer);
+      document.removeEventListener('keydown', resetRotationTimer);
+      if (rotationTimeoutRef.current) {
+        clearTimeout(rotationTimeoutRef.current);
+      }
+    };
+  }, [preferences.displaySettings?.autoRotate, preferences.displaySettings?.rotateInterval, currentDashboard, currentSubSection, dashboardRotation]);
 
   const handleSaveSettings = async (newPreferences) => {
     await updatePreferences(newPreferences);
