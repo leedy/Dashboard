@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, lazy, Suspense } from 'react'
+import { useState, useEffect, useRef, useMemo, lazy, Suspense } from 'react'
 import axios from 'axios'
 import Layout from './components/layout/Layout'
 import usePreferences from './hooks/usePreferences'
@@ -153,47 +153,50 @@ function App() {
   ];
 
   // Filter dashboards based on photo and sports availability
-  const dashboardRotation = allDashboards
-    .map(dash => {
-      // For todays-games, filter sub-sections based on available sports
-      if (dash.dashboard === 'todays-games' && dash.subSections) {
-        const availableSubSections = dash.subSections.filter(sport => availableSports[sport]);
-        return {
-          ...dash,
-          subSections: availableSubSections.length > 0 ? availableSubSections : dash.subSections
-        };
-      }
-
-      // For countdown, populate sub-sections from countdownEvents
-      if (dash.dashboard === 'countdown') {
-        const countdownEvents = preferences.countdownEvents || [];
-        if (countdownEvents.length > 0) {
+  // Memoize to prevent unnecessary re-renders that would restart rotation timer
+  const dashboardRotation = useMemo(() => {
+    return allDashboards
+      .map(dash => {
+        // For todays-games, filter sub-sections based on available sports
+        if (dash.dashboard === 'todays-games' && dash.subSections) {
+          const availableSubSections = dash.subSections.filter(sport => availableSports[sport]);
           return {
             ...dash,
-            subSections: countdownEvents.map(event => event.id)
+            subSections: availableSubSections.length > 0 ? availableSubSections : dash.subSections
           };
         }
-        // If no countdownEvents but legacy countdownEvent exists, use null (single countdown)
-        return dash;
-      }
 
-      return dash;
-    })
-    .filter(dash => {
-      // Filter out dashboards that require photos but have none
-      if (dash.requiresPhotos) {
-        return photoCounts[dash.dashboard] > 0;
-      }
-      return true;
-    })
-    .filter(dash => {
-      // Filter based on user's rotation dashboard selections
-      const rotationDashboards = preferences.displaySettings?.rotationDashboards;
-      if (!rotationDashboards || rotationDashboards.length === 0) {
-        return true; // If no preference set, include all dashboards
-      }
-      return rotationDashboards.includes(dash.dashboard);
-    });
+        // For countdown, populate sub-sections from countdownEvents
+        if (dash.dashboard === 'countdown') {
+          const countdownEvents = preferences.countdownEvents || [];
+          if (countdownEvents.length > 0) {
+            return {
+              ...dash,
+              subSections: countdownEvents.map(event => event.id)
+            };
+          }
+          // If no countdownEvents but legacy countdownEvent exists, use null (single countdown)
+          return dash;
+        }
+
+        return dash;
+      })
+      .filter(dash => {
+        // Filter out dashboards that require photos but have none
+        if (dash.requiresPhotos) {
+          return photoCounts[dash.dashboard] > 0;
+        }
+        return true;
+      })
+      .filter(dash => {
+        // Filter based on user's rotation dashboard selections
+        const rotationDashboards = preferences.displaySettings?.rotationDashboards;
+        if (!rotationDashboards || rotationDashboards.length === 0) {
+          return true; // If no preference set, include all dashboards
+        }
+        return rotationDashboards.includes(dash.dashboard);
+      });
+  }, [availableSports, preferences.countdownEvents, preferences.displaySettings?.rotationDashboards, photoCounts]);
 
   // Update current dashboard when default preference changes
   useEffect(() => {
