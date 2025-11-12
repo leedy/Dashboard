@@ -3,6 +3,26 @@ const UsageEvent = require('../models/UsageEvent');
 
 const router = express.Router();
 
+// Helper function to get real client IP behind proxy
+const getClientIp = (req) => {
+  // Check X-Forwarded-For header (nginx, load balancers)
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) {
+    // X-Forwarded-For can be "client, proxy1, proxy2"
+    // We want the first (original client) IP
+    return forwarded.split(',')[0].trim();
+  }
+
+  // Check X-Real-IP header (alternative nginx header)
+  const realIp = req.headers['x-real-ip'];
+  if (realIp) {
+    return realIp;
+  }
+
+  // Fallback to direct connection IP
+  return req.ip || req.connection.remoteAddress;
+};
+
 // Log a usage event
 router.post('/log', async (req, res) => {
   try {
@@ -18,7 +38,7 @@ router.post('/log', async (req, res) => {
     } = req.body;
 
     // Get IP address and user agent from request
-    const ipAddress = req.ip || req.connection.remoteAddress;
+    const ipAddress = getClientIp(req);
     const userAgent = req.get('User-Agent');
 
     const event = new UsageEvent({
@@ -46,7 +66,7 @@ router.post('/log', async (req, res) => {
 router.post('/log/batch', async (req, res) => {
   try {
     const { events } = req.body;
-    const ipAddress = req.ip || req.connection.remoteAddress;
+    const ipAddress = getClientIp(req);
     const userAgent = req.get('User-Agent');
 
     const eventsToInsert = events.map(event => ({

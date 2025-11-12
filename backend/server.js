@@ -17,6 +17,9 @@ const adminAuthRoutes = require('./routes/adminAuth');
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3001;
 
+// Trust proxy headers (for nginx reverse proxy)
+app.set('trust proxy', true);
+
 // Connect to MongoDB
 connectDB();
 
