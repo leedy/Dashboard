@@ -3,6 +3,8 @@ import axios from 'axios';
 import usePreferences from '../../hooks/usePreferences';
 import './PhotoSlideshow.css';
 
+const STORAGE_KEY = 'family-photos-slideshow-index';
+
 function PhotoSlideshow() {
   const [photos, setPhotos] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -10,6 +12,19 @@ function PhotoSlideshow() {
   const [error, setError] = useState(null);
   const [fade, setFade] = useState(true);
   const { preferences } = usePreferences();
+
+  // Load saved position from localStorage on mount
+  useEffect(() => {
+    const savedIndex = localStorage.getItem(STORAGE_KEY);
+    if (savedIndex !== null) {
+      setCurrentIndex(parseInt(savedIndex, 10));
+    }
+  }, []);
+
+  // Save current position to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, currentIndex.toString());
+  }, [currentIndex]);
 
   useEffect(() => {
     fetchPhotos();
@@ -64,10 +79,13 @@ function PhotoSlideshow() {
       // API already returns full photos with base64 data - no need for individual requests!
       setPhotos(response.data);
 
-      // Reset index if it's out of bounds (e.g., photos were deleted)
-      if (currentIndex >= response.data.length) {
-        setCurrentIndex(0);
-      }
+      // Validate saved index - reset if it's out of bounds (e.g., photos were deleted)
+      setCurrentIndex(prevIndex => {
+        if (prevIndex >= response.data.length) {
+          return 0;
+        }
+        return prevIndex;
+      });
 
       setLoading(false);
     } catch (err) {
