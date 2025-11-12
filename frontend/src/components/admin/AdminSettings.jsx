@@ -239,6 +239,24 @@ function AdminSettings({ preferences, onSave }) {
                 max="300"
                 value={(localPrefs.displaySettings?.familyPhotoInterval || 10000) / 1000}
                 onChange={(e) => {
+                  // Allow user to type freely, validate on blur
+                  const value = e.target.value;
+                  if (value === '') return; // Allow clearing the field
+
+                  const seconds = parseInt(value);
+                  if (isNaN(seconds)) return;
+
+                  const updatedPrefs = {
+                    ...localPrefs,
+                    displaySettings: {
+                      ...localPrefs.displaySettings,
+                      familyPhotoInterval: seconds * 1000
+                    }
+                  };
+                  setLocalPrefs(updatedPrefs);
+                }}
+                onBlur={(e) => {
+                  // Validate and save when user is done editing
                   const seconds = Math.max(1, Math.min(300, parseInt(e.target.value) || 10));
                   const updatedPrefs = {
                     ...localPrefs,
@@ -266,6 +284,24 @@ function AdminSettings({ preferences, onSave }) {
                 max="300"
                 value={(localPrefs.displaySettings?.eventPhotoInterval || 10000) / 1000}
                 onChange={(e) => {
+                  // Allow user to type freely, validate on blur
+                  const value = e.target.value;
+                  if (value === '') return; // Allow clearing the field
+
+                  const seconds = parseInt(value);
+                  if (isNaN(seconds)) return;
+
+                  const updatedPrefs = {
+                    ...localPrefs,
+                    displaySettings: {
+                      ...localPrefs.displaySettings,
+                      eventPhotoInterval: seconds * 1000
+                    }
+                  };
+                  setLocalPrefs(updatedPrefs);
+                }}
+                onBlur={(e) => {
+                  // Validate and save when user is done editing
                   const seconds = Math.max(1, Math.min(300, parseInt(e.target.value) || 10));
                   const updatedPrefs = {
                     ...localPrefs,
