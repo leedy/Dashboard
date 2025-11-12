@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import usePreferences from '../../hooks/usePreferences';
 import './PhotoSlideshow.css';
 
 function PhotoSlideshow() {
@@ -8,9 +9,17 @@ function PhotoSlideshow() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [fade, setFade] = useState(true);
+  const { preferences } = usePreferences();
 
   useEffect(() => {
     fetchPhotos();
+
+    // Refresh photo list every 30 seconds to pick up newly uploaded photos
+    const refreshInterval = setInterval(() => {
+      fetchPhotos();
+    }, 30000);
+
+    return () => clearInterval(refreshInterval);
   }, []);
 
   // Preload images for smoother transitions
@@ -27,17 +36,20 @@ function PhotoSlideshow() {
   useEffect(() => {
     if (photos.length === 0) return;
 
-    // Auto-advance every 10 seconds
+    // Get display interval from preferences (default: 10 seconds)
+    const displayInterval = preferences.displaySettings?.familyPhotoInterval || 10000;
+
+    // Auto-advance based on user preference
     const interval = setInterval(() => {
       setFade(false);
       setTimeout(() => {
         setCurrentIndex((prev) => (prev + 1) % photos.length);
         setFade(true);
       }, 500); // Wait for fade out
-    }, 10000);
+    }, displayInterval);
 
     return () => clearInterval(interval);
-  }, [photos.length]);
+  }, [photos.length, preferences.displaySettings?.familyPhotoInterval]);
 
   const fetchPhotos = async () => {
     try {
@@ -51,6 +63,12 @@ function PhotoSlideshow() {
 
       // API already returns full photos with base64 data - no need for individual requests!
       setPhotos(response.data);
+
+      // Reset index if it's out of bounds (e.g., photos were deleted)
+      if (currentIndex >= response.data.length) {
+        setCurrentIndex(0);
+      }
+
       setLoading(false);
     } catch (err) {
       console.error('Error fetching photos:', err);

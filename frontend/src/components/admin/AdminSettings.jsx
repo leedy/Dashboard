@@ -226,6 +226,65 @@ function AdminSettings({ preferences, onSave }) {
 
         {/* Right Column */}
         <div>
+          {/* Photo Slideshow Settings */}
+          <div className="settings-section">
+            <h3>Photo Slideshow</h3>
+
+            <div className="setting-item">
+              <label htmlFor="family-photo-interval">Family Photos Display Time (seconds)</label>
+              <input
+                id="family-photo-interval"
+                type="number"
+                min="1"
+                max="300"
+                value={(localPrefs.displaySettings?.familyPhotoInterval || 10000) / 1000}
+                onChange={(e) => {
+                  const seconds = Math.max(1, Math.min(300, parseInt(e.target.value) || 10));
+                  const updatedPrefs = {
+                    ...localPrefs,
+                    displaySettings: {
+                      ...localPrefs.displaySettings,
+                      familyPhotoInterval: seconds * 1000
+                    }
+                  };
+                  setLocalPrefs(updatedPrefs);
+                  onSave(updatedPrefs);
+                }}
+                placeholder="10"
+              />
+              <small style={{ color: '#888', fontSize: '0.85rem', marginTop: '0.25rem', display: 'block' }}>
+                How long each family photo displays before transitioning (1-300 seconds)
+              </small>
+            </div>
+
+            <div className="setting-item">
+              <label htmlFor="event-photo-interval">Event Slides Display Time (seconds)</label>
+              <input
+                id="event-photo-interval"
+                type="number"
+                min="1"
+                max="300"
+                value={(localPrefs.displaySettings?.eventPhotoInterval || 10000) / 1000}
+                onChange={(e) => {
+                  const seconds = Math.max(1, Math.min(300, parseInt(e.target.value) || 10));
+                  const updatedPrefs = {
+                    ...localPrefs,
+                    displaySettings: {
+                      ...localPrefs.displaySettings,
+                      eventPhotoInterval: seconds * 1000
+                    }
+                  };
+                  setLocalPrefs(updatedPrefs);
+                  onSave(updatedPrefs);
+                }}
+                placeholder="10"
+              />
+              <small style={{ color: '#888', fontSize: '0.85rem', marginTop: '0.25rem', display: 'block' }}>
+                How long each event slide displays before transitioning (1-300 seconds)
+              </small>
+            </div>
+          </div>
+
           {/* API Keys Section */}
           <div className="settings-section">
             <h3>API Keys</h3>

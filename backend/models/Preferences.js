@@ -59,7 +59,9 @@ const preferencesSchema = new mongoose.Schema({
         'family-photos',
         'event-slides'
       ]
-    }
+    },
+    familyPhotoInterval: { type: Number, default: 10000 },
+    eventPhotoInterval: { type: Number, default: 10000 }
   },
   disneyExcludedRides: {
     type: [Number],

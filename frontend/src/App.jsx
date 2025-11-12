@@ -416,7 +416,7 @@ function App() {
           }}>
             Loading dashboard...
           </div>
-        }>
+        } key={currentDashboard}>
           {renderDashboard()}
         </Suspense>
       </Layout>
