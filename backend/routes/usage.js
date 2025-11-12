@@ -20,7 +20,7 @@ const getClientIp = (req) => {
   }
 
   // Fallback to direct connection IP
-  return req.ip || req.connection.remoteAddress;
+  return req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress;
 };
 
 // Log a usage event
