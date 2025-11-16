@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './Layout.css';
 
-function Layout({ children, currentDashboard, onDashboardChange, onAdminAccess, photoCounts }) {
+function Layout({ children, currentDashboard, onDashboardChange, onAdminAccess, onSettingsAccess, photoCounts }) {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [closeTimeout, setCloseTimeout] = useState(null);
@@ -133,7 +133,22 @@ function Layout({ children, currentDashboard, onDashboardChange, onAdminAccess, 
             </div>
           ))}
           <button
-            className={`nav-button settings-button ${currentDashboard === 'admin' ? 'active' : ''}`}
+            className={`nav-button settings-button ${currentDashboard === 'settings' ? 'active' : ''}`}
+            onClick={() => {
+              if (onSettingsAccess) {
+                onSettingsAccess();
+                setOpenDropdown(null);
+                if (closeTimeout) {
+                  clearTimeout(closeTimeout);
+                  setCloseTimeout(null);
+                }
+              }
+            }}
+          >
+            ⚙️ Settings
+          </button>
+          <button
+            className={`nav-button admin-button ${currentDashboard === 'admin' ? 'active' : ''}`}
             onClick={() => {
               if (onAdminAccess) {
                 onAdminAccess();
@@ -145,7 +160,7 @@ function Layout({ children, currentDashboard, onDashboardChange, onAdminAccess, 
               }
             }}
           >
-            ⚙️ Admin
+            👤 Admin
           </button>
         </nav>
 
@@ -177,6 +192,17 @@ function Layout({ children, currentDashboard, onDashboardChange, onAdminAccess, 
               ))}
               <div className="mobile-category">
                 <button
+                  className={`mobile-menu-item settings-item ${currentDashboard === 'settings' ? 'active' : ''}`}
+                  onClick={() => {
+                    if (onSettingsAccess) {
+                      onSettingsAccess();
+                      setMobileMenuOpen(false);
+                    }
+                  }}
+                >
+                  ⚙️ Settings
+                </button>
+                <button
                   className={`mobile-menu-item admin-item ${currentDashboard === 'admin' ? 'active' : ''}`}
                   onClick={() => {
                     if (onAdminAccess) {
@@ -185,7 +211,7 @@ function Layout({ children, currentDashboard, onDashboardChange, onAdminAccess, 
                     }
                   }}
                 >
-                  ⚙️ Admin
+                  👤 Admin
                 </button>
               </div>
             </nav>

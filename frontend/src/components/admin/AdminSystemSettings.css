@@ -1,0 +1,130 @@
+.admin-system-settings {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.system-settings-header {
+  margin-bottom: 2rem;
+}
+
+.system-settings-header h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.8rem;
+  color: #fff;
+}
+
+.system-settings-subtitle {
+  margin: 0;
+  color: #aaa;
+  font-size: 0.95rem;
+}
+
+.system-settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.system-settings-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.system-settings-section h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.3rem;
+  color: #4fc3f7;
+}
+
+.section-description {
+  margin: 0 0 1.5rem 0;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.setting-item {
+  margin-bottom: 1.5rem;
+}
+
+.setting-item:last-child {
+  margin-bottom: 0;
+}
+
+.setting-item label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #e0e0e0;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.setting-item input[type="text"],
+.setting-item input[type="number"] {
+  width: 100%;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.setting-item input[type="text"]:focus,
+.setting-item input[type="number"]:focus {
+  outline: none;
+  border-color: #4fc3f7;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.setting-item small {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.setting-item small a {
+  color: #4fc3f7;
+  text-decoration: none;
+}
+
+.setting-item small a:hover {
+  text-decoration: underline;
+}
+
+.system-settings-info {
+  margin-top: 1rem;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 183, 77, 0.1);
+  border-left: 4px solid #ffb74d;
+  border-radius: 4px;
+}
+
+.system-settings-info p {
+  margin: 0;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.system-settings-info strong {
+  color: #ffb74d;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .system-settings-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .system-settings-section {
+    padding: 1rem;
+  }
+
+  .setting-item input[type="text"],
+  .setting-item input[type="number"] {
+    font-size: 0.9rem;
+  }
+}

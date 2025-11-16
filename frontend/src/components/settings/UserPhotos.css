@@ -1,0 +1,11 @@
+/* Reuse the same styles as PhotoManagement.css */
+@import '../admin/PhotoManagement.css';
+
+/* Override the class names for user-photos context */
+.user-photos {
+  composes: photo-management from '../admin/PhotoManagement.css';
+}
+
+.user-photos-header {
+  composes: photo-management-header from '../admin/PhotoManagement.css';
+}

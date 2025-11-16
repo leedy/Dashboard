@@ -108,3 +108,23 @@
     font-size: 0.9rem;
   }
 }
+
+/* Admin Info Tip */
+.admin-info {
+  margin-top: 2rem;
+  padding: 1rem 1.5rem;
+  background: rgba(79, 195, 247, 0.1);
+  border-left: 4px solid #4fc3f7;
+  border-radius: 4px;
+}
+
+.admin-info p {
+  margin: 0;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.admin-info strong {
+  color: #4fc3f7;
+}

@@ -21,6 +21,7 @@ const PhotoSlideshow = lazy(() => import('./components/dashboards/PhotoSlideshow
 const EventSlideshow = lazy(() => import('./components/dashboards/EventSlideshow'))
 const Admin = lazy(() => import('./components/admin/Admin'))
 const AdminLogin = lazy(() => import('./components/admin/AdminLogin'))
+const UserSettings = lazy(() => import('./components/settings/UserSettings'))
 
 function App() {
   const {
@@ -36,6 +37,7 @@ function App() {
   })
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false)
   const [showAdminLogin, setShowAdminLogin] = useState(false)
+  const [showUserSettings, setShowUserSettings] = useState(false)
 
   // Check which sports have games available
   const availableSports = useAvailableSports()
@@ -362,6 +364,14 @@ function App() {
     setCurrentDashboard('todays-games');
   };
 
+  const handleSettingsAccess = () => {
+    setShowUserSettings(true);
+  };
+
+  const handleCloseSettings = () => {
+    setShowUserSettings(false);
+  };
+
   // Handle manual navigation in countdown (and other dashboards with sub-sections)
   // This will reset the auto-rotation timer by updating currentSubSection
   const handleManualNavigation = (newSubSection) => {
@@ -486,6 +496,7 @@ function App() {
         currentDashboard={currentDashboard}
         onDashboardChange={setCurrentDashboard}
         onAdminAccess={handleAdminAccess}
+        onSettingsAccess={handleSettingsAccess}
         photoCounts={photoCounts}
       >
         <Suspense fallback={
@@ -508,6 +519,15 @@ function App() {
           <AdminLogin
             onLoginSuccess={handleAdminLoginSuccess}
             onCancel={handleAdminLoginCancel}
+          />
+        </Suspense>
+      )}
+      {showUserSettings && (
+        <Suspense fallback={null}>
+          <UserSettings
+            preferences={preferences}
+            onSave={handleSaveSettings}
+            onClose={handleCloseSettings}
           />
         </Suspense>
       )}
