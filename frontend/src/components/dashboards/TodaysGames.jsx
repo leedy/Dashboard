@@ -261,7 +261,23 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
           if (game.gameState === 'LIVE' || game.gameState === 'CRIT') {
             const period = game.period || game.periodDescriptor?.number;
             const clock = game.clock?.timeRemaining || '';
-            if (period && clock) {
+
+            // Check if period has ended (00:00 or 0:00)
+            const isPeriodEnd = clock === '00:00' || clock === '0:00' || clock === '00.0' || clock === '';
+
+            if (period && isPeriodEnd) {
+              // Period has ended - show "End" messages
+              if (period === 1) {
+                periodInfo = 'End 1st';
+              } else if (period === 2) {
+                periodInfo = 'End 2nd';
+              } else if (period === 3) {
+                periodInfo = 'End Regulation';
+              } else if (period >= 4) {
+                periodInfo = 'End Overtime';
+              }
+            } else if (period && clock) {
+              // Normal in-progress period - show period and time
               periodInfo = `${period}${period === 1 ? 'st' : period === 2 ? 'nd' : period === 3 ? 'rd' : 'th'} ${clock}`;
             } else if (period) {
               periodInfo = `Period ${period}`;
