@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
 import './SportsDashboard.css';
 import TeamModal from './TeamModal';
@@ -12,6 +12,8 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
   const [selectedTeam, setSelectedTeam] = useState(null); // { abbrev: 'PHI', name: 'Philadelphia Flyers' }
   const [teamRecords, setTeamRecords] = useState({}); // Store team records by abbreviation or name
   const [selectedGame, setSelectedGame] = useState(null); // For goal details modal
+  const [, setRenderTick] = useState(0); // Dummy state to force re-renders for countdown
+  const intermissionTimersRef = useRef({}); // Track intermission start times by gameId
 
   // Determine which sports have games available
   const availableSportsList = useMemo(() => {
@@ -33,6 +35,33 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
       setSelectedSport(activeSport);
     }
   }, [activeSport]);
+
+  // Helper function to calculate remaining intermission time
+  const calculateIntermissionTime = (gameId, apiTime) => {
+    if (!apiTime) return '';
+
+    // Parse API time (MM:SS format) to total seconds
+    const parts = apiTime.split(':');
+    const totalSeconds = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+
+    // Check if we have a stored start time for this intermission
+    if (!intermissionTimersRef.current[gameId]) {
+      // First time seeing this intermission - store the start time and duration
+      intermissionTimersRef.current[gameId] = {
+        startTime: Date.now(),
+        duration: totalSeconds
+      };
+    }
+
+    const timer = intermissionTimersRef.current[gameId];
+    const elapsedSeconds = Math.floor((Date.now() - timer.startTime) / 1000);
+    const remainingSeconds = Math.max(0, timer.duration - elapsedSeconds);
+
+    // Format as MM:SS
+    const minutes = Math.floor(remainingSeconds / 60);
+    const seconds = remainingSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
 
   const favoriteNHLTeam = preferences?.favoriteNHLTeam || { name: 'Philadelphia Flyers', abbrev: 'PHI' };
   const favoriteNFLTeam = preferences?.favoriteNFLTeam || { name: 'Philadelphia Eagles', abbrev: 'PHI' };
@@ -63,6 +92,15 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
 
     return () => clearInterval(interval); // Cleanup on unmount
   }, [selectedSport]);
+
+  // Force re-render every second for intermission countdown
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRenderTick(tick => tick + 1);
+    }, 1000); // 1000ms = 1 second
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
 
   const isFavoriteTeam = (teamName) => {
     if (!teamName) return false;
@@ -258,13 +296,16 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
 
           // Get period and clock info for live games
           let periodInfo = '';
+          let inIntermission = false;
+          let intermissionClock = '';
           if (game.gameState === 'LIVE' || game.gameState === 'CRIT') {
             const period = game.period || game.periodDescriptor?.number;
             const clock = game.clock?.timeRemaining || '';
-            const inIntermission = game.clock?.inIntermission || false;
+            inIntermission = game.clock?.inIntermission || false;
 
             if (period && inIntermission) {
               // Period has ended - in intermission - show "End" messages
+              intermissionClock = clock; // Store the API's intermission time
               if (period === 1) {
                 periodInfo = 'End 1st';
               } else if (period === 2) {
@@ -274,11 +315,18 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
               } else if (period >= 4) {
                 periodInfo = 'End Overtime';
               }
-            } else if (period && clock) {
-              // Normal in-progress period - show period and time
-              periodInfo = `${period}${period === 1 ? 'st' : period === 2 ? 'nd' : period === 3 ? 'rd' : 'th'} ${clock}`;
-            } else if (period) {
-              periodInfo = `Period ${period}`;
+            } else {
+              // Not in intermission - clear any stored timer for this game
+              if (intermissionTimersRef.current[game.id]) {
+                delete intermissionTimersRef.current[game.id];
+              }
+
+              if (period && clock) {
+                // Normal in-progress period - show period and time
+                periodInfo = `${period}${period === 1 ? 'st' : period === 2 ? 'nd' : period === 3 ? 'rd' : 'th'} ${clock}`;
+              } else if (period) {
+                periodInfo = `Period ${period}`;
+              }
             }
           }
 
@@ -306,7 +354,9 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
             startTime: gameDate,
             isFavorite: isFavoriteTeam(homeTeamName) || isFavoriteTeam(awayTeamName),
             isLive: isLive,
-            isFinal: isFinal
+            isFinal: isFinal,
+            inIntermission: inIntermission,
+            intermissionClock: intermissionClock
           };
         })
         .sort((a, b) => {
@@ -584,13 +634,18 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
               {gamesData.map((game, index) => (
                 <div key={index} className={`game-card upcoming ${game.isFavorite ? 'favorite-team' : ''} ${game.isLive ? 'live-game' : ''}`}>
                   <div
-                    className={`game-time ${game.isLive ? 'live-indicator' : ''} ${selectedSport === 'nhl' && (game.isLive || game.isFinal) && game.gameId ? 'clickable-time' : ''}`}
+                    className={`game-time ${game.isLive ? 'live-indicator' : ''} ${selectedSport === 'nhl' && (game.isLive || game.isFinal) && game.gameId ? 'clickable-time' : ''} ${game.inIntermission ? 'intermission-display' : ''}`}
                     onClick={() => handleGameTimeClick(game)}
                     style={{
                       cursor: selectedSport === 'nhl' && (game.isLive || game.isFinal) && game.gameId ? 'pointer' : 'default'
                     }}
                   >
-                    {game.date}
+                    <span>{game.date}</span>
+                    {selectedSport === 'nhl' && game.inIntermission && game.intermissionClock && (
+                      <span className="intermission-countdown">
+                        {calculateIntermissionTime(game.gameId, game.intermissionClock)}
+                      </span>
+                    )}
                   </div>
                   <div className="game-matchup">
                     <div className="team-row">

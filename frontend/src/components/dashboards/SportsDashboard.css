@@ -179,6 +179,19 @@
   transform: scale(1.05);
 }
 
+.game-time.intermission-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.intermission-countdown {
+  font-size: 0.95rem;
+  color: #aaa;
+  font-weight: 600;
+  margin-left: 1rem;
+}
+
 .game-matchup {
   display: flex;
   flex-direction: column;
