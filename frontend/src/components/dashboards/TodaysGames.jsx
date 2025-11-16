@@ -605,9 +605,7 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
           {lastUpdated && (
             <p className="last-updated">
               Last updated: {formatLastUpdated()}
-              {getRefreshCountdown() > 0 && (
-                <span className="refresh-countdown"> (refreshing in {getRefreshCountdown()}s)</span>
-              )}
+              <span className="refresh-countdown"> (refreshing in {getRefreshCountdown()}s)</span>
             </p>
           )}
         </div>
