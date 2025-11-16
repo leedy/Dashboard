@@ -1,15 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const Preferences = require('../models/Preferences');
+const userAuth = require('../middleware/userAuth');
 
-// Get preferences for the default user
-router.get('/', async (req, res) => {
+// Get preferences for the authenticated user
+router.get('/', userAuth, async (req, res) => {
   try {
-    let preferences = await Preferences.findOne({ userId: 'default-user' });
+    let preferences = await Preferences.findOne({ userId: req.user.userId });
 
     // If no preferences exist, create default ones
     if (!preferences) {
-      preferences = new Preferences({ userId: 'default-user' });
+      preferences = new Preferences({ userId: req.user.userId });
       await preferences.save();
     }
 
@@ -20,16 +21,16 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Update preferences for the default user
-router.put('/', async (req, res) => {
+// Update preferences for the authenticated user
+router.put('/', userAuth, async (req, res) => {
   try {
     console.log('Updating preferences with:', JSON.stringify(req.body, null, 2));
-    let preferences = await Preferences.findOne({ userId: 'default-user' });
+    let preferences = await Preferences.findOne({ userId: req.user.userId });
 
     if (!preferences) {
       // Create new preferences if they don't exist
       preferences = new Preferences({
-        userId: 'default-user',
+        userId: req.user.userId,
         ...req.body
       });
     } else {
@@ -46,11 +47,11 @@ router.put('/', async (req, res) => {
   }
 });
 
-// Reset preferences to defaults
-router.post('/reset', async (req, res) => {
+// Reset preferences to defaults for authenticated user
+router.post('/reset', userAuth, async (req, res) => {
   try {
-    await Preferences.deleteOne({ userId: 'default-user' });
-    const preferences = new Preferences({ userId: 'default-user' });
+    await Preferences.deleteOne({ userId: req.user.userId });
+    const preferences = new Preferences({ userId: req.user.userId });
     await preferences.save();
     res.json(preferences);
   } catch (error) {

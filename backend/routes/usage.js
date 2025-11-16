@@ -1,5 +1,7 @@
 const express = require('express');
 const UsageEvent = require('../models/UsageEvent');
+const optionalUserAuth = require('../middleware/optionalUserAuth');
+const adminAuth = require('../middleware/adminAuth');
 
 const router = express.Router();
 
@@ -23,8 +25,8 @@ const getClientIp = (req) => {
   return req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress;
 };
 
-// Log a usage event
-router.post('/log', async (req, res) => {
+// Log a usage event (with optional authentication)
+router.post('/log', optionalUserAuth, async (req, res) => {
   try {
     const {
       eventType,
@@ -41,12 +43,15 @@ router.post('/log', async (req, res) => {
     const ipAddress = getClientIp(req);
     const userAgent = req.get('User-Agent');
 
+    // Use authenticated userId if available, otherwise use body userId or default
+    const finalUserId = req.user?.userId || userId || 'default-user';
+
     const event = new UsageEvent({
       eventType,
       dashboardId,
       featureName,
       sessionId,
-      userId: userId || 'default-user',
+      userId: finalUserId,
       ipAddress,
       userAgent,
       duration,
@@ -62,16 +67,19 @@ router.post('/log', async (req, res) => {
   }
 });
 
-// Batch log multiple events (for performance)
-router.post('/log/batch', async (req, res) => {
+// Batch log multiple events (for performance) (with optional authentication)
+router.post('/log/batch', optionalUserAuth, async (req, res) => {
   try {
     const { events } = req.body;
     const ipAddress = getClientIp(req);
     const userAgent = req.get('User-Agent');
 
+    // Use authenticated userId if available
+    const authUserId = req.user?.userId;
+
     const eventsToInsert = events.map(event => ({
       ...event,
-      userId: event.userId || 'default-user',
+      userId: authUserId || event.userId || 'default-user',
       ipAddress,
       userAgent
     }));
@@ -84,8 +92,8 @@ router.post('/log/batch', async (req, res) => {
   }
 });
 
-// Get analytics overview
-router.get('/analytics/overview', async (req, res) => {
+// Get analytics overview (admin only)
+router.get('/analytics/overview', adminAuth, async (req, res) => {
   try {
     const { days = 30, userId } = req.query;
     const startDate = new Date();
@@ -154,8 +162,8 @@ router.get('/analytics/overview', async (req, res) => {
   }
 });
 
-// Get recent activity log
-router.get('/analytics/recent', async (req, res) => {
+// Get recent activity log (admin only)
+router.get('/analytics/recent', adminAuth, async (req, res) => {
   try {
     const { limit = 100, userId } = req.query;
     const query = userId && userId !== 'all' ? { userId } : {};
@@ -172,8 +180,8 @@ router.get('/analytics/recent', async (req, res) => {
   }
 });
 
-// Get user sessions
-router.get('/analytics/sessions', async (req, res) => {
+// Get user sessions (admin only)
+router.get('/analytics/sessions', adminAuth, async (req, res) => {
   try {
     const { days = 7 } = req.query;
     const startDate = new Date();
@@ -205,8 +213,8 @@ router.get('/analytics/sessions', async (req, res) => {
   }
 });
 
-// Get dashboard statistics
-router.get('/analytics/dashboards', async (req, res) => {
+// Get dashboard statistics (admin only)
+router.get('/analytics/dashboards', adminAuth, async (req, res) => {
   try {
     const { days = 30 } = req.query;
     const startDate = new Date();

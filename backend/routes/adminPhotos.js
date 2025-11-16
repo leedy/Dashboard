@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Photo = require('../models/Photo');
 const multer = require('multer');
-const userAuth = require('../middleware/userAuth');
+const adminAuth = require('../middleware/adminAuth');
 
 // Configure multer for memory storage (we'll convert to base64)
 const storage = multer.memoryStorage();
@@ -22,18 +22,21 @@ const upload = multer({
   }
 });
 
-// Upload photos (supports multiple files) - requires authentication
-router.post('/upload', userAuth, upload.array('photos', 20), async (req, res) => {
+// Admin: Upload photos (supports multiple files)
+router.post('/upload', adminAuth, upload.array('photos', 20), async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: 'No files uploaded' });
     }
 
-    const { category } = req.body;
+    const { category, userId } = req.body;
 
     if (!category || !['family-photos', 'event-slides', 'dashboard-assets'].includes(category)) {
       return res.status(400).json({ error: 'Invalid category' });
     }
+
+    // Admin can specify userId, or defaults to 'system' for dashboard-assets
+    const photoUserId = userId || (category === 'dashboard-assets' ? 'system' : 'admin');
 
     const results = {
       success: [],
@@ -45,9 +48,6 @@ router.post('/upload', userAuth, upload.array('photos', 20), async (req, res) =>
       try {
         // Convert buffer to base64 data URI
         const base64Data = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
-
-        // Determine userId: 'system' for dashboard-assets, authenticated user for personal photos
-        const photoUserId = category === 'dashboard-assets' ? 'system' : req.user.userId;
 
         // Create photo document
         const photo = new Photo({
@@ -83,23 +83,19 @@ router.post('/upload', userAuth, upload.array('photos', 20), async (req, res) =>
   }
 });
 
-// Get all photos or filter by category for authenticated user
-router.get('/', userAuth, async (req, res) => {
+// Admin: Get all photos (can see ALL users' photos)
+router.get('/', adminAuth, async (req, res) => {
   try {
-    const { category } = req.query;
+    const { category, userId } = req.query;
 
     let query = {};
 
-    // For dashboard-assets, return all system assets (no user filtering)
-    // For personal categories, filter by authenticated user
-    if (category === 'dashboard-assets') {
-      query = { category: 'dashboard-assets', userId: 'system' };
-    } else if (category) {
-      // Specific personal category
-      query = { userId: req.user.userId, category };
-    } else {
-      // No category specified - return user's personal photos only (not system assets)
-      query = { userId: req.user.userId };
+    if (category) {
+      query.category = category;
+    }
+
+    if (userId) {
+      query.userId = userId;
     }
 
     // Get photos with base64 data (needed for thumbnails)
@@ -113,18 +109,13 @@ router.get('/', userAuth, async (req, res) => {
   }
 });
 
-// Get single photo with full base64 data
-router.get('/:id', userAuth, async (req, res) => {
+// Admin: Get single photo (can see any photo)
+router.get('/:id', adminAuth, async (req, res) => {
   try {
     const photo = await Photo.findById(req.params.id);
 
     if (!photo) {
       return res.status(404).json({ error: 'Photo not found' });
-    }
-
-    // Allow access to system assets (dashboard-assets) or own photos
-    if (photo.userId !== 'system' && photo.userId !== req.user.userId) {
-      return res.status(403).json({ error: 'Not authorized to access this photo' });
     }
 
     res.json(photo);
@@ -134,27 +125,59 @@ router.get('/:id', userAuth, async (req, res) => {
   }
 });
 
-// Delete photo for authenticated user
-router.delete('/:id', userAuth, async (req, res) => {
+// Admin: Delete photo (can delete any photo)
+router.delete('/:id', adminAuth, async (req, res) => {
   try {
-    const photo = await Photo.findById(req.params.id);
+    const photo = await Photo.findByIdAndDelete(req.params.id);
 
     if (!photo) {
       return res.status(404).json({ error: 'Photo not found' });
     }
 
-    // For personal photos: only owner can delete
-    // For dashboard-assets: any authenticated user can delete (system-wide)
-    if (photo.userId !== 'system' && photo.userId !== req.user.userId) {
-      return res.status(403).json({ error: 'Not authorized to delete this photo' });
-    }
-
-    await Photo.findByIdAndDelete(req.params.id);
-
     res.json({ message: 'Photo deleted successfully', id: req.params.id });
   } catch (error) {
     console.error('Error deleting photo:', error);
     res.status(500).json({ error: 'Failed to delete photo' });
+  }
+});
+
+// Admin: Get photo statistics
+router.get('/stats/summary', adminAuth, async (req, res) => {
+  try {
+    const stats = await Photo.aggregate([
+      {
+        $group: {
+          _id: {
+            category: '$category',
+            userId: '$userId'
+          },
+          count: { $sum: 1 },
+          totalSize: { $sum: '$fileSize' }
+        }
+      },
+      {
+        $group: {
+          _id: '$_id.category',
+          users: {
+            $push: {
+              userId: '$_id.userId',
+              count: '$count',
+              totalSize: '$totalSize'
+            }
+          },
+          totalCount: { $sum: '$count' },
+          totalSize: { $sum: '$totalSize' }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]);
+
+    res.json(stats);
+  } catch (error) {
+    console.error('Error fetching photo stats:', error);
+    res.status(500).json({ error: 'Failed to fetch photo statistics' });
   }
 });
 

@@ -4,8 +4,8 @@ const preferencesSchema = new mongoose.Schema({
   userId: {
     type: String,
     required: true,
-    unique: true,
-    default: 'default-user'
+    unique: true, // Each user has one preferences document
+    index: true
   },
   favoriteNHLTeam: {
     abbrev: { type: String, default: 'PHI' },

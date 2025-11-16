@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const photoSchema = new mongoose.Schema({
+  userId: {
+    type: String,
+    required: true,
+    index: true
+  },
   category: {
     type: String,
     required: true,
@@ -36,7 +41,8 @@ const photoSchema = new mongoose.Schema({
   }
 });
 
-// Index for efficient category queries
+// Indexes for efficient queries
+photoSchema.index({ userId: 1, category: 1, uploadDate: -1 });
 photoSchema.index({ category: 1, uploadDate: -1 });
 
 const Photo = mongoose.model('Photo', photoSchema);

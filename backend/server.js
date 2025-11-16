@@ -8,11 +8,13 @@ require('dotenv').config();
 const connectDB = require('./config/database');
 const preferencesRoutes = require('./routes/preferences');
 const photosRoutes = require('./routes/photos');
+const adminPhotosRoutes = require('./routes/adminPhotos');
 const gameCacheRoutes = require('./routes/gameCache');
 const standingsCacheRoutes = require('./routes/standingsCache');
 const stocksRoutes = require('./routes/stocks');
 const usageRoutes = require('./routes/usage');
 const adminAuthRoutes = require('./routes/adminAuth');
+const userAuthRoutes = require('./routes/userAuth');
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3001;
@@ -29,13 +31,15 @@ app.use(express.json({ limit: '20mb' })); // Increase limit for base64 images (1
 app.use(express.urlencoded({ limit: '20mb', extended: true }));
 
 // API Routes
+app.use('/api/auth', userAuthRoutes); // User authentication (register, login, profile)
+app.use('/api/admin/auth', adminAuthRoutes); // Admin authentication
+app.use('/api/admin/photos', adminPhotosRoutes); // Admin photo management (all photos, all users)
 app.use('/api/preferences', preferencesRoutes);
-app.use('/api/photos', photosRoutes);
+app.use('/api/photos', photosRoutes); // User photo routes (per-user photos only)
 app.use('/api/games', gameCacheRoutes);
 app.use('/api/standings', standingsCacheRoutes);
 app.use('/api/stocks', stocksRoutes);
 app.use('/api/usage', usageRoutes);
-app.use('/api/admin/auth', adminAuthRoutes);
 
 // Proxy routes for external APIs
 // Custom NHL endpoint for recent games

@@ -9,7 +9,7 @@ const CATEGORIES = [
 ];
 
 function PhotoManagement() {
-  const [activeCategory, setActiveCategory] = useState('family-photos');
+  const [activeCategory, setActiveCategory] = useState('dashboard-assets'); // Default to dashboard-assets for admin
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -26,7 +26,13 @@ function PhotoManagement() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`/api/photos?category=${category}`);
+      // Use admin API endpoint with admin token
+      const adminToken = localStorage.getItem('adminToken');
+      const response = await axios.get(`/api/admin/photos?category=${category}`, {
+        headers: {
+          Authorization: `Bearer ${adminToken}`
+        }
+      });
       setPhotos(response.data);
     } catch (err) {
       console.error('Error fetching photos:', err);
@@ -78,9 +84,12 @@ function PhotoManagement() {
       });
       formData.append('category', activeCategory);
 
-      const response = await axios.post('/api/photos/upload', formData, {
+      // Use admin API endpoint with admin token
+      const adminToken = localStorage.getItem('adminToken');
+      const response = await axios.post('/api/admin/photos/upload', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${adminToken}`
         }
       });
 
@@ -164,7 +173,13 @@ function PhotoManagement() {
     }
 
     try {
-      await axios.delete(`/api/photos/${photoId}`);
+      // Use admin API endpoint with admin token
+      const adminToken = localStorage.getItem('adminToken');
+      await axios.delete(`/api/admin/photos/${photoId}`, {
+        headers: {
+          Authorization: `Bearer ${adminToken}`
+        }
+      });
       // Refresh photo list
       await fetchPhotos(activeCategory);
     } catch (err) {
@@ -193,7 +208,12 @@ function PhotoManagement() {
     <div className="photo-management">
       <div className="photo-management-header">
         <h2>Photo Management</h2>
-        <p>Upload and manage photos for your dashboards</p>
+        <p>
+          {activeCategory === 'dashboard-assets'
+            ? 'Manage system-wide dashboard assets (visible to all users)'
+            : 'View and manage all user photos across the system'
+          }
+        </p>
       </div>
 
       {/* Category Tabs */}
@@ -206,9 +226,9 @@ function PhotoManagement() {
           >
             <span className="category-icon">{category.icon}</span>
             <span className="category-label">{category.label}</span>
-            <span className="category-count">
-              ({photos.filter(p => p.category === category.id).length})
-            </span>
+            {activeCategory === category.id && (
+              <span className="category-count">({photos.length})</span>
+            )}
           </button>
         ))}
       </div>
