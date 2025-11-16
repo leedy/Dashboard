@@ -296,7 +296,10 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
           };
         })
         .sort((a, b) => {
-          // Live games first
+          // Favorite team games first
+          if (a.isFavorite && !b.isFavorite) return -1;
+          if (!a.isFavorite && b.isFavorite) return 1;
+          // Then live games
           if (a.isLive && !b.isLive) return -1;
           if (!a.isLive && b.isLive) return 1;
           // Then sort by start time
@@ -390,10 +393,13 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
           };
         })
         .sort((a, b) => {
-          // Live games first
+          // Favorite team games first
+          if (a.isFavorite && !b.isFavorite) return -1;
+          if (!a.isFavorite && b.isFavorite) return 1;
+          // Then live games
           if (a.isLive && !b.isLive) return -1;
           if (!a.isLive && b.isLive) return 1;
-          // Upcoming games (not final) before final games
+          // Then upcoming games (not final) before final games
           if (!a.isFinal && b.isFinal) return -1;
           if (a.isFinal && !b.isFinal) return 1;
           // Then sort by start time
@@ -480,7 +486,10 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
           };
         })
         .sort((a, b) => {
-          // Live games first
+          // Favorite team games first
+          if (a.isFavorite && !b.isFavorite) return -1;
+          if (!a.isFavorite && b.isFavorite) return 1;
+          // Then live games
           if (a.isLive && !b.isLive) return -1;
           if (!a.isLive && b.isLive) return 1;
           // Then sort by start time
