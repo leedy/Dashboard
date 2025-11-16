@@ -261,12 +261,10 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
           if (game.gameState === 'LIVE' || game.gameState === 'CRIT') {
             const period = game.period || game.periodDescriptor?.number;
             const clock = game.clock?.timeRemaining || '';
+            const inIntermission = game.clock?.inIntermission || false;
 
-            // Check if period has ended (00:00 or 0:00)
-            const isPeriodEnd = clock === '00:00' || clock === '0:00' || clock === '00.0' || clock === '';
-
-            if (period && isPeriodEnd) {
-              // Period has ended - show "End" messages
+            if (period && inIntermission) {
+              // Period has ended - in intermission - show "End" messages
               if (period === 1) {
                 periodInfo = 'End 1st';
               } else if (period === 2) {
