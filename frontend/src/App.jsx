@@ -5,6 +5,7 @@ import usePreferences from './hooks/usePreferences'
 import { useAvailableSports } from './hooks/useAvailableSports'
 import ErrorBoundary from './components/common/ErrorBoundary'
 import { useDashboardTracking, usePageLoadTracking } from './hooks/useUsageTracking'
+import { useAuth } from './contexts/AuthContext'
 import './App.css'
 
 // Lazy load dashboard components for better initial load performance
@@ -28,6 +29,7 @@ function App() {
     preferences,
     updatePreferences
   } = usePreferences();
+  const { logout } = useAuth();
 
   const [currentDashboard, setCurrentDashboard] = useState(preferences.defaultDashboard)
   const [currentSubSection, setCurrentSubSection] = useState(null)
@@ -372,6 +374,12 @@ function App() {
     setShowUserSettings(false);
   };
 
+  const handleUserLogout = () => {
+    logout();
+    setShowUserSettings(false);
+    setCurrentDashboard('todays-games');
+  };
+
   // Handle manual navigation in countdown (and other dashboards with sub-sections)
   // This will reset the auto-rotation timer by updating currentSubSection
   const handleManualNavigation = (newSubSection) => {
@@ -528,6 +536,7 @@ function App() {
             preferences={preferences}
             onSave={handleSaveSettings}
             onClose={handleCloseSettings}
+            onLogout={handleUserLogout}
           />
         </Suspense>
       )}

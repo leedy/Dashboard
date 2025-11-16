@@ -7,7 +7,7 @@ import UserPhotos from './UserPhotos';
 import DisneyRideSelection from '../admin/DisneyRideSelection';
 import './UserSettings.css';
 
-function UserSettings({ preferences, onSave, onClose }) {
+function UserSettings({ preferences, onSave, onClose, onLogout }) {
   const [activeTab, setActiveTab] = useState('personal');
   const { user } = useAuth();
 
@@ -19,9 +19,16 @@ function UserSettings({ preferences, onSave, onClose }) {
             <h1>Settings</h1>
             <p className="user-info">Logged in as: <strong>{user?.displayName || user?.username}</strong></p>
           </div>
-          <button className="settings-close-button" onClick={onClose}>
-            ✕ Close
-          </button>
+          <div className="user-settings-header-actions">
+            {onLogout && (
+              <button className="user-settings-logout-button" onClick={onLogout}>
+                🚪 Logout
+              </button>
+            )}
+            <button className="settings-close-button" onClick={onClose}>
+              ✕ Close
+            </button>
+          </div>
         </div>
 
         <div className="user-settings-tabs">

@@ -52,6 +52,30 @@
   color: #4fc3f7;
 }
 
+.user-settings-header-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.user-settings-logout-button {
+  background: #ff9800;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 600;
+}
+
+.user-settings-logout-button:hover {
+  background: #fb8c00;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
+}
+
 .settings-close-button {
   background: #f44336;
   color: white;
