@@ -579,6 +579,17 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
     });
   };
 
+  const getRefreshCountdown = () => {
+    if (!lastUpdated) return null;
+
+    const now = Date.now();
+    const lastUpdateTime = lastUpdated.getTime();
+    const elapsedSeconds = Math.floor((now - lastUpdateTime) / 1000);
+    const remainingSeconds = Math.max(0, 30 - elapsedSeconds);
+
+    return remainingSeconds;
+  };
+
   const getHeaderTitle = () => {
     if (selectedSport === 'nfl') {
       return "This Week's Games";
@@ -592,7 +603,12 @@ function TodaysGames({ preferences, activeSport, availableSports }) {
         <div className="header-title">
           <h2>{getHeaderTitle()}</h2>
           {lastUpdated && (
-            <p className="last-updated">Last updated: {formatLastUpdated()}</p>
+            <p className="last-updated">
+              Last updated: {formatLastUpdated()}
+              {getRefreshCountdown() > 0 && (
+                <span className="refresh-countdown"> (refreshing in {getRefreshCountdown()}s)</span>
+              )}
+            </p>
           )}
         </div>
         <div className="sport-selector">

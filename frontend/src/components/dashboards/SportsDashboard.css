@@ -33,6 +33,13 @@
   white-space: nowrap;
 }
 
+.refresh-countdown {
+  color: #999;
+  font-size: 0.8rem;
+  font-weight: 400;
+  font-style: italic;
+}
+
 .sport-selector {
   display: flex;
   gap: 1rem;
