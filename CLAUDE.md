@@ -119,17 +119,9 @@ JWT_SECRET=your_secure_secret
 
 ### Frontend (.env.local in root)
 
-```bash
-cp .env.local.template .env.local
-# Edit with your TMDb API key
-```
+**Note:** TMDb API key is now configured in Admin System Settings, not in .env.local.
 
-Required variables:
-```env
-VITE_TMDB_API_KEY=your_tmdb_api_key
-```
-
-Get free API key: https://www.themoviedb.org/settings/api
+The frontend .env.local file is optional and primarily used for development overrides if needed.
 
 ## MongoDB Connection
 
@@ -201,16 +193,21 @@ Routes are in `backend/routes/`. Each route file exports an Express router.
 - `Layout.jsx` - Fixed header navigation with dashboard switcher
 
 **Settings** (`components/settings/`):
-- `Settings.jsx` - User preferences modal (favorite teams, location, etc.)
+- `UserSettings.jsx` - User preferences modal (favorite teams, location, countdowns, photos)
+- `UserPhotos.jsx` - User photo management (family photos, event slides)
 
 **Admin** (`components/admin/`):
-- Admin authentication and management interface
+- `Admin.jsx` - Admin panel with tabs for system settings, photos, analytics
+- `AdminSystemSettings.jsx` - System-wide settings (TMDb API key)
+- `AdminLogin.jsx` - Admin authentication interface
+- `PhotoManagement.jsx` - Dashboard asset photo management
 
 ### State Management
 
 - React hooks (`useState`, `useEffect`)
-- Custom hooks in `hooks/` (e.g., `usePreferences.js`)
-- No Redux/Context API - keeping it simple
+- Custom hooks in `hooks/` (e.g., `usePreferences.js`, `useAuth.js`)
+- AuthContext for user authentication state
+- Minimal global state - keeping it simple
 
 ## External APIs
 
@@ -221,12 +218,23 @@ Routes are in `backend/routes/`. Each route file exports an Express router.
 - ThemeParks.Wiki API (api.themeparks.wiki)
 
 **API key required:**
-- TMDb API - Movies data (in `frontend/.env.local`)
+- TMDb API - Movies data (configured in Admin System Settings)
 
 All external requests are proxied through backend to avoid CORS and enable caching.
 
-## Admin System
+## Authentication System
 
+### User Accounts
+**Access:** Click "Settings" button in navigation, then "Create Account" if needed
+
+Users can:
+- Create accounts with username/display name/password
+- Manage personal preferences (favorite teams, location, etc.)
+- Manage personal photos (family photos, event slides)
+- Configure countdowns and Disney ride preferences
+- Log out from Settings panel
+
+### Admin Accounts
 **Access:** Navigate to `/admin/login`
 
 **Create Admin Account:**
@@ -236,10 +244,12 @@ node scripts/createAdmin.js
 ```
 
 Admin features:
-- View/manage user preferences
-- View/manage photos
-- View usage statistics
+- Configure system-wide settings (TMDb API key)
+- Manage dashboard asset photos
+- View usage analytics across all users
 - Admin tokens expire in 7 days
+
+**Note:** Admin and user authentication are separate. Admin panel requires admin token, user settings require user token.
 
 ## Production Deployment with PM2
 
@@ -271,10 +281,12 @@ In production, backend serves the built frontend from `dist/` folder. No separat
 
 **Sports Dashboards:**
 - Live NHL/NFL/MLB games with real-time scores
-- Auto-refresh every 30-60 seconds during live games
+- Auto-refresh every 30 seconds with live countdown timer
+- NHL intermission detection with countdown to period start
 - Division standings
-- Favorite team highlighting
+- Favorite team highlighting (always shown first)
 - Player statistics (NHL)
+- Goal details modal (NHL)
 
 **Disney Dashboard:**
 - Real-time wait times for all 4 parks
@@ -285,7 +297,9 @@ In production, backend serves the built frontend from `dist/` folder. No separat
 **Other:**
 - Upcoming movie releases
 - Photo gallery with upload
-- Admin management panel
+- Multi-user authentication with personal preferences
+- Separate user settings and admin panel
+- Usage analytics tracking
 
 ## Common Development Tasks
 

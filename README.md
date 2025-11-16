@@ -6,10 +6,13 @@ A modern, responsive dashboard application built with React and Vite. This app p
 
 ### 🏒 NHL Dashboard
 - **Today's Games**: Live NHL games with real-time scores, period information, and game clock
+- **Intermission Detection**: Displays "End 1st", "End 2nd", etc. with live countdown to period start
+- **Refresh Countdown**: Shows time until next data refresh (e.g., "refreshing in 23s")
 - **Division Standings**: Current NHL standings organized by division
 - **Player Stats**: Click any team name to view detailed player statistics including goals, assists, points, and plus/minus
-- **Auto-Refresh**: Game data updates every 30-60 seconds during live games
+- **Auto-Refresh**: Game data updates every 30 seconds during live games
 - **Team Logos**: Full team logo support including new franchises (Utah Hockey Club/Mammoth)
+- **Favorite Team First**: Your favorite team's games always appear at the top of the list
 
 ### 🏈 NFL Dashboard
 - **Today's Games**: Live NFL games with real-time scores, quarter, and game clock
@@ -48,6 +51,9 @@ A modern, responsive dashboard application built with React and Vite. This app p
 - **Fixed Header Navigation**: Easy dashboard switching with always-visible navigation
 - **Space-Optimized Layout**: Maximized content area with minimal chrome
 - **Live Data**: All sports and theme park data updates in real-time
+- **Multi-User Support**: Create user accounts with personalized preferences
+- **User Settings**: Manage favorite teams, location, countdowns, and personal photos
+- **Admin Panel**: Separate admin interface for system-wide settings and analytics
 
 ## Data Refresh Strategy
 
@@ -148,21 +154,18 @@ BACKEND_PORT=3001             # Backend server port
 
 **Note**: The MongoDB configuration is stored in `server/.env` (backend), not in the root directory.
 
-#### TMDb API Configuration (Frontend - Optional)
+#### TMDb API Configuration (Admin Panel)
 
-Set up TMDb API key for the Movies dashboard by creating a `.env.local` file in the root directory:
+The TMDb API key for the Movies dashboard is now configured through the Admin Panel:
 
-```bash
-# Copy the template
-cp .env.local.template .env.local
-```
-
-Then edit `.env.local`:
-```env
-VITE_TMDB_API_KEY=your_api_key_here
-```
+1. Create an admin account (see Admin System section below)
+2. Navigate to `/admin/login` and log in
+3. Go to the "System Settings" tab
+4. Enter your TMDb API key in the provided field
 
 Get your free API key at: https://www.themoviedb.org/settings/api
+
+**Note:** The `.env.local` file is no longer required for TMDb configuration. All API keys are managed centrally through the admin panel.
 
 ### Running Locally
 
@@ -338,18 +341,44 @@ This app integrates with several APIs:
 6. **TMDb API** (api.themoviedb.org) - **Requires API key**
    - Movie information and posters
    - Get your free API key at: https://www.themoviedb.org/settings/api
+   - **Configured in Admin Panel** (see Authentication System section below)
 
-### Setting Up TMDb API Key
+## Authentication System
 
-Create a `.env.local` file in the project root (or copy from `.env.local.template`):
+The dashboard supports multi-user authentication with separate user and admin access levels.
+
+### User Accounts
+
+**Creating a User Account:**
+1. Click the "Settings" button in the navigation header
+2. If not logged in, click "Create Account"
+3. Enter username, display name, and password
+4. Your preferences will be saved to your personal account
+
+**User Features:**
+- Personal favorite teams (NHL, NFL, MLB)
+- Location and weather preferences
+- Custom countdowns
+- Personal photo galleries (family photos, event slides)
+- Disney ride preferences
+- Logout from Settings panel
+
+### Admin Access
+
+**Creating an Admin Account:**
 ```bash
-cp .env.local.template .env.local
+cd backend
+node scripts/createAdmin.js
 ```
 
-Then edit it:
-```env
-VITE_TMDB_API_KEY=your_api_key_here
-```
+**Admin Features:**
+- Access at `/admin/login`
+- System-wide settings (TMDb API key configuration)
+- Dashboard asset photo management
+- Usage analytics across all users
+- Admin tokens expire in 7 days
+
+**Note:** Admin and user authentication are completely separate. You need an admin token to access admin features and a user token to manage personal settings.
 
 ## Proxy Configuration
 
