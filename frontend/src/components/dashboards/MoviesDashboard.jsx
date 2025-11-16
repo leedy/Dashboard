@@ -7,31 +7,18 @@ function MoviesDashboard({ preferences }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Use API key from preferences first, fall back to environment variable
-  const TMDB_API_KEY = preferences?.tmdbApiKey || import.meta.env.VITE_TMDB_API_KEY;
   const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
 
   useEffect(() => {
     fetchUpcomingMovies();
-  }, [preferences?.tmdbApiKey]);
+  }, []);
 
   const fetchUpcomingMovies = async () => {
-    if (!TMDB_API_KEY) {
-      setError('TMDb API key not configured. Please add your API key in the Admin panel.');
-      return;
-    }
-
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get('https://api.themoviedb.org/3/movie/upcoming', {
-        params: {
-          api_key: TMDB_API_KEY,
-          language: 'en-US',
-          page: 1,
-          region: 'US'
-        }
-      });
+      // Call backend endpoint which uses system API key
+      const response = await axios.get('/api/tmdb/upcoming');
 
       // Filter to movies releasing in the next 30 days
       const today = new Date();
@@ -50,7 +37,15 @@ function MoviesDashboard({ preferences }) {
       setMovies(filteredMovies);
     } catch (error) {
       console.error('Error fetching upcoming movies:', error);
-      setError('Failed to load upcoming movies. Please check your API key and try again.');
+
+      // Handle specific error messages from backend
+      if (error.response?.status === 503) {
+        setError('TMDb API key not configured. Please add your API key in the Admin panel.');
+      } else if (error.response?.status === 401) {
+        setError('Invalid TMDb API key. Please check the API key in the Admin panel.');
+      } else {
+        setError('Failed to load upcoming movies. Please try again later.');
+      }
     } finally {
       setLoading(false);
     }
