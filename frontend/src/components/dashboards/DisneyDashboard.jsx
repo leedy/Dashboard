@@ -110,9 +110,14 @@ function DisneyDashboard({ preferences, activePark }) {
   };
 
   // Check if the park is currently open
+  // Note: We primarily rely on the is_open status from the queue-times API
+  // The park hours are mainly for display purposes
   const isParkOpen = () => {
     if (!parkHours || !parkHours.openingTime || !parkHours.closingTime) {
-      return false;
+      // If we don't have park hours, check if any rides are open
+      return waitTimesData.lands?.some(land =>
+        land.rides?.some(ride => ride.is_open)
+      ) || false;
     }
 
     const now = new Date();
@@ -143,7 +148,6 @@ function DisneyDashboard({ preferences, activePark }) {
       return [];
     }
 
-    const parkOpen = isParkOpen();
     const excludedRides = preferences.disneyExcludedRides || [];
     const allRides = [];
     waitTimesData.lands.forEach(land => {
@@ -160,9 +164,9 @@ function DisneyDashboard({ preferences, activePark }) {
     // Sort by wait time descending (longest first)
     // Closed rides go to the end
     return allRides.sort((a, b) => {
-      // If park is closed, all rides are considered closed
-      const aOpen = parkOpen && a.is_open;
-      const bOpen = parkOpen && b.is_open;
+      // Trust the API's is_open status
+      const aOpen = a.is_open;
+      const bOpen = b.is_open;
 
       if (!aOpen && !bOpen) return 0;
       if (!aOpen) return 1;
@@ -173,11 +177,6 @@ function DisneyDashboard({ preferences, activePark }) {
 
   // Calculate current crowd level based on average wait times
   const getCrowdLevel = () => {
-    // If park is closed, don't show crowd level
-    if (!isParkOpen()) {
-      return null;
-    }
-
     if (!waitTimesData.lands || waitTimesData.lands.length === 0) {
       return null;
     }
@@ -291,7 +290,6 @@ function DisneyDashboard({ preferences, activePark }) {
               // Original view: grouped by land
               <div className="lands-grid">
                 {waitTimesData.lands.map((land) => {
-                  const parkOpen = isParkOpen();
                   const excludedRides = preferences.disneyExcludedRides || [];
                   // Filter to only show included rides
                   const includedRides = land.rides ? land.rides.filter(ride => !excludedRides.includes(ride.id)) : [];
@@ -304,7 +302,7 @@ function DisneyDashboard({ preferences, activePark }) {
                       <h3 className="land-name">{land.name}</h3>
                       <div className="rides-list">
                         {includedRides.map((ride) => {
-                          const rideIsOpen = parkOpen && ride.is_open;
+                          const rideIsOpen = ride.is_open; // Trust the API's status
                           return (
                             <div
                               key={ride.id}
@@ -334,8 +332,7 @@ function DisneyDashboard({ preferences, activePark }) {
               // New view: sorted by wait time in two columns
               <div className="rides-sorted-grid">
                 {getAllRidesSorted().map((ride) => {
-                  const parkOpen = isParkOpen();
-                  const rideIsOpen = parkOpen && ride.is_open;
+                  const rideIsOpen = ride.is_open; // Trust the API's status
                   return (
                     <div
                       key={ride.id}
