@@ -11,9 +11,9 @@
   background: white;
   border-radius: 12px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  max-width: 450px;
+  max-width: 900px;
   width: 100%;
-  padding: 40px;
+  padding: 50px;
 }
 
 .user-auth-header {
@@ -149,7 +149,7 @@
 .admin-setup-header {
   background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
   color: white;
-  padding: 30px;
+  padding: 40px;
   border-radius: 12px;
   margin: -20px -20px 30px -20px;
   text-align: left;
@@ -157,29 +157,30 @@
 
 .admin-setup-header h1 {
   color: white;
-  font-size: 32px;
-  margin: 0 0 10px 0;
+  font-size: 36px;
+  margin: 0 0 12px 0;
 }
 
 .admin-setup-subtitle {
-  font-size: 16px;
-  margin: 0 0 20px 0;
+  font-size: 18px;
+  margin: 0 0 24px 0;
   opacity: 0.95;
   color: white;
 }
 
 .admin-setup-info {
   background: rgba(255, 255, 255, 0.15);
-  padding: 20px;
+  padding: 32px;
   border-radius: 8px;
-  margin-top: 20px;
+  margin-top: 24px;
   backdrop-filter: blur(10px);
 }
 
 .admin-setup-info p {
-  margin: 0 0 12px 0;
-  font-size: 14px;
+  margin: 0 0 14px 0;
+  font-size: 15px;
   color: white;
+  line-height: 1.6;
 }
 
 .admin-setup-info p:last-child {
@@ -194,14 +195,18 @@
 .admin-perks-list {
   list-style: none;
   padding: 0;
-  margin: 0 0 16px 0;
+  margin: 0 0 20px 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px;
 }
 
 .admin-perks-list li {
-  padding: 8px 0 8px 28px;
+  padding: 12px 0 12px 36px;
   position: relative;
-  font-size: 14px;
+  font-size: 15px;
   color: white;
+  line-height: 1.5;
 }
 
 .admin-perks-list li::before {
@@ -222,9 +227,10 @@
 }
 
 .admin-note {
-  font-size: 13px;
+  font-size: 14px;
   opacity: 0.9;
   font-style: italic;
+  margin-top: 4px;
 }
 
 .admin-setup-button {
@@ -238,9 +244,27 @@
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+  .user-auth-card {
+    max-width: 700px;
+  }
+}
+
+@media (max-width: 768px) {
+  .user-auth-card {
+    max-width: 500px;
+    padding: 40px;
+  }
+
+  .admin-perks-list {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 500px) {
   .user-auth-card {
     padding: 30px 20px;
+    max-width: 100%;
   }
 
   .user-auth-header h1 {
@@ -258,5 +282,9 @@
 
   .admin-setup-subtitle {
     font-size: 14px;
+  }
+
+  .admin-perks-list {
+    grid-template-columns: 1fr;
   }
 }

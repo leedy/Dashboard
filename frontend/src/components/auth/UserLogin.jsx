@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './UserAuth.css';
 
 function UserLogin() {
@@ -8,8 +9,28 @@ function UserLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [checkingSetup, setCheckingSetup] = useState(true);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // Check if this is first-time setup (no users exist)
+  useEffect(() => {
+    const checkSetupStatus = async () => {
+      try {
+        const response = await axios.get('/api/auth/setup-needed');
+        if (response.data.setupNeeded) {
+          // No users exist - redirect to registration for first-time setup
+          navigate('/register', { replace: true });
+        }
+      } catch (error) {
+        console.error('Error checking setup status:', error);
+      } finally {
+        setCheckingSetup(false);
+      }
+    };
+
+    checkSetupStatus();
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,6 +47,18 @@ function UserLogin() {
       setLoading(false);
     }
   };
+
+  if (checkingSetup) {
+    return (
+      <div className="user-auth-container">
+        <div className="user-auth-card">
+          <div className="user-auth-header">
+            <p>Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="user-auth-container">
