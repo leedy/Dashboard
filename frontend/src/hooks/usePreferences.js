@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 
 const DEFAULT_PREFERENCES = {
   favoriteNHLTeam: {
@@ -52,16 +53,33 @@ const DEFAULT_PREFERENCES = {
 export const usePreferences = () => {
   const [preferences, setPreferences] = useState(DEFAULT_PREFERENCES);
   const [loading, setLoading] = useState(true);
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   // Load preferences from backend on initial mount
   useEffect(() => {
     const fetchPreferences = async () => {
+      // Wait for auth to finish loading
+      if (authLoading) {
+        return;
+      }
+
+      // Only fetch if user is authenticated
+      if (!isAuthenticated) {
+        setPreferences(DEFAULT_PREFERENCES);
+        setLoading(false);
+        return;
+      }
+
       try {
         const response = await axios.get('/api/preferences');
         setPreferences(response.data);
       } catch (error) {
-        console.error('Error loading preferences from backend:', error);
-        // Fall back to default preferences if backend is unavailable
+        // Only log error if it's not a 401 (not authenticated)
+        // Users who aren't logged in will just use default preferences
+        if (error.response?.status !== 401) {
+          console.error('Error loading preferences from backend:', error);
+        }
+        // Fall back to default preferences if backend is unavailable or user not authenticated
         setPreferences(DEFAULT_PREFERENCES);
       } finally {
         setLoading(false);
@@ -69,7 +87,7 @@ export const usePreferences = () => {
     };
 
     fetchPreferences();
-  }, []);
+  }, [isAuthenticated, authLoading]);
 
   // Save preferences to backend
   const savePreferences = async (newPreferences) => {
@@ -77,7 +95,10 @@ export const usePreferences = () => {
       const response = await axios.put('/api/preferences', newPreferences);
       setPreferences(response.data);
     } catch (error) {
-      console.error('Error saving preferences to backend:', error);
+      // Only log error if it's not a 401 (not authenticated)
+      if (error.response?.status !== 401) {
+        console.error('Error saving preferences to backend:', error);
+      }
       // Still update local state even if backend save fails
       setPreferences(newPreferences);
     }
@@ -149,7 +170,10 @@ export const usePreferences = () => {
       const response = await axios.post('/api/preferences/reset');
       setPreferences(response.data);
     } catch (error) {
-      console.error('Error resetting preferences:', error);
+      // Only log error if it's not a 401 (not authenticated)
+      if (error.response?.status !== 401) {
+        console.error('Error resetting preferences:', error);
+      }
       setPreferences(DEFAULT_PREFERENCES);
     }
   };

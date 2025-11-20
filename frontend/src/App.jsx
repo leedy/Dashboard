@@ -455,6 +455,7 @@ function App() {
         onAdminAccess={handleAdminAccess}
         onSettingsAccess={handleSettingsAccess}
         photoCounts={photoCounts}
+        user={user}
       >
         <Suspense fallback={
           <div style={{

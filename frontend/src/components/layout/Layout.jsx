@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './Layout.css';
 
-function Layout({ children, currentDashboard, onDashboardChange, onAdminAccess, onSettingsAccess, photoCounts }) {
+function Layout({ children, currentDashboard, onDashboardChange, onAdminAccess, onSettingsAccess, photoCounts, user }) {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [closeTimeout, setCloseTimeout] = useState(null);
@@ -147,21 +147,23 @@ function Layout({ children, currentDashboard, onDashboardChange, onAdminAccess, 
           >
             ⚙️ Settings
           </button>
-          <button
-            className={`nav-button admin-button ${currentDashboard === 'admin' ? 'active' : ''}`}
-            onClick={() => {
-              if (onAdminAccess) {
-                onAdminAccess();
-                setOpenDropdown(null);
-                if (closeTimeout) {
-                  clearTimeout(closeTimeout);
-                  setCloseTimeout(null);
+          {user?.isAdmin && (
+            <button
+              className={`nav-button admin-button ${currentDashboard === 'admin' ? 'active' : ''}`}
+              onClick={() => {
+                if (onAdminAccess) {
+                  onAdminAccess();
+                  setOpenDropdown(null);
+                  if (closeTimeout) {
+                    clearTimeout(closeTimeout);
+                    setCloseTimeout(null);
+                  }
                 }
-              }
-            }}
-          >
-            👤 Admin
-          </button>
+              }}
+            >
+              👤 Admin
+            </button>
+          )}
         </nav>
 
         {/* Mobile/Tablet slide-out menu */}
@@ -202,17 +204,19 @@ function Layout({ children, currentDashboard, onDashboardChange, onAdminAccess, 
                 >
                   ⚙️ Settings
                 </button>
-                <button
-                  className={`mobile-menu-item admin-item ${currentDashboard === 'admin' ? 'active' : ''}`}
-                  onClick={() => {
-                    if (onAdminAccess) {
-                      onAdminAccess();
-                      setMobileMenuOpen(false);
-                    }
-                  }}
-                >
-                  👤 Admin
-                </button>
+                {user?.isAdmin && (
+                  <button
+                    className={`mobile-menu-item admin-item ${currentDashboard === 'admin' ? 'active' : ''}`}
+                    onClick={() => {
+                      if (onAdminAccess) {
+                        onAdminAccess();
+                        setMobileMenuOpen(false);
+                      }
+                    }}
+                  >
+                    👤 Admin
+                  </button>
+                )}
               </div>
             </nav>
           </>
