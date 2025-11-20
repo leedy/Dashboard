@@ -9,25 +9,35 @@ const PARKS = {
   'animal-kingdom': { id: 8, name: 'Animal Kingdom', icon: '🦁' }
 };
 
-function DisneyRideSelection({ preferences, onSave }) {
+function AdminDisneyDefaults() {
   const [allRides, setAllRides] = useState({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedPark, setSelectedPark] = useState('magic-kingdom');
-  const [excludedRides, setExcludedRides] = useState(preferences.disneyExcludedRides || []);
-  const [knownRides, setKnownRides] = useState(preferences.disneyKnownRides || []);
+  const [excludedRides, setExcludedRides] = useState([]);
+  const [knownRides, setKnownRides] = useState([]);
   const [saveMessage, setSaveMessage] = useState(null);
-  const [newRidesDetected, setNewRidesDetected] = useState(0);
 
   useEffect(() => {
+    loadDefaultPreferences();
     fetchAllRides();
   }, []);
 
-  // Sync excludedRides and knownRides with preferences when they change
-  useEffect(() => {
-    setExcludedRides(preferences.disneyExcludedRides || []);
-    setKnownRides(preferences.disneyKnownRides || []);
-  }, [preferences]);
+  const loadDefaultPreferences = async () => {
+    try {
+      const adminToken = localStorage.getItem('adminToken');
+      const response = await axios.get('/api/preferences?userId=default-user', {
+        headers: {
+          Authorization: `Bearer ${adminToken}`
+        }
+      });
+
+      setExcludedRides(response.data.disneyExcludedRides || []);
+      setKnownRides(response.data.disneyKnownRides || []);
+    } catch (error) {
+      console.error('Error loading default preferences:', error);
+    }
+  };
 
   const fetchAllRides = async (isRefresh = false) => {
     if (isRefresh) {
@@ -65,61 +75,8 @@ function DisneyRideSelection({ preferences, onSave }) {
 
       setAllRides(ridesData);
 
-      // Detect new rides (rides in API but not in knownRides)
-      const newRides = allCurrentRideIds.filter(id => !knownRides.includes(id));
-
-      // Only auto-exclude if this is not a first-time user (knownRides has some entries)
-      // For first-time users, just populate knownRides without excluding anything
-      if (newRides.length > 0 && knownRides.length > 0) {
-        setNewRidesDetected(newRides.length);
-
-        // Auto-exclude new rides and update known rides
-        const updatedExcluded = [...new Set([...excludedRides, ...newRides])];
-        const updatedKnown = [...new Set([...knownRides, ...allCurrentRideIds])];
-
-        setExcludedRides(updatedExcluded);
-        setKnownRides(updatedKnown);
-
-        // Auto-save the updated preferences
-        const updatedPreferences = {
-          ...preferences,
-          disneyExcludedRides: updatedExcluded,
-          disneyKnownRides: updatedKnown
-        };
-
-        await onSave(updatedPreferences);
-
-        setSaveMessage({
-          type: 'success',
-          text: `Found ${newRides.length} new attraction(s) - automatically excluded from crowd calculations`
-        });
-        setTimeout(() => {
-          setSaveMessage(null);
-          setNewRidesDetected(0);
-        }, 5000);
-      } else if (newRides.length > 0 && knownRides.length === 0) {
-        // First-time user: just populate knownRides without excluding
-        const updatedKnown = [...new Set(allCurrentRideIds)];
-        setKnownRides(updatedKnown);
-
-        const updatedPreferences = {
-          ...preferences,
-          disneyKnownRides: updatedKnown
-        };
-
-        await onSave(updatedPreferences);
-      } else if (isRefresh) {
-        // Just update known rides to include current state
-        const updatedKnown = [...new Set([...knownRides, ...allCurrentRideIds])];
-        if (updatedKnown.length !== knownRides.length) {
-          setKnownRides(updatedKnown);
-          await onSave({
-            ...preferences,
-            disneyKnownRides: updatedKnown
-          });
-        }
-
-        setSaveMessage({ type: 'success', text: 'Attraction list refreshed - no new attractions found' });
+      if (isRefresh) {
+        setSaveMessage({ type: 'success', text: 'Attraction list refreshed successfully' });
         setTimeout(() => setSaveMessage(null), 3000);
       }
     } catch (error) {
@@ -128,6 +85,27 @@ function DisneyRideSelection({ preferences, onSave }) {
     } finally {
       setLoading(false);
       setRefreshing(false);
+    }
+  };
+
+  const saveDefaults = async (updatedExcluded, updatedKnown) => {
+    try {
+      const adminToken = localStorage.getItem('adminToken');
+      await axios.put('/api/preferences?userId=default-user', {
+        disneyExcludedRides: updatedExcluded,
+        disneyKnownRides: updatedKnown
+      }, {
+        headers: {
+          Authorization: `Bearer ${adminToken}`
+        }
+      });
+
+      setSaveMessage({ type: 'success', text: 'Default settings saved - new users will inherit these selections' });
+      setTimeout(() => setSaveMessage(null), 3000);
+    } catch (error) {
+      console.error('Error saving defaults:', error);
+      setSaveMessage({ type: 'error', text: 'Failed to save defaults' });
+      setTimeout(() => setSaveMessage(null), 3000);
     }
   };
 
@@ -141,14 +119,7 @@ function DisneyRideSelection({ preferences, onSave }) {
       : [...excludedRides, rideId];
 
     setExcludedRides(updatedExcluded);
-
-    // Auto-save
-    const updatedPreferences = {
-      ...preferences,
-      disneyExcludedRides: updatedExcluded,
-      disneyKnownRides: knownRides
-    };
-    await onSave(updatedPreferences);
+    await saveDefaults(updatedExcluded, knownRides);
   };
 
   const toggleAllInPark = async (include) => {
@@ -170,46 +141,11 @@ function DisneyRideSelection({ preferences, onSave }) {
     }
 
     setExcludedRides(updatedExcluded);
-
-    // Auto-save
-    const updatedPreferences = {
-      ...preferences,
-      disneyExcludedRides: updatedExcluded,
-      disneyKnownRides: knownRides
-    };
-    await onSave(updatedPreferences);
+    await saveDefaults(updatedExcluded, knownRides);
   };
-
 
   const handleRefresh = async () => {
     await fetchAllRides(true);
-  };
-
-  const handleResetToDefaults = async () => {
-    try {
-      // Fetch default-user preferences
-      const response = await axios.get('/api/preferences?userId=default-user');
-      const defaultExcluded = response.data.disneyExcludedRides || [];
-      const defaultKnown = response.data.disneyKnownRides || [];
-
-      setExcludedRides(defaultExcluded);
-      setKnownRides(defaultKnown);
-
-      // Save to user preferences
-      const updatedPreferences = {
-        ...preferences,
-        disneyExcludedRides: defaultExcluded,
-        disneyKnownRides: defaultKnown
-      };
-      await onSave(updatedPreferences);
-
-      setSaveMessage({ type: 'success', text: 'Reset to system defaults successfully' });
-      setTimeout(() => setSaveMessage(null), 3000);
-    } catch (error) {
-      console.error('Error resetting to defaults:', error);
-      setSaveMessage({ type: 'error', text: 'Failed to reset to defaults' });
-      setTimeout(() => setSaveMessage(null), 3000);
-    }
   };
 
   const currentParkRides = allRides[selectedPark] || [];
@@ -219,8 +155,8 @@ function DisneyRideSelection({ preferences, onSave }) {
   return (
     <div className="disney-ride-selection">
       <div className="ride-selection-header">
-        <h2>Disney Crowd Calculation Settings</h2>
-        <p>Select which attractions should be included in the crowd level calculation</p>
+        <h2>Disney Default Crowd Calculation Settings</h2>
+        <p>Configure which attractions are included by default for new users. Existing users are not affected.</p>
       </div>
 
       {loading ? (
@@ -242,10 +178,7 @@ function DisneyRideSelection({ preferences, onSave }) {
 
           <div className="ride-selection-controls">
             <div className="selection-stats">
-              {includedCount} of {totalCount} attractions included
-              {newRidesDetected > 0 && (
-                <span className="new-rides-badge">+{newRidesDetected} new</span>
-              )}
+              {includedCount} of {totalCount} attractions included by default
             </div>
             <div className="bulk-actions">
               <button
@@ -255,13 +188,6 @@ function DisneyRideSelection({ preferences, onSave }) {
                 title="Refresh attraction list from Disney API"
               >
                 {refreshing ? '🔄 Refreshing...' : '🔄 Refresh List'}
-              </button>
-              <button
-                className="reset-defaults-btn"
-                onClick={handleResetToDefaults}
-                title="Reset to system default settings"
-              >
-                🔄 Reset to Defaults
               </button>
               <button className="bulk-btn" onClick={() => toggleAllInPark(true)}>
                 Include All
@@ -313,4 +239,4 @@ function DisneyRideSelection({ preferences, onSave }) {
   );
 }
 
-export default DisneyRideSelection;
+export default AdminDisneyDefaults;

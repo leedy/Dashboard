@@ -3,6 +3,8 @@ import axios from 'axios';
 import AdminSystemSettings from './AdminSystemSettings';
 import PhotoManagement from './PhotoManagement';
 import UsageAnalytics from './UsageAnalytics';
+import AdminUsers from './AdminUsers';
+import AdminDisneyDefaults from './AdminDisneyDefaults';
 import './Admin.css';
 
 function Admin({ preferences, onSave, onCancel, onLogout }) {
@@ -58,6 +60,18 @@ function Admin({ preferences, onSave, onCancel, onLogout }) {
           System Settings
         </button>
         <button
+          className={`admin-tab ${activeTab === 'users' ? 'active' : ''}`}
+          onClick={() => setActiveTab('users')}
+        >
+          Users
+        </button>
+        <button
+          className={`admin-tab ${activeTab === 'disney-defaults' ? 'active' : ''}`}
+          onClick={() => setActiveTab('disney-defaults')}
+        >
+          Disney Defaults
+        </button>
+        <button
           className={`admin-tab ${activeTab === 'photos' ? 'active' : ''}`}
           onClick={() => setActiveTab('photos')}
         >
@@ -96,6 +110,12 @@ function Admin({ preferences, onSave, onCancel, onLogout }) {
               }}
             />
           )
+        )}
+        {activeTab === 'users' && (
+          <AdminUsers />
+        )}
+        {activeTab === 'disney-defaults' && (
+          <AdminDisneyDefaults />
         )}
         {activeTab === 'photos' && (
           <PhotoManagement />

@@ -74,6 +74,14 @@ function App() {
     checkPhotoCounts();
   }, []);
 
+  // Check URL path on mount for admin login
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path === '/admin/login') {
+      setShowAdminLogin(true);
+    }
+  }, []);
+
   // Check admin authentication on mount
   useEffect(() => {
     const checkAdminAuth = async () => {
@@ -92,6 +100,11 @@ function App() {
 
         if (response.data.valid) {
           setIsAdminAuthenticated(true);
+          // If already authenticated and on admin login page, go to admin panel
+          if (window.location.pathname === '/admin/login') {
+            setCurrentDashboard('admin');
+            window.history.replaceState({}, '', '/');
+          }
         } else {
           setIsAdminAuthenticated(false);
           localStorage.removeItem('adminToken');
@@ -354,10 +367,18 @@ function App() {
     setIsAdminAuthenticated(true);
     setShowAdminLogin(false);
     setCurrentDashboard('admin');
+    // Clear the URL if we're on /admin/login
+    if (window.location.pathname === '/admin/login') {
+      window.history.replaceState({}, '', '/');
+    }
   };
 
   const handleAdminLoginCancel = () => {
     setShowAdminLogin(false);
+    // Clear the URL if we're on /admin/login
+    if (window.location.pathname === '/admin/login') {
+      window.history.replaceState({}, '', '/');
+    }
   };
 
   const handleAdminLogout = () => {

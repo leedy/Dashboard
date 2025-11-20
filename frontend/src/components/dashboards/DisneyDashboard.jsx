@@ -68,7 +68,7 @@ function DisneyDashboard({ preferences, activePark }) {
   const fetchParkHours = async () => {
     try {
       const entityId = parks[selectedPark].entityId;
-      const response = await axios.get(`https://api.themeparks.wiki/v1/entity/${entityId}/schedule`);
+      const response = await axios.get(`/api/themeparks/v1/entity/${entityId}/schedule`);
 
       // Get today's date in YYYY-MM-DD format (local time)
       const today = new Date();
@@ -302,7 +302,8 @@ function DisneyDashboard({ preferences, activePark }) {
                       <h3 className="land-name">{land.name}</h3>
                       <div className="rides-list">
                         {includedRides.map((ride) => {
-                          const rideIsOpen = ride.is_open; // Trust the API's status
+                          // Override ride status if park is closed
+                          const rideIsOpen = isParkOpen() && ride.is_open;
                           return (
                             <div
                               key={ride.id}
@@ -332,7 +333,7 @@ function DisneyDashboard({ preferences, activePark }) {
               // New view: sorted by wait time in two columns
               <div className="rides-sorted-grid">
                 {getAllRidesSorted().map((ride) => {
-                  const rideIsOpen = ride.is_open; // Trust the API's status
+                  const rideIsOpen = isParkOpen() && ride.is_open;
                   return (
                     <div
                       key={ride.id}

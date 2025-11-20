@@ -1,0 +1,122 @@
+.admin-users {
+  padding: 1.5rem;
+}
+
+.users-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.users-header h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.5rem;
+}
+
+.users-count {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.loading-state,
+.error-state {
+  padding: 2rem;
+  text-align: center;
+  color: #aaa;
+  font-size: 1rem;
+}
+
+.error-state {
+  color: #ff6b6b;
+}
+
+.no-users {
+  padding: 2rem;
+  text-align: center;
+  color: #aaa;
+  font-style: italic;
+}
+
+.users-table-container {
+  overflow-x: auto;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #fff;
+}
+
+.users-table thead {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.users-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #fff;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.users-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.users-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.username-cell {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #4fc3f7;
+}
+
+.email-cell {
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background: #4caf50;
+  color: #fff;
+}
+
+.status-badge.inactive {
+  background: #f44336;
+  color: #fff;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  .users-table-container {
+    overflow-x: scroll;
+  }
+
+  .users-table {
+    font-size: 0.85rem;
+  }
+
+  .users-table th,
+  .users-table td {
+    padding: 0.5rem;
+  }
+}

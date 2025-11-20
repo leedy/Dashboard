@@ -4,6 +4,7 @@ import AdminSettings from '../admin/AdminSettings';
 import DashboardControls from '../admin/DashboardControls';
 import CountdownManagement from '../admin/CountdownManagement';
 import UserPhotos from './UserPhotos';
+import UserProfile from './UserProfile';
 import DisneyRideSelection from '../admin/DisneyRideSelection';
 import './UserSettings.css';
 
@@ -32,6 +33,12 @@ function UserSettings({ preferences, onSave, onClose, onLogout }) {
         </div>
 
         <div className="user-settings-tabs">
+          <button
+            className={`settings-tab ${activeTab === 'profile' ? 'active' : ''}`}
+            onClick={() => setActiveTab('profile')}
+          >
+            Profile
+          </button>
           <button
             className={`settings-tab ${activeTab === 'personal' ? 'active' : ''}`}
             onClick={() => setActiveTab('personal')}
@@ -65,6 +72,9 @@ function UserSettings({ preferences, onSave, onClose, onLogout }) {
         </div>
 
         <div className="user-settings-content">
+          {activeTab === 'profile' && (
+            <UserProfile />
+          )}
           {activeTab === 'personal' && (
             <AdminSettings
               preferences={preferences}

@@ -171,6 +171,22 @@ app.use('/api/queue-times', async (req, res) => {
   }
 });
 
+// ThemeParks.wiki API proxy
+app.use('/api/themeparks', async (req, res) => {
+  try {
+    // Remove /api/themeparks from the path
+    const path = req.url.replace('/api/themeparks', '');
+    const queryString = Object.keys(req.query).length > 0 ? `?${new URLSearchParams(req.query)}` : '';
+    const targetUrl = `https://api.themeparks.wiki${path}${queryString}`;
+    console.log('ThemeParks Proxy:', targetUrl);
+    const response = await axios.get(targetUrl);
+    res.json(response.data);
+  } catch (error) {
+    console.error('ThemeParks API proxy error:', error.message);
+    res.status(error.response?.status || 500).json({ error: 'ThemeParks API request failed' });
+  }
+});
+
 // Team news RSS feed endpoint - supports any team
 app.get('/api/news/team/:teamName', async (req, res) => {
   try {

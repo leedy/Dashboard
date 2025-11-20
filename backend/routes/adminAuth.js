@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const AdminCredentials = require('../models/AdminCredentials');
+const User = require('../models/User');
 const adminAuth = require('../middleware/adminAuth');
 
 const router = express.Router();
@@ -98,6 +99,36 @@ router.post('/change-password', adminAuth, async (req, res) => {
   } catch (error) {
     console.error('Change password error:', error);
     res.status(500).json({ message: 'Server error changing password' });
+  }
+});
+
+// Get all registered users (protected admin route)
+router.get('/users', adminAuth, async (req, res) => {
+  try {
+    // Fetch all users, exclude password hash, sorted by creation date (newest first)
+    const users = await User.find({})
+      .select('-passwordHash')
+      .sort({ createdAt: -1 });
+
+    // Format user data for response
+    const formattedUsers = users.map(user => ({
+      id: user._id,
+      username: user.username,
+      email: user.email || 'N/A',
+      displayName: user.displayName,
+      isActive: user.isActive,
+      lastLogin: user.lastLogin,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    }));
+
+    res.json({
+      users: formattedUsers,
+      totalCount: formattedUsers.length
+    });
+  } catch (error) {
+    console.error('Get users error:', error);
+    res.status(500).json({ message: 'Server error fetching users' });
   }
 });
 
