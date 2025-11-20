@@ -16,11 +16,6 @@ const userAuth = (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    // Check if it's a user token (not admin)
-    if (decoded.isAdmin) {
-      return res.status(403).json({ message: 'Admin token not valid for user endpoints' });
-    }
-
     // Ensure userId exists in token
     if (!decoded.userId) {
       return res.status(401).json({ message: 'Invalid token format' });

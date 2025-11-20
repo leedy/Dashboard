@@ -105,6 +105,52 @@
   color: #fff;
 }
 
+.admin-toggle-btn {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-toggle-btn.admin {
+  background: #ff9800;
+  color: #fff;
+}
+
+.admin-toggle-btn.admin:hover {
+  background: #f57c00;
+  transform: translateY(-1px);
+}
+
+.admin-toggle-btn.non-admin {
+  background: rgba(255, 255, 255, 0.1);
+  color: #aaa;
+}
+
+.admin-toggle-btn.non-admin:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.admin-toggle-btn.protected {
+  opacity: 0.7;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.admin-toggle-btn.protected:hover {
+  transform: none;
+  background: #ff9800;
+}
+
+.admin-toggle-btn:disabled {
+  cursor: not-allowed;
+}
+
 /* Responsive table */
 @media (max-width: 768px) {
   .users-table-container {

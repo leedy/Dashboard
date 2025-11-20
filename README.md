@@ -158,8 +158,8 @@ BACKEND_PORT=3001             # Backend server port
 
 The TMDb API key for the Movies dashboard is now configured through the Admin Panel:
 
-1. Create an admin account (see Admin System section below)
-2. Navigate to `/admin/login` and log in
+1. Create a user account (first user is automatically an admin)
+2. Click the "Admin" button in the navigation
 3. Go to the "System Settings" tab
 4. Enter your TMDb API key in the provided field
 
@@ -365,20 +365,26 @@ The dashboard supports multi-user authentication with separate user and admin ac
 
 ### Admin Access
 
-**Creating an Admin Account:**
-```bash
-cd backend
-node scripts/createAdmin.js
-```
+**First User Setup:**
+- When you first access the registration page, you'll see a special "Admin Account Setup" screen
+- This screen explains that the first user automatically becomes an administrator
+- Admin privileges include system settings, user management, and analytics access
+- The setup process is the same as regular registration, but with clear guidance
+- Additional admins can be designated later from the Admin Panel → Users tab
+
+**Accessing Admin Panel:**
+- Click the "Admin" button in navigation (only visible to admin users)
+- Admin status is a flag on regular user accounts
+- The last remaining admin cannot have their admin status removed (protected)
 
 **Admin Features:**
-- Access at `/admin/login`
-- System-wide settings (TMDb API key configuration)
-- Dashboard asset photo management
-- Usage analytics across all users
-- Admin tokens expire in 7 days
+- **System Settings:** TMDb API key configuration and other system-wide settings
+- **Users:** View all registered users and manage admin status
+- **Disney Defaults:** Set default Disney ride preferences for new users
+- **Photo Management:** Manage dashboard asset photos
+- **Usage Analytics:** View usage tracking across all users
 
-**Note:** Admin and user authentication are completely separate. You need an admin token to access admin features and a user token to manage personal settings.
+**Note:** Admin and user authentication use the same token system (30-day JWT tokens). Admin access is controlled by the `isAdmin` field on user accounts.
 
 ## Proxy Configuration
 

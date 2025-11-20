@@ -7,7 +7,7 @@ import AdminUsers from './AdminUsers';
 import AdminDisneyDefaults from './AdminDisneyDefaults';
 import './Admin.css';
 
-function Admin({ preferences, onSave, onCancel, onLogout }) {
+function Admin({ preferences, onSave, onCancel }) {
   const [activeTab, setActiveTab] = useState('system');
   const [systemPreferences, setSystemPreferences] = useState(null);
   const [loadingSystem, setLoadingSystem] = useState(true);
@@ -16,13 +16,9 @@ function Admin({ preferences, onSave, onCancel, onLogout }) {
   useEffect(() => {
     const loadSystemPreferences = async () => {
       try {
-        const adminToken = localStorage.getItem('adminToken');
         // Fetch the default-user preferences which contains system-wide settings
-        const response = await axios.get('/api/preferences?userId=default-user', {
-          headers: {
-            Authorization: `Bearer ${adminToken}`
-          }
-        });
+        // Token is automatically included via axios defaults from AuthContext
+        const response = await axios.get('/api/preferences?userId=default-user');
         setSystemPreferences(response.data);
       } catch (error) {
         console.error('Error loading system preferences:', error);
@@ -41,11 +37,6 @@ function Admin({ preferences, onSave, onCancel, onLogout }) {
       <div className="admin-header">
         <h1>Admin Panel</h1>
         <div className="admin-header-actions">
-          {onLogout && (
-            <button className="admin-logout-button" onClick={onLogout}>
-              🚪 Logout
-            </button>
-          )}
           <button className="admin-close-button" onClick={onCancel}>
             ✕ Close
           </button>
@@ -96,13 +87,9 @@ function Admin({ preferences, onSave, onCancel, onLogout }) {
               preferences={systemPreferences}
               onSave={async (updatedPrefs) => {
                 try {
-                  const adminToken = localStorage.getItem('adminToken');
                   // Save to default-user (system-wide settings)
-                  await axios.put('/api/preferences?userId=default-user', updatedPrefs, {
-                    headers: {
-                      Authorization: `Bearer ${adminToken}`
-                    }
-                  });
+                  // Token is automatically included via axios defaults from AuthContext
+                  await axios.put('/api/preferences?userId=default-user', updatedPrefs);
                   setSystemPreferences(updatedPrefs);
                 } catch (error) {
                   console.error('Error saving system preferences:', error);

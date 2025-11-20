@@ -26,13 +26,8 @@ function PhotoManagement() {
     setLoading(true);
     setError(null);
     try {
-      // Use admin API endpoint with admin token
-      const adminToken = localStorage.getItem('adminToken');
-      const response = await axios.get(`/api/admin/photos?category=${category}`, {
-        headers: {
-          Authorization: `Bearer ${adminToken}`
-        }
-      });
+      // Token is automatically included via axios defaults from AuthContext
+      const response = await axios.get(`/api/admin/photos?category=${category}`);
       setPhotos(response.data);
     } catch (err) {
       console.error('Error fetching photos:', err);
@@ -84,12 +79,10 @@ function PhotoManagement() {
       });
       formData.append('category', activeCategory);
 
-      // Use admin API endpoint with admin token
-      const adminToken = localStorage.getItem('adminToken');
+      // Token is automatically included via axios defaults from AuthContext
       const response = await axios.post('/api/admin/photos/upload', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${adminToken}`
+          'Content-Type': 'multipart/form-data'
         }
       });
 
@@ -173,13 +166,8 @@ function PhotoManagement() {
     }
 
     try {
-      // Use admin API endpoint with admin token
-      const adminToken = localStorage.getItem('adminToken');
-      await axios.delete(`/api/admin/photos/${photoId}`, {
-        headers: {
-          Authorization: `Bearer ${adminToken}`
-        }
-      });
+      // Token is automatically included via axios defaults from AuthContext
+      await axios.delete(`/api/admin/photos/${photoId}`);
       // Refresh photo list
       await fetchPhotos(activeCategory);
     } catch (err) {

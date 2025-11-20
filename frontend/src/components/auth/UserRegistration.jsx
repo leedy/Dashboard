@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './UserAuth.css';
 
 function UserRegistration() {
@@ -11,8 +12,26 @@ function UserRegistration() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isFirstUser, setIsFirstUser] = useState(false);
+  const [checkingSetup, setCheckingSetup] = useState(true);
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  // Check if this is the first user (admin setup)
+  useEffect(() => {
+    const checkSetupStatus = async () => {
+      try {
+        const response = await axios.get('/api/auth/setup-needed');
+        setIsFirstUser(response.data.setupNeeded);
+      } catch (error) {
+        console.error('Error checking setup status:', error);
+      } finally {
+        setCheckingSetup(false);
+      }
+    };
+
+    checkSetupStatus();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,13 +66,43 @@ function UserRegistration() {
     }
   };
 
+  if (checkingSetup) {
+    return (
+      <div className="user-auth-container">
+        <div className="user-auth-card">
+          <div className="user-auth-header">
+            <p>Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="user-auth-container">
       <div className="user-auth-card">
-        <div className="user-auth-header">
-          <h1>Create Account</h1>
-          <p>Sign up for your Dashboard account</p>
-        </div>
+        {isFirstUser ? (
+          <div className="user-auth-header admin-setup-header">
+            <h1>🔐 Admin Account Setup</h1>
+            <p className="admin-setup-subtitle">Welcome! Let's create your administrator account.</p>
+            <div className="admin-setup-info">
+              <p><strong>Important:</strong> As the first user, you will automatically receive administrator privileges.</p>
+              <p className="admin-perks">Admin access includes:</p>
+              <ul className="admin-perks-list">
+                <li>System-wide settings management</li>
+                <li>User account administration</li>
+                <li>Dashboard asset management</li>
+                <li>Usage analytics and monitoring</li>
+              </ul>
+              <p className="admin-note">You can designate additional administrators later from the Admin Panel.</p>
+            </div>
+          </div>
+        ) : (
+          <div className="user-auth-header">
+            <h1>Create Account</h1>
+            <p>Sign up for your Dashboard account</p>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="user-auth-form">
           <div className="user-auth-field">
@@ -131,25 +180,27 @@ function UserRegistration() {
 
           <button
             type="submit"
-            className="user-auth-button primary"
+            className={`user-auth-button primary ${isFirstUser ? 'admin-setup-button' : ''}`}
             disabled={loading || !username || !password || !displayName}
           >
-            {loading ? 'Creating Account...' : 'Sign Up'}
+            {loading ? 'Creating Account...' : (isFirstUser ? '🔐 Create Admin Account' : 'Sign Up')}
           </button>
 
-          <div className="user-auth-footer">
-            <p>
-              Already have an account?{' '}
-              <button
-                type="button"
-                className="user-auth-link"
-                onClick={() => navigate('/login')}
-                disabled={loading}
-              >
-                Log in
-              </button>
-            </p>
-          </div>
+          {!isFirstUser && (
+            <div className="user-auth-footer">
+              <p>
+                Already have an account?{' '}
+                <button
+                  type="button"
+                  className="user-auth-link"
+                  onClick={() => navigate('/login')}
+                  disabled={loading}
+                >
+                  Log in
+                </button>
+              </p>
+            </div>
+          )}
         </form>
       </div>
     </div>

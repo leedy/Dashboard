@@ -197,10 +197,12 @@ Routes are in `backend/routes/`. Each route file exports an Express router.
 - `UserPhotos.jsx` - User photo management (family photos, event slides)
 
 **Admin** (`components/admin/`):
-- `Admin.jsx` - Admin panel with tabs for system settings, photos, analytics
+- `Admin.jsx` - Admin panel with tabs for system settings, photos, analytics, users
 - `AdminSystemSettings.jsx` - System-wide settings (TMDb API key)
-- `AdminLogin.jsx` - Admin authentication interface
+- `AdminUsers.jsx` - User management interface (view all users, manage admin status)
+- `AdminDisneyDefaults.jsx` - Default Disney ride preferences for new users
 - `PhotoManagement.jsx` - Dashboard asset photo management
+- `UsageAnalytics.jsx` - Usage tracking and analytics
 
 ### State Management
 
@@ -234,22 +236,28 @@ Users can:
 - Configure countdowns and Disney ride preferences
 - Log out from Settings panel
 
-### Admin Accounts
-**Access:** Navigate to `/admin/login`
+**First User Setup:**
+- When creating the first account, a special "Admin Account Setup" screen is displayed
+- The first user is automatically assigned admin privileges
+- The setup screen explains admin permissions and responsibilities
+- This ensures there is always at least one admin account
+- Additional admins can be designated from the Admin Panel → Users tab
 
-**Create Admin Account:**
-```bash
-cd backend
-node scripts/createAdmin.js
-```
+### Admin Access
+**Access:** Click "Admin" button in navigation (only visible to admin users)
 
-Admin features:
-- Configure system-wide settings (TMDb API key)
-- Manage dashboard asset photos
-- View usage analytics across all users
-- Admin tokens expire in 7 days
+Admin users have access to:
+- **System Settings:** Configure system-wide settings (TMDb API key)
+- **Users:** View all registered users and manage admin status
+- **Disney Defaults:** Set default Disney ride preferences for new users
+- **Photo Management:** Manage dashboard asset photos
+- **Usage Analytics:** View usage tracking across all users
 
-**Note:** Admin and user authentication are separate. Admin panel requires admin token, user settings require user token.
+**Admin Management:**
+- Admin status is a flag on regular user accounts (`isAdmin` field)
+- Admins are designated in Admin Panel → Users tab
+- The last remaining admin cannot have their admin status removed (protected)
+- All authentication uses the same token system (30-day JWT tokens)
 
 ## Production Deployment with PM2
 

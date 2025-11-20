@@ -25,12 +25,8 @@ function AdminDisneyDefaults() {
 
   const loadDefaultPreferences = async () => {
     try {
-      const adminToken = localStorage.getItem('adminToken');
-      const response = await axios.get('/api/preferences?userId=default-user', {
-        headers: {
-          Authorization: `Bearer ${adminToken}`
-        }
-      });
+      // Token is automatically included via axios defaults from AuthContext
+      const response = await axios.get('/api/preferences?userId=default-user');
 
       setExcludedRides(response.data.disneyExcludedRides || []);
       setKnownRides(response.data.disneyKnownRides || []);
@@ -90,14 +86,10 @@ function AdminDisneyDefaults() {
 
   const saveDefaults = async (updatedExcluded, updatedKnown) => {
     try {
-      const adminToken = localStorage.getItem('adminToken');
+      // Token is automatically included via axios defaults from AuthContext
       await axios.put('/api/preferences?userId=default-user', {
         disneyExcludedRides: updatedExcluded,
         disneyKnownRides: updatedKnown
-      }, {
-        headers: {
-          Authorization: `Bearer ${adminToken}`
-        }
       });
 
       setSaveMessage({ type: 'success', text: 'Default settings saved - new users will inherit these selections' });

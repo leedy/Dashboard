@@ -7,6 +7,20 @@ const userAuth = require('../middleware/userAuth');
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
+// Check if initial setup is needed (no users exist)
+router.get('/setup-needed', async (req, res) => {
+  try {
+    const userCount = await User.countDocuments();
+    res.json({
+      setupNeeded: userCount === 0,
+      userCount
+    });
+  } catch (error) {
+    console.error('Setup check error:', error);
+    res.status(500).json({ message: 'Server error checking setup status' });
+  }
+});
+
 // Register new user
 router.post('/register', async (req, res) => {
   try {
@@ -39,6 +53,10 @@ router.post('/register', async (req, res) => {
       }
     }
 
+    // Check if this is the first user (make them admin automatically)
+    const userCount = await User.countDocuments();
+    const isFirstUser = userCount === 0;
+
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
@@ -48,7 +66,8 @@ router.post('/register', async (req, res) => {
       username: username.toLowerCase(),
       email: email ? email.toLowerCase() : undefined,
       passwordHash,
-      displayName
+      displayName,
+      isAdmin: isFirstUser // First user is automatically an admin
     });
 
     await user.save();
@@ -58,7 +77,8 @@ router.post('/register', async (req, res) => {
       {
         userId: user._id,
         username: user.username,
-        displayName: user.displayName
+        displayName: user.displayName,
+        isAdmin: user.isAdmin || false
       },
       JWT_SECRET,
       { expiresIn: '30d' } // 30 days for user tokens
@@ -70,7 +90,8 @@ router.post('/register', async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        displayName: user.displayName
+        displayName: user.displayName,
+        isAdmin: user.isAdmin || false
       }
     });
   } catch (error) {
@@ -115,7 +136,8 @@ router.post('/login', async (req, res) => {
       {
         userId: user._id,
         username: user.username,
-        displayName: user.displayName
+        displayName: user.displayName,
+        isAdmin: user.isAdmin || false
       },
       JWT_SECRET,
       { expiresIn: '30d' }
@@ -128,6 +150,7 @@ router.post('/login', async (req, res) => {
         username: user.username,
         email: user.email,
         displayName: user.displayName,
+        isAdmin: user.isAdmin || false,
         lastLogin: user.lastLogin
       }
     });
@@ -152,6 +175,7 @@ router.get('/me', userAuth, async (req, res) => {
       email: user.email,
       displayName: user.displayName,
       isActive: user.isActive,
+      isAdmin: user.isAdmin || false,
       lastLogin: user.lastLogin,
       createdAt: user.createdAt
     });
@@ -169,7 +193,8 @@ router.get('/verify', userAuth, async (req, res) => {
     user: {
       id: req.user.userId,
       username: req.user.username,
-      displayName: req.user.displayName
+      displayName: req.user.displayName,
+      isAdmin: req.user.isAdmin || false
     }
   });
 });

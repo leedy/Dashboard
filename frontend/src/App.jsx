@@ -21,7 +21,6 @@ const StocksDashboard = lazy(() => import('./components/dashboards/StocksDashboa
 const PhotoSlideshow = lazy(() => import('./components/dashboards/PhotoSlideshow'))
 const EventSlideshow = lazy(() => import('./components/dashboards/EventSlideshow'))
 const Admin = lazy(() => import('./components/admin/Admin'))
-const AdminLogin = lazy(() => import('./components/admin/AdminLogin'))
 const UserSettings = lazy(() => import('./components/settings/UserSettings'))
 
 function App() {
@@ -29,7 +28,7 @@ function App() {
     preferences,
     updatePreferences
   } = usePreferences();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   const [currentDashboard, setCurrentDashboard] = useState(preferences.defaultDashboard)
   const [currentSubSection, setCurrentSubSection] = useState(null)
@@ -37,8 +36,6 @@ function App() {
     'family-photos': 0,
     'event-slides': 0
   })
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false)
-  const [showAdminLogin, setShowAdminLogin] = useState(false)
   const [showUserSettings, setShowUserSettings] = useState(false)
 
   // Check which sports have games available
@@ -72,51 +69,6 @@ function App() {
     };
 
     checkPhotoCounts();
-  }, []);
-
-  // Check URL path on mount for admin login
-  useEffect(() => {
-    const path = window.location.pathname;
-    if (path === '/admin/login') {
-      setShowAdminLogin(true);
-    }
-  }, []);
-
-  // Check admin authentication on mount
-  useEffect(() => {
-    const checkAdminAuth = async () => {
-      const token = localStorage.getItem('adminToken');
-      if (!token) {
-        setIsAdminAuthenticated(false);
-        return;
-      }
-
-      try {
-        const response = await axios.get('/api/admin/auth/verify', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (response.data.valid) {
-          setIsAdminAuthenticated(true);
-          // If already authenticated and on admin login page, go to admin panel
-          if (window.location.pathname === '/admin/login') {
-            setCurrentDashboard('admin');
-            window.history.replaceState({}, '', '/');
-          }
-        } else {
-          setIsAdminAuthenticated(false);
-          localStorage.removeItem('adminToken');
-        }
-      } catch (error) {
-        console.error('Admin token verification failed:', error);
-        setIsAdminAuthenticated(false);
-        localStorage.removeItem('adminToken');
-      }
-    };
-
-    checkAdminAuth();
   }, []);
 
   // Define available dashboards with their sub-sections for rotation
@@ -356,35 +308,13 @@ function App() {
   };
 
   const handleAdminAccess = () => {
-    if (isAdminAuthenticated) {
+    // Check if user is admin
+    if (user && user.isAdmin) {
       setCurrentDashboard('admin');
     } else {
-      setShowAdminLogin(true);
+      // If not admin, show an error or redirect
+      alert('You must be an admin to access this section. Please contact an administrator.');
     }
-  };
-
-  const handleAdminLoginSuccess = () => {
-    setIsAdminAuthenticated(true);
-    setShowAdminLogin(false);
-    setCurrentDashboard('admin');
-    // Clear the URL if we're on /admin/login
-    if (window.location.pathname === '/admin/login') {
-      window.history.replaceState({}, '', '/');
-    }
-  };
-
-  const handleAdminLoginCancel = () => {
-    setShowAdminLogin(false);
-    // Clear the URL if we're on /admin/login
-    if (window.location.pathname === '/admin/login') {
-      window.history.replaceState({}, '', '/');
-    }
-  };
-
-  const handleAdminLogout = () => {
-    localStorage.removeItem('adminToken');
-    setIsAdminAuthenticated(false);
-    setCurrentDashboard('todays-games');
   };
 
   const handleSettingsAccess = () => {
@@ -476,8 +406,8 @@ function App() {
           "Event Slides"
         );
       case 'admin':
-        if (!isAdminAuthenticated) {
-          // If somehow they get here without auth, redirect to todays-games
+        if (!user || !user.isAdmin) {
+          // If somehow they get here without admin access, redirect to todays-games
           setCurrentDashboard('todays-games');
           return null;
         }
@@ -486,13 +416,12 @@ function App() {
             preferences={preferences}
             onSave={handleSaveSettings}
             onCancel={handleCancelSettings}
-            onLogout={handleAdminLogout}
           />,
           "Admin Panel"
         );
       case 'settings':
         // Backward compatibility - redirect to admin with auth check
-        if (!isAdminAuthenticated) {
+        if (!user || !user.isAdmin) {
           setCurrentDashboard('todays-games');
           return null;
         }
@@ -501,7 +430,6 @@ function App() {
             preferences={preferences}
             onSave={handleSaveSettings}
             onCancel={handleCancelSettings}
-            onLogout={handleAdminLogout}
           />,
           "Settings"
         );
@@ -543,14 +471,6 @@ function App() {
           {renderDashboard()}
         </Suspense>
       </Layout>
-      {showAdminLogin && (
-        <Suspense fallback={null}>
-          <AdminLogin
-            onLoginSuccess={handleAdminLoginSuccess}
-            onCancel={handleAdminLoginCancel}
-          />
-        </Suspense>
-      )}
       {showUserSettings && (
         <Suspense fallback={null}>
           <UserSettings
