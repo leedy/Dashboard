@@ -187,8 +187,8 @@ function DisneyRideSelection({ preferences, onSave }) {
 
   const handleResetToDefaults = async () => {
     try {
-      // Fetch default-user preferences
-      const response = await axios.get('/api/preferences?userId=default-user');
+      // Fetch default preferences using the public endpoint
+      const response = await axios.get('/api/preferences/defaults');
       const defaultExcluded = response.data.disneyExcludedRides || [];
       const defaultKnown = response.data.disneyKnownRides || [];
 

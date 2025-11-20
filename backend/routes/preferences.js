@@ -159,4 +159,21 @@ router.post('/reset', userAuth, async (req, res) => {
   }
 });
 
+// Get default preferences (accessible to all authenticated users)
+router.get('/defaults', userAuth, async (req, res) => {
+  try {
+    let preferences = await Preferences.findOne({ userId: 'default-user' });
+
+    if (!preferences) {
+      preferences = new Preferences({ userId: 'default-user' });
+      await preferences.save();
+    }
+
+    res.json(preferences);
+  } catch (error) {
+    console.error('Error fetching default preferences:', error);
+    res.status(500).json({ error: 'Failed to fetch default preferences' });
+  }
+});
+
 module.exports = router;
