@@ -327,6 +327,7 @@ This document tracks potential improvements and feature additions for the Dashbo
 - Recurring events
 - Countdown sharing via URL
 - Past event archive
+- Keyboard navigation for multiple countdowns (left/right arrow keys)
 
 ### New Dashboard Ideas
 - **Calendar Integration:** Google Calendar, Outlook, iCal sync
