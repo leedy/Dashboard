@@ -106,62 +106,69 @@ export const usePreferences = () => {
 
   // Update individual preference sections
   const updatePreferences = async (updates) => {
-    const updated = {
-      ...preferences,
-      ...updates
-    };
-    await savePreferences(updated);
+    try {
+      // Fetch latest preferences from backend to avoid race conditions
+      const response = await axios.get('/api/preferences');
+      const latestPreferences = response.data;
+
+      // Merge with latest data
+      const updated = {
+        ...latestPreferences,
+        ...updates
+      };
+      await savePreferences(updated);
+    } catch (error) {
+      // If fetch fails, fall back to local state
+      console.warn('Failed to fetch latest preferences, using local state:', error);
+      const updated = {
+        ...preferences,
+        ...updates
+      };
+      await savePreferences(updated);
+    }
   };
 
   const updateFavoriteNHLTeam = async (team) => {
-    const updated = {
-      ...preferences,
-      favoriteNHLTeam: team
-    };
-    await savePreferences(updated);
+    await updatePreferences({ favoriteNHLTeam: team });
   };
 
   const updateFavoriteNFLTeam = async (team) => {
-    const updated = {
-      ...preferences,
-      favoriteNFLTeam: team
-    };
-    await savePreferences(updated);
+    await updatePreferences({ favoriteNFLTeam: team });
   };
 
   const updateWeatherLocation = async (location) => {
-    const updated = {
-      ...preferences,
-      weatherLocation: location
-    };
-    await savePreferences(updated);
+    await updatePreferences({ weatherLocation: location });
   };
 
   const updateDefaultDashboard = async (dashboard) => {
-    const updated = {
-      ...preferences,
-      defaultDashboard: dashboard
-    };
-    await savePreferences(updated);
+    await updatePreferences({ defaultDashboard: dashboard });
   };
 
   const updateDisplaySettings = async (settings) => {
-    const updated = {
-      ...preferences,
-      displaySettings: {
-        ...preferences.displaySettings,
-        ...settings
-      }
-    };
-    await savePreferences(updated);
+    try {
+      // Fetch latest to get current displaySettings
+      const response = await axios.get('/api/preferences');
+      const latestPreferences = response.data;
+
+      await updatePreferences({
+        displaySettings: {
+          ...latestPreferences.displaySettings,
+          ...settings
+        }
+      });
+    } catch (error) {
+      console.warn('Failed to fetch latest for display settings, using local state:', error);
+      await updatePreferences({
+        displaySettings: {
+          ...preferences.displaySettings,
+          ...settings
+        }
+      });
+    }
   };
 
   const updateCountdownEvent = async (event) => {
-    const updated = {
-      ...preferences,
-      countdownEvent: event
-    };
-    await savePreferences(updated);
+    await updatePreferences({ countdownEvent: event });
   };
 
   // Reset to defaults
