@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A modern, responsive dashboard application displaying real-time sports data (NHL, NFL, MLB), Disney World wait times, and entertainment information. Designed for TV displays and home dashboards.
+A modern, responsive dashboard application displaying real-time sports data (NHL, NFL, MLB), Disney World wait times, weather forecasts, stock market indices, and entertainment information. Designed for TV displays and home dashboards.
 
 ## Architecture
 
@@ -176,6 +176,10 @@ Frontend requests data every 30 seconds. Backend serves from cache or refreshes 
 - `/api/nfl/*` → site.api.espn.com
 - `/api/mlb/*` → site.api.espn.com
 - `/api/queue-times/*` → queue-times.com
+- `/api/stocks/quotes` → Yahoo Finance (major indices)
+- `/api/news/flyers` → Google News RSS (Flyers news)
+- `/api/news/team/:teamName` → Google News RSS (any team)
+- `/api/tmdb/*` → api.themoviedb.org
 
 Routes are in `backend/routes/`. Each route file exports an Express router.
 
@@ -184,10 +188,19 @@ Routes are in `backend/routes/`. Each route file exports an Express router.
 **Dashboard Views** (`components/dashboards/`):
 - `TodaysGames.jsx` - NHL/NFL/MLB live scores
 - `Standings.jsx` - NHL/NFL division standings
+- `UpcomingGames.jsx` - Scheduled games calendar
 - `DisneyDashboard.jsx` - Wait times + crowd levels
 - `MoviesDashboard.jsx` - Upcoming movie releases
-- `PhotoGallery.jsx` - Photo management
+- `WeatherDashboard.jsx` - Current conditions + 7-day forecast + AQI
+- `CarWashDashboard.jsx` - Car wash recommendation based on weather
+- `StocksDashboard.jsx` - Major stock indices (S&P 500, Dow, Nasdaq, Russell)
+- `ISSTracker.jsx` - Real-time ISS position
+- `FlyersNews.jsx` - Philadelphia Flyers news feed
+- `CountdownDashboard.jsx` - Custom countdown timers
+- `PhotoSlideshow.jsx` / `EventSlideshow.jsx` - Photo displays
 - `PlayerStats.jsx` - NHL player statistics modal
+- `GoalDetailsModal.jsx` - NHL goal details popup
+- `TeamModal.jsx` - Team information popup
 
 **Layout** (`components/layout/`):
 - `Layout.jsx` - Fixed header navigation with dashboard switcher
@@ -213,16 +226,24 @@ Routes are in `backend/routes/`. Each route file exports an Express router.
 
 ## External APIs
 
-**No API key required:**
-- NHL API (api-web.nhle.com)
-- ESPN NFL/MLB API (site.api.espn.com)
-- Queue-Times API (queue-times.com)
-- ThemeParks.Wiki API (api.themeparks.wiki)
+**Backend Proxied (no API key required):**
+- NHL API (api-web.nhle.com) - Game scores, standings, player stats
+- ESPN NFL/MLB API (site.api.espn.com) - Game scores, standings
+- Queue-Times API (queue-times.com) - Disney wait times
+- ThemeParks.Wiki API (api.themeparks.wiki) - Park hours
+- Yahoo Finance (via yahoo-finance2 npm package) - Stock market indices
+- Google News RSS (news.google.com/rss/search) - Team news feeds
 
-**API key required:**
-- TMDb API - Movies data (configured in Admin System Settings)
+**Backend Proxied (API key required):**
+- TMDb API (api.themoviedb.org) - Movies data (configured in Admin System Settings)
 
-All external requests are proxied through backend to avoid CORS and enable caching.
+**Frontend Direct Calls (no API key required):**
+- Open-Meteo Weather API (api.open-meteo.com/v1/forecast) - Weather forecasts
+- Open-Meteo Air Quality API (air-quality-api.open-meteo.com/v1/air-quality) - AQI data
+- Open-Meteo Geocoding API (geocoding-api.open-meteo.com/v1/search) - Location search
+- ISS Tracker API (api.wheretheiss.at/v1/satellites/25544) - ISS position
+
+Most external requests are proxied through backend to avoid CORS and enable caching. Weather and ISS APIs are called directly from frontend since they don't have CORS restrictions.
 
 ## Authentication System
 
@@ -295,6 +316,7 @@ In production, backend serves the built frontend from `dist/` folder. No separat
 - Favorite team highlighting (always shown first)
 - Player statistics (NHL)
 - Goal details modal (NHL)
+- Team news feeds (via Google News RSS)
 
 **Disney Dashboard:**
 - Real-time wait times for all 4 parks
@@ -302,9 +324,22 @@ In production, backend serves the built frontend from `dist/` folder. No separat
 - Crowd level indicator (Low/Moderate/High/Very High)
 - Two view modes: By Land or By Wait Time
 
-**Other:**
-- Upcoming movie releases
-- Photo gallery with upload
+**Weather Dashboard:**
+- Current conditions with feels-like temperature
+- 7-day forecast with precipitation probability
+- Air Quality Index (AQI) current and forecast
+- Moon phase display for nighttime
+- Location configurable in user preferences
+
+**Other Dashboards:**
+- Upcoming movie releases (TMDb)
+- Stock market indices (S&P 500, Dow, Nasdaq, Russell 2000)
+- ISS real-time position tracker
+- Car wash recommendation (based on 6-day rain forecast)
+- Custom countdown timers
+- Photo slideshows (family photos, event slides)
+
+**System Features:**
 - Multi-user authentication with personal preferences
 - Separate user settings and admin panel
 - Usage analytics tracking
