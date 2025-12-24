@@ -25,7 +25,8 @@ function UserPhotos() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`/api/photos?category=${category}`);
+      // Use metadata=true for faster listing (excludes heavy base64 data)
+      const response = await axios.get(`/api/photos?category=${category}&metadata=true`);
       setPhotos(response.data);
     } catch (err) {
       console.error('Error fetching photos:', err);
@@ -274,7 +275,7 @@ function UserPhotos() {
             <div key={photo._id} className="photo-card">
               <div className="photo-thumbnail">
                 <img
-                  src={photo.base64Data}
+                  src={photo.base64Data || `/api/photos/${photo._id}/image`}
                   alt={photo.filename}
                   loading="lazy"
                 />

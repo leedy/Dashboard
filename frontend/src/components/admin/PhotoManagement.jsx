@@ -26,8 +26,8 @@ function PhotoManagement() {
     setLoading(true);
     setError(null);
     try {
-      // Token is automatically included via axios defaults from AuthContext
-      const response = await axios.get(`/api/admin/photos?category=${category}`);
+      // Use metadata=true for faster listing (excludes heavy base64 data)
+      const response = await axios.get(`/api/admin/photos?category=${category}&metadata=true`);
       setPhotos(response.data);
     } catch (err) {
       console.error('Error fetching photos:', err);
@@ -283,7 +283,7 @@ function PhotoManagement() {
             <div key={photo._id} className="photo-card">
               <div className="photo-thumbnail">
                 <img
-                  src={photo.base64Data}
+                  src={photo.base64Data || `/api/admin/photos/${photo._id}/image`}
                   alt={photo.filename}
                   loading="lazy"
                 />

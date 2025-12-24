@@ -86,7 +86,7 @@ router.post('/upload', userAuth, upload.array('photos', 20), async (req, res) =>
 // Get all photos or filter by category for authenticated user
 router.get('/', userAuth, async (req, res) => {
   try {
-    const { category } = req.query;
+    const { category, metadata } = req.query;
 
     let query = {};
 
@@ -102,8 +102,13 @@ router.get('/', userAuth, async (req, res) => {
       query = { userId: req.user.userId };
     }
 
-    // Get photos with base64 data (needed for thumbnails)
+    // If metadata=true, exclude heavy base64Data for faster listing
+    const selectFields = metadata === 'true'
+      ? '-base64Data'
+      : undefined;
+
     const photos = await Photo.find(query)
+      .select(selectFields)
       .sort({ uploadDate: -1 });
 
     res.json(photos);
@@ -131,6 +136,38 @@ router.get('/:id', userAuth, async (req, res) => {
   } catch (error) {
     console.error('Error fetching photo:', error);
     res.status(500).json({ error: 'Failed to fetch photo' });
+  }
+});
+
+// Get photo as image (for use in img src)
+router.get('/:id/image', userAuth, async (req, res) => {
+  try {
+    const photo = await Photo.findById(req.params.id);
+
+    if (!photo) {
+      return res.status(404).send('Photo not found');
+    }
+
+    // Allow access to system assets (dashboard-assets) or own photos
+    if (photo.userId !== 'system' && photo.userId !== req.user.userId) {
+      return res.status(403).send('Not authorized');
+    }
+
+    // Extract the actual base64 data (remove data:image/...;base64, prefix)
+    const matches = photo.base64Data.match(/^data:(.+);base64,(.+)$/);
+    if (!matches) {
+      return res.status(500).send('Invalid image data');
+    }
+
+    const contentType = matches[1];
+    const imageData = Buffer.from(matches[2], 'base64');
+
+    res.set('Content-Type', contentType);
+    res.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+    res.send(imageData);
+  } catch (error) {
+    console.error('Error fetching photo image:', error);
+    res.status(500).send('Failed to fetch photo');
   }
 });
 
