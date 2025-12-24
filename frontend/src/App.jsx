@@ -55,8 +55,8 @@ function App() {
     const checkPhotoCounts = async () => {
       try {
         const [familyResponse, eventResponse] = await Promise.all([
-          axios.get('/api/photos?category=family-photos'),
-          axios.get('/api/photos?category=event-slides')
+          axios.get('/api/photos?category=family-photos&metadata=true'),
+          axios.get('/api/photos?category=event-slides&metadata=true')
         ]);
 
         setPhotoCounts({
