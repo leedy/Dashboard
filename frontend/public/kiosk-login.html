@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Kiosk Login</title>
+  <style>
+    body {
+      background: #1a1a2e;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: sans-serif;
+      flex-direction: column;
+    }
+    .error {
+      color: #ff6b6b;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="status">Loading Dashboard...</div>
+  <div id="error" class="error"></div>
+
+  <script>
+    // Load token from separate config file (not committed to git)
+    fetch('/kiosk-token.json')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Token file not found. Run: node backend/scripts/generateKioskToken.js <username> <password> > frontend/public/kiosk-token.json');
+        }
+        return response.json();
+      })
+      .then(config => {
+        if (config.token) {
+          localStorage.setItem('userToken', config.token);
+          window.location.href = '/';
+        } else {
+          throw new Error('No token found in config file');
+        }
+      })
+      .catch(error => {
+        document.getElementById('status').textContent = 'Kiosk login failed';
+        document.getElementById('error').textContent = error.message;
+        console.error('Kiosk login error:', error);
+      });
+  </script>
+</body>
+</html>

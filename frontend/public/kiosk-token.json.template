@@ -1,0 +1,5 @@
+{
+  "token": "YOUR_TOKEN_HERE",
+  "_comment": "Generate this file by running: cd backend && node scripts/generateKioskToken.js <username> <password>",
+  "_instructions": "Then create kiosk-token.json with: {\"token\": \"<output from above command>\"}"
+}

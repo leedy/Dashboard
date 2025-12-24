@@ -16,10 +16,16 @@ dist-ssr
 .env
 .env.local
 server/.env
+backend/.env
+
+# Kiosk token (contains auth token - do not commit)
+frontend/public/kiosk-token.json
 
 # But keep templates
 !.env.local.template
 !server/.env.template
+!backend/.env.template
+!frontend/public/kiosk-token.json.template
 
 # Editor directories and files
 .vscode/*
