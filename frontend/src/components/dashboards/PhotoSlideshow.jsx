@@ -117,6 +117,17 @@ function PhotoSlideshow() {
 
   const currentPhoto = photos[currentIndex];
 
+  // Safety check - if currentPhoto is undefined, show loading state
+  if (!currentPhoto) {
+    return (
+      <div className="slideshow-container">
+        <div className="slideshow-message">
+          <p>Loading photos...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="slideshow-container">
       <div className={`slideshow-image ${fade ? 'fade-in' : 'fade-out'}`}>
