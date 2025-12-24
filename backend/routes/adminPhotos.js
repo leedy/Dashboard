@@ -131,8 +131,28 @@ router.get('/:id', adminAuth, async (req, res) => {
 });
 
 // Admin: Get photo as image (for use in img src)
-router.get('/:id/image', adminAuth, async (req, res) => {
+// Supports token via query param since img tags can't send Authorization header
+router.get('/:id/image', async (req, res) => {
   try {
+    // Get token from query param or header
+    const token = req.query.token || req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+      return res.status(401).send('Authentication required');
+    }
+
+    // Verify token and check admin
+    const jwt = require('jsonwebtoken');
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (!decoded.isAdmin) {
+        return res.status(403).send('Admin access required');
+      }
+    } catch (err) {
+      return res.status(401).send('Invalid token');
+    }
+
     const photo = await Photo.findById(req.params.id);
 
     if (!photo) {

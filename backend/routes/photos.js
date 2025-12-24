@@ -140,8 +140,25 @@ router.get('/:id', userAuth, async (req, res) => {
 });
 
 // Get photo as image (for use in img src)
-router.get('/:id/image', userAuth, async (req, res) => {
+// Supports token via query param since img tags can't send Authorization header
+router.get('/:id/image', async (req, res) => {
   try {
+    // Get token from query param or header
+    const token = req.query.token || req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+      return res.status(401).send('Authentication required');
+    }
+
+    // Verify token
+    const jwt = require('jsonwebtoken');
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(401).send('Invalid token');
+    }
+
     const photo = await Photo.findById(req.params.id);
 
     if (!photo) {
@@ -149,7 +166,7 @@ router.get('/:id/image', userAuth, async (req, res) => {
     }
 
     // Allow access to system assets (dashboard-assets) or own photos
-    if (photo.userId !== 'system' && photo.userId !== req.user.userId) {
+    if (photo.userId !== 'system' && photo.userId !== decoded.userId) {
       return res.status(403).send('Not authorized');
     }
 

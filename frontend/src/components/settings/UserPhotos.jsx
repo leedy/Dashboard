@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from '../../contexts/AuthContext';
 import './UserPhotos.css';
 
 const CATEGORIES = [
@@ -16,6 +17,7 @@ function UserPhotos() {
   const [uploadError, setUploadError] = useState(null);
   const [uploadProgress, setUploadProgress] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
+  const { token } = useAuth();
 
   useEffect(() => {
     fetchPhotos(activeCategory);
@@ -275,7 +277,7 @@ function UserPhotos() {
             <div key={photo._id} className="photo-card">
               <div className="photo-thumbnail">
                 <img
-                  src={photo.base64Data || `/api/photos/${photo._id}/image`}
+                  src={photo.base64Data || `/api/photos/${photo._id}/image?token=${token}`}
                   alt={photo.filename}
                   loading="lazy"
                 />
