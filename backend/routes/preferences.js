@@ -49,10 +49,6 @@ router.get('/', async (req, res) => {
       const jwt = require('jsonwebtoken');
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      if (decoded.isAdmin) {
-        return res.status(403).json({ error: 'User token required (not admin token)' });
-      }
-
       let preferences = await Preferences.findOne({ userId: decoded.userId });
 
       // If no preferences exist, create default ones
@@ -119,10 +115,6 @@ router.put('/', async (req, res) => {
     try {
       const jwt = require('jsonwebtoken');
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      if (decoded.isAdmin) {
-        return res.status(403).json({ error: 'User token required (not admin token)' });
-      }
 
       let preferences = await Preferences.findOne({ userId: decoded.userId });
 
