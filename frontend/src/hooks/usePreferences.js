@@ -55,9 +55,9 @@ export const usePreferences = () => {
   const [loading, setLoading] = useState(true);
   const { isAuthenticated, loading: authLoading } = useAuth();
 
-  // Load preferences from backend on initial mount
+  // Load preferences from backend on initial mount and poll for updates
   useEffect(() => {
-    const fetchPreferences = async () => {
+    const fetchPreferences = async (isPolling = false) => {
       // Wait for auth to finish loading
       if (authLoading) {
         return;
@@ -66,13 +66,19 @@ export const usePreferences = () => {
       // Only fetch if user is authenticated
       if (!isAuthenticated) {
         setPreferences(DEFAULT_PREFERENCES);
-        setLoading(false);
+        if (!isPolling) setLoading(false);
         return;
       }
 
       try {
         const response = await axios.get('/api/preferences');
-        setPreferences(response.data);
+        // Only update if server data is newer (compare updatedAt timestamps)
+        const serverUpdatedAt = new Date(response.data.updatedAt).getTime();
+        const localUpdatedAt = preferences.updatedAt ? new Date(preferences.updatedAt).getTime() : 0;
+
+        if (!isPolling || serverUpdatedAt > localUpdatedAt) {
+          setPreferences(response.data);
+        }
       } catch (error) {
         // Only log error if it's not a 401 (not authenticated)
         // Users who aren't logged in will just use default preferences
@@ -80,13 +86,24 @@ export const usePreferences = () => {
           console.error('Error loading preferences from backend:', error);
         }
         // Fall back to default preferences if backend is unavailable or user not authenticated
-        setPreferences(DEFAULT_PREFERENCES);
+        if (!isPolling) {
+          setPreferences(DEFAULT_PREFERENCES);
+        }
       } finally {
-        setLoading(false);
+        if (!isPolling) setLoading(false);
       }
     };
 
     fetchPreferences();
+
+    // Poll for preference updates every 30 seconds
+    const pollInterval = setInterval(() => {
+      if (isAuthenticated && !authLoading) {
+        fetchPreferences(true);
+      }
+    }, 30000);
+
+    return () => clearInterval(pollInterval);
   }, [isAuthenticated, authLoading]);
 
   // Save preferences to backend
