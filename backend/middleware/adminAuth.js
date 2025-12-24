@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-
 const adminAuth = async (req, res, next) => {
   try {
+    const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+
     // Get token from header
     const authHeader = req.headers.authorization;
 

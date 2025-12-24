@@ -1,9 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const Parser = require('rss-parser');
 const path = require('path');
-require('dotenv').config();
 
 const connectDB = require('./config/database');
 const preferencesRoutes = require('./routes/preferences');
