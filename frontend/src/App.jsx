@@ -37,6 +37,8 @@ function App() {
     'event-slides': 0
   })
   const [showUserSettings, setShowUserSettings] = useState(false)
+  // Counter to force rotation timer restart on user interaction
+  const [rotationResetCounter, setRotationResetCounter] = useState(0)
 
   // Check which sports have games available
   const availableSports = useAvailableSports()
@@ -172,11 +174,11 @@ function App() {
     setCurrentDashboard(preferences.defaultDashboard);
   }, [preferences.defaultDashboard]);
 
-  // Ref to store rotation interval ID for resetting
-  const rotationIntervalRef = useRef(null);
-  const rotationTimeoutRef = useRef(null);
+  // Ref for debounce timeout on user interaction
+  const rotationDebounceRef = useRef(null);
 
   // Auto-rotate dashboards with sub-section support
+  // This single effect manages all rotation - restarts when rotationResetCounter changes (user interaction)
   useEffect(() => {
     if (!preferences.displaySettings?.autoRotate || currentDashboard === 'admin') {
       return;
@@ -194,8 +196,8 @@ function App() {
         const currentSubIndex = currentDashboardConfig.subSections.indexOf(currentSubSection);
         const isLastSubSection = currentSubIndex === currentDashboardConfig.subSections.length - 1;
 
-        if (currentSubSection === null) {
-          // Initialize to first sub-section if not set
+        if (currentSubSection === null || currentSubIndex === -1) {
+          // Initialize to first sub-section if not set or invalid
           setCurrentSubSection(currentDashboardConfig.subSections[0]);
         } else if (isLastSubSection) {
           // Move to next dashboard and set its first sub-section (if any)
@@ -206,8 +208,7 @@ function App() {
           setCurrentSubSection(nextDashboard.subSections ? nextDashboard.subSections[0] : null);
         } else {
           // Move to next sub-section in current dashboard
-          const nextSubIndex = currentSubIndex === -1 ? 0 : currentSubIndex + 1;
-          setCurrentSubSection(currentDashboardConfig.subSections[nextSubIndex]);
+          setCurrentSubSection(currentDashboardConfig.subSections[currentSubIndex + 1]);
         }
       } else {
         // No sub-sections, just move to next dashboard
@@ -221,82 +222,43 @@ function App() {
 
     // Start rotation timer
     const intervalId = setInterval(rotateToNext, rotateInterval);
-    rotationIntervalRef.current = intervalId;
 
     return () => {
       clearInterval(intervalId);
-      rotationIntervalRef.current = null;
     };
-  }, [preferences.displaySettings?.autoRotate, preferences.displaySettings?.rotateInterval, preferences.displaySettings?.rotationDashboards, currentDashboard, currentSubSection, dashboardRotation]);
+  }, [preferences.displaySettings?.autoRotate, preferences.displaySettings?.rotateInterval, preferences.displaySettings?.rotationDashboards, currentDashboard, currentSubSection, dashboardRotation, rotationResetCounter]);
 
-  // Reset rotation timer on user interaction
+  // Reset rotation timer on user interaction by incrementing the reset counter
+  // This causes the rotation effect above to restart with a fresh timer
   useEffect(() => {
     if (!preferences.displaySettings?.autoRotate || currentDashboard === 'admin') {
       return;
     }
 
-    const resetRotationTimer = () => {
-      // Clear existing interval
-      if (rotationIntervalRef.current) {
-        clearInterval(rotationIntervalRef.current);
+    const handleUserInteraction = () => {
+      // Debounce rapid interactions
+      if (rotationDebounceRef.current) {
+        clearTimeout(rotationDebounceRef.current);
       }
-
-      // Clear any pending timeout
-      if (rotationTimeoutRef.current) {
-        clearTimeout(rotationTimeoutRef.current);
-      }
-
-      // Set a short timeout to restart the interval
-      // This debounces rapid clicks
-      rotationTimeoutRef.current = setTimeout(() => {
-        const rotateInterval = (preferences.displaySettings?.rotateInterval || 30) * 1000;
-
-        const rotateToNext = () => {
-          const currentDashboardIndex = dashboardRotation.findIndex(d => d.dashboard === currentDashboard);
-          const currentDashboardConfig = dashboardRotation[currentDashboardIndex];
-
-          if (currentDashboardConfig?.subSections && currentDashboardConfig.subSections.length > 0) {
-            const currentSubIndex = currentDashboardConfig.subSections.indexOf(currentSubSection);
-            const isLastSubSection = currentSubIndex === currentDashboardConfig.subSections.length - 1;
-
-            if (currentSubSection === null) {
-              setCurrentSubSection(currentDashboardConfig.subSections[0]);
-            } else if (isLastSubSection) {
-              const nextDashboardIndex = (currentDashboardIndex + 1) % dashboardRotation.length;
-              const nextDashboard = dashboardRotation[nextDashboardIndex];
-              setCurrentDashboard(nextDashboard.dashboard);
-              setCurrentSubSection(nextDashboard.subSections ? nextDashboard.subSections[0] : null);
-            } else {
-              const nextSubIndex = currentSubIndex === -1 ? 0 : currentSubIndex + 1;
-              setCurrentSubSection(currentDashboardConfig.subSections[nextSubIndex]);
-            }
-          } else {
-            const nextDashboardIndex = (currentDashboardIndex + 1) % dashboardRotation.length;
-            const nextDashboard = dashboardRotation[nextDashboardIndex];
-            setCurrentDashboard(nextDashboard.dashboard);
-            setCurrentSubSection(nextDashboard.subSections ? nextDashboard.subSections[0] : null);
-          }
-        };
-
-        const newIntervalId = setInterval(rotateToNext, rotateInterval);
-        rotationIntervalRef.current = newIntervalId;
-      }, 300); // 300ms debounce
+      rotationDebounceRef.current = setTimeout(() => {
+        setRotationResetCounter(c => c + 1);
+      }, 300);
     };
 
     // Add event listeners for user interaction
-    document.addEventListener('click', resetRotationTimer);
-    document.addEventListener('touchstart', resetRotationTimer);
-    document.addEventListener('keydown', resetRotationTimer);
+    document.addEventListener('click', handleUserInteraction);
+    document.addEventListener('touchstart', handleUserInteraction);
+    document.addEventListener('keydown', handleUserInteraction);
 
     return () => {
-      document.removeEventListener('click', resetRotationTimer);
-      document.removeEventListener('touchstart', resetRotationTimer);
-      document.removeEventListener('keydown', resetRotationTimer);
-      if (rotationTimeoutRef.current) {
-        clearTimeout(rotationTimeoutRef.current);
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+      if (rotationDebounceRef.current) {
+        clearTimeout(rotationDebounceRef.current);
       }
     };
-  }, [preferences.displaySettings?.autoRotate, preferences.displaySettings?.rotateInterval, currentDashboard, currentSubSection, dashboardRotation]);
+  }, [preferences.displaySettings?.autoRotate, currentDashboard]);
 
   const handleSaveSettings = async (newPreferences) => {
     await updatePreferences(newPreferences);
