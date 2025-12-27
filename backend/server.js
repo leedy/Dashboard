@@ -1,9 +1,36 @@
 require('dotenv').config();
+const crypto = require('crypto');
+const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const Parser = require('rss-parser');
 const path = require('path');
+
+// Auto-generate JWT_SECRET if not set
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'your-secret-key-change-in-production') {
+  const generatedSecret = crypto.randomBytes(32).toString('hex');
+  process.env.JWT_SECRET = generatedSecret;
+
+  // Try to save to .env file for persistence
+  const envPath = path.join(__dirname, '.env');
+  try {
+    if (fs.existsSync(envPath)) {
+      let envContent = fs.readFileSync(envPath, 'utf8');
+      if (envContent.includes('JWT_SECRET=')) {
+        envContent = envContent.replace(/JWT_SECRET=.*/, `JWT_SECRET=${generatedSecret}`);
+      } else {
+        envContent += `\nJWT_SECRET=${generatedSecret}\n`;
+      }
+      fs.writeFileSync(envPath, envContent);
+      console.log('Generated and saved new JWT_SECRET to .env');
+    } else {
+      console.log('JWT_SECRET auto-generated for this session (create .env from .env.template to persist)');
+    }
+  } catch (err) {
+    console.log('JWT_SECRET auto-generated for this session (could not write to .env)');
+  }
+}
 
 const connectDB = require('./config/database');
 const preferencesRoutes = require('./routes/preferences');
