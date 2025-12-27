@@ -3,6 +3,18 @@ import './AdminSystemSettings.css';
 
 function AdminSystemSettings({ preferences, onSave }) {
   const [localPrefs, setLocalPrefs] = useState(preferences);
+  const [clearConfirm, setClearConfirm] = useState(false);
+
+  const handleClearLocalData = () => {
+    if (!clearConfirm) {
+      setClearConfirm(true);
+      return;
+    }
+    localStorage.clear();
+    sessionStorage.clear();
+    setClearConfirm(false);
+    window.location.href = '/login';
+  };
 
   useEffect(() => {
     setLocalPrefs(preferences);
@@ -48,7 +60,54 @@ function AdminSystemSettings({ preferences, onSave }) {
           </div>
         </div>
 
-        {/* Future system settings can go here */}
+        {/* Troubleshooting Section */}
+        <div className="system-settings-section">
+          <h3>Troubleshooting</h3>
+          <p className="section-description">
+            Tools for resolving common issues
+          </p>
+
+          <div className="setting-item">
+            <label>Clear Browser Data</label>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.5rem' }}>
+              <button
+                onClick={handleClearLocalData}
+                style={{
+                  padding: '0.5rem 1rem',
+                  backgroundColor: clearConfirm ? '#f44336' : '#ff9800',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem'
+                }}
+              >
+                {clearConfirm ? 'Click Again to Confirm' : 'Clear Local Data'}
+              </button>
+              {clearConfirm && (
+                <button
+                  onClick={() => setClearConfirm(false)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    backgroundColor: '#666',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+            <small style={{ color: '#888', fontSize: '0.85rem', marginTop: '0.5rem', display: 'block' }}>
+              Clears all cached data and authentication tokens. You will need to log in again.
+              Use this if you're experiencing issues with settings not saving or authentication problems.
+            </small>
+          </div>
+        </div>
+
         <div className="system-settings-info">
           <p>💡 <strong>Note:</strong> Changes to system settings affect all users of the dashboard.</p>
         </div>
