@@ -5,8 +5,7 @@ services:
     build: .
     container_name: dashboard-app
     restart: unless-stopped
-    ports:
-      - "3001:3001"
+    network_mode: host
     environment:
       # MongoDB Configuration
       - MONGO_HOST=${MONGO_HOST:-192.168.1.100}
