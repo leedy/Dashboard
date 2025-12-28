@@ -39,7 +39,7 @@ Dashboard/
 **Technology Stack:**
 - Frontend: React 19, Vite 7, Axios
 - Backend: Express, Node.js
-- Database: MongoDB (remote at 192.168.1.100:27017)
+- Database: MongoDB (configure host in backend/.env)
 - Auth: JWT tokens
 - Production: PM2 process manager
 
@@ -108,9 +108,9 @@ cp .env.template .env
 
 Required variables:
 ```env
-MONGO_HOST=192.168.1.100
+MONGO_HOST=your_mongodb_host    # e.g., localhost, 192.168.1.27, or your server IP
 MONGO_PORT=27017
-MONGO_USERNAME=dashboard_user
+MONGO_USERNAME=your_username
 MONGO_PASSWORD=your_password
 MONGO_DATABASE=dashboard
 BACKEND_PORT=3001
@@ -125,12 +125,13 @@ The frontend .env.local file is optional and primarily used for development over
 
 ## MongoDB Connection
 
-**CRITICAL**: This app connects to a **remote MongoDB server** at 192.168.1.100 (not localhost).
+This app connects to an external MongoDB server (not embedded).
 
-- MongoDB must be running on the network before starting the app
-- Connection configured in `backend/.env`
+- MongoDB must be running before starting the app
+- Connection configured in `backend/.env` (set MONGO_HOST to your server's IP or hostname)
 - Database name: `dashboard`
 - The app does NOT start or manage MongoDB
+- For Docker deployments: use `127.0.0.1` if MongoDB is on the same host
 
 **Collections:**
 - `preferences` - User settings and favorites
@@ -368,7 +369,7 @@ In production, backend serves the built frontend from `dist/` folder. No separat
 
 - Check backend terminal for errors
 - Verify `.env` exists with correct values
-- Test MongoDB connection: `mongosh mongodb://user:pass@192.168.1.100:27017/dashboard`
+- Test MongoDB connection: `mongosh mongodb://user:pass@your_mongo_host:27017/dashboard`
 - Check PM2 logs: `pm2 logs dashboard-backend`
 
 ### Debug Frontend Issues
@@ -381,7 +382,7 @@ In production, backend serves the built frontend from `dist/` folder. No separat
 ## Common Gotchas
 
 1. **Missing .env files**: Copy from templates in both `backend/` and root
-2. **MongoDB unreachable**: Ensure server at 192.168.1.100 is running and accessible
+2. **MongoDB unreachable**: Ensure MongoDB server is running and MONGO_HOST is correct in backend/.env
 3. **Stale production build**: Run `npm run build` after frontend changes
 4. **Wrong port**: Backend must be on 3001 (check `backend/.env` and `vite.config.js`)
 5. **PM2 not restarting**: Use `pm2 restart dashboard-backend` after code changes

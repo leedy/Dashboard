@@ -142,7 +142,7 @@ cp .env.template .env
 2. Edit `server/.env` with your MongoDB connection details:
 ```env
 # MongoDB Configuration
-MONGO_HOST=192.168.1.100      # Your MongoDB server IP (or localhost)
+MONGO_HOST=your_mongodb_host  # Your MongoDB server IP, hostname, or localhost
 MONGO_PORT=27017              # MongoDB port (default: 27017)
 MONGO_USERNAME=your_username  # Your MongoDB username
 MONGO_PASSWORD=your_password  # Your MongoDB password
@@ -151,6 +151,8 @@ MONGO_DATABASE=dashboard      # Database name
 # Backend Server Configuration
 BACKEND_PORT=3001             # Backend server port
 ```
+
+**Note:** For Docker deployments on the same host as MongoDB, use `127.0.0.1` as MONGO_HOST.
 
 **Note**: The MongoDB configuration is stored in `server/.env` (backend), not in the root directory.
 
@@ -238,7 +240,7 @@ Your Computer                    Your MongoDB Server (e.g., Unraid)
 │         ↓               │      │                              │
 │  Backend (Express)      │──────┼─────> MongoDB                │
 │  Port: 3001             │      │       Port: 27017            │
-│                         │      │       IP: 192.168.1.100      │
+│                         │      │       IP: <your_mongo_host>  │
 │  What npm run dev:all   │      │                              │
 │  actually starts ↑      │      │  Must already be running!    │
 │                         │      │                              │
@@ -264,12 +266,12 @@ Your Computer                    Your MongoDB Server (e.g., Unraid)
 
 ✅ **Works:** When you're on the same network as your MongoDB server
 ```
-You're home → Same WiFi → Can reach 192.168.1.100 → ✅ App works
+You're home → Same WiFi → Can reach your MongoDB server → ✅ App works
 ```
 
 ❌ **Doesn't Work:** When you're away from home
 ```
-You're at coffee shop → Different network → Can't reach 192.168.1.100 → ❌ App fails
+You're at coffee shop → Different network → Can't reach your MongoDB server → ❌ App fails
 ```
 
 ### Options for Remote Access
