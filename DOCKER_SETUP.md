@@ -47,6 +47,12 @@ Scroll down to **Environment variables** and add:
 | `MONGO_PASSWORD` | your_password | Your MongoDB password |
 | `MONGO_DATABASE` | `dashboard` | Database name |
 
+**Optional variables:**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BACKEND_PORT` | `3001` | Port the app runs on (change if 3001 is in use) |
+
 **Note:** If MongoDB is on a different server, use that server's IP address instead of `127.0.0.1`.
 
 ### Step 4: Deploy
@@ -57,7 +63,7 @@ Scroll down to **Environment variables** and add:
 
 ### Step 5: Access the App
 
-Open `http://your-server-ip:3001` in your browser.
+Open `http://your-server-ip:3001` in your browser (or your custom `BACKEND_PORT` if changed).
 
 ## Updating the App
 
@@ -148,7 +154,7 @@ services:
       - MONGO_USERNAME=${MONGO_USERNAME:-dashboard_user}
       - MONGO_PASSWORD=${MONGO_PASSWORD:-changeme}
       - MONGO_DATABASE=${MONGO_DATABASE:-dashboard}
-      - BACKEND_PORT=3001
+      - BACKEND_PORT=${BACKEND_PORT:-3001}
       - JWT_SECRET=${JWT_SECRET:-auto-generated-if-not-set}
 ```
 

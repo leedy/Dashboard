@@ -14,5 +14,5 @@ services:
       - MONGO_PASSWORD=${MONGO_PASSWORD:-changeme}
       - MONGO_DATABASE=${MONGO_DATABASE:-dashboard}
       # Backend Configuration
-      - BACKEND_PORT=3001
+      - BACKEND_PORT=${BACKEND_PORT:-3001}
       - JWT_SECRET=${JWT_SECRET:-auto-generated-if-not-set}
