@@ -17,6 +17,7 @@ dist-ssr
 .env.local
 server/.env
 backend/.env
+docker.env
 
 # Kiosk token (contains auth token - do not commit)
 frontend/public/kiosk-token.json

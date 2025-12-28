@@ -6,6 +6,9 @@ services:
     container_name: dashboard-app
     restart: unless-stopped
     network_mode: host
+    env_file:
+      - path: ./docker.env
+        required: false
     environment:
       # MongoDB Configuration
       - MONGO_HOST=${MONGO_HOST:-127.0.0.1}

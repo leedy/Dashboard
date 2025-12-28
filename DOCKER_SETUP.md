@@ -17,6 +17,7 @@ The Docker deployment uses three files in the repository root:
 |------|---------|
 | `Dockerfile` | Instructions for building the app image |
 | `docker-compose.yml` | Configuration for running the container |
+| `docker.env.example` | Template for environment variables |
 | `.dockerignore` | Files to exclude from the build |
 
 ## Deployment via Portainer
@@ -37,6 +38,24 @@ The Docker deployment uses three files in the repository root:
 
 ### Step 3: Set Environment Variables
 
+You have two options for setting environment variables:
+
+#### Option A: Use an env file (Recommended for reuse)
+
+1. Copy `docker.env.example` to `docker.env` on your server
+2. Edit `docker.env` with your actual values
+3. The docker-compose.yml will automatically load it
+
+```bash
+# On your server, in the cloned repo directory:
+cp docker.env.example docker.env
+nano docker.env  # Edit with your values
+```
+
+**Note:** `docker.env` is git-ignored so your credentials won't be committed.
+
+#### Option B: Set in Portainer UI (Manual each time)
+
 Scroll down to **Environment variables** and add:
 
 | Variable | Value | Description |
@@ -47,7 +66,7 @@ Scroll down to **Environment variables** and add:
 | `MONGO_PASSWORD` | your_password | Your MongoDB password |
 | `MONGO_DATABASE` | `dashboard` | Database name |
 
-**Optional variables:**
+#### Optional variables (both options)
 
 | Variable | Default | Description |
 |----------|---------|-------------|
