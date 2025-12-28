@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  dashboard:
+    build: .
+    container_name: dashboard-app
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      # MongoDB Configuration
+      - MONGO_HOST=${MONGO_HOST:-192.168.1.100}
+      - MONGO_PORT=${MONGO_PORT:-27017}
+      - MONGO_USERNAME=${MONGO_USERNAME:-dashboard_user}
+      - MONGO_PASSWORD=${MONGO_PASSWORD:-changeme}
+      - MONGO_DATABASE=${MONGO_DATABASE:-dashboard}
+      # Backend Configuration
+      - BACKEND_PORT=3001
+      - JWT_SECRET=${JWT_SECRET:-auto-generated-if-not-set}
