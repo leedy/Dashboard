@@ -393,6 +393,7 @@ In production, backend serves the built frontend from `dist/` folder. No separat
 
 Additional documentation in repository:
 - `README.md` - Full project documentation
+- `DOCKER_SETUP.md` - Docker/Portainer deployment guide
 - `RASPBERRY_PI_SETUP.md` - Raspberry Pi deployment guide
 - `KIOSK_MODE.md` - Kiosk mode configuration
 - `ROADMAP.md` - Future feature plans
