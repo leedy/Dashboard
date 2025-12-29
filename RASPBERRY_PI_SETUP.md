@@ -133,7 +133,7 @@ nano .env
 
 **For Remote MongoDB (Option A):**
 ```env
-MONGO_HOST=192.168.1.100  # Replace with your MongoDB server IP
+MONGO_HOST=<your-mongo-host>  # Replace with your MongoDB server IP
 MONGO_PORT=27017
 MONGO_USERNAME=admin
 MONGO_PASSWORD=your_password
@@ -572,8 +572,8 @@ sudo systemctl restart dashboard-frontend
 sudo systemctl status mongodb
 
 # For remote MongoDB
-ping 192.168.1.100  # Replace with your MongoDB IP
-telnet 192.168.1.100 27017  # Test if port is accessible
+ping <your-mongo-host>  # Replace with your MongoDB IP
+telnet <your-mongo-host> 27017  # Test if port is accessible
 ```
 
 **Check environment variables:**

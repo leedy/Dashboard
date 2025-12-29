@@ -258,7 +258,7 @@ Your Computer                    Your MongoDB Server (e.g., Unraid)
 **What You Need:**
 - A MongoDB server must be **already running** and accessible at the IP address specified in `server/.env`
 - The MongoDB server can be on:
-  - Your local network (like an Unraid server at `192.168.1.100`)
+  - Your local network (like an Unraid server)
   - Your local computer (if you install MongoDB locally)
   - A cloud service (like MongoDB Atlas)
 

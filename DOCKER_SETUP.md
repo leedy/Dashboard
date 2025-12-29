@@ -95,14 +95,14 @@ Scroll down to **Environment variables** and add:
 
 | Variable | Value | Description |
 |----------|-------|-------------|
-| `MONGO_HOST` | `192.168.1.30` | MongoDB host IP address (**required** - use your server's actual IP) |
+| `MONGO_HOST` | `<your-mongo-host>` | MongoDB host IP address (**required** - use your server's actual IP) |
 | `MONGO_PORT` | `27017` | MongoDB port |
 | `MONGO_USERNAME` | your_username | Your MongoDB username |
 | `MONGO_PASSWORD` | your_password | Your MongoDB password |
 | `MONGO_DATABASE` | `dashboard` | Database name |
 
 **Important:**
-- `MONGO_HOST` must be set to your MongoDB server's actual IP address (e.g., `192.168.1.30`)
+- `MONGO_HOST` must be set to your MongoDB server's actual IP address
 - Do NOT use `127.0.0.1` or `localhost` - the container cannot reach the host this way
 - The MongoDB user must be created in the database specified by `MONGO_DATABASE`. See [MONGODB_SETUP.md](MONGODB_SETUP.md) for setup instructions.
 
@@ -228,7 +228,7 @@ services:
 
 **Key settings:**
 - `ports` - Maps container port to host port. This allows Portainer to display the port allocation correctly.
-- `MONGO_HOST` - **Required.** Must be your MongoDB server's actual IP address (e.g., `192.168.1.30`). Cannot use `127.0.0.1` since the container has its own network.
+- `MONGO_HOST` - **Required.** Must be your MongoDB server's actual IP address. Cannot use `127.0.0.1` since the container has its own network.
 - `restart: unless-stopped` - Container restarts automatically unless manually stopped
 - Environment variables use `${VAR:-default}` syntax (Portainer values override defaults)
 

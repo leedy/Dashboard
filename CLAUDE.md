@@ -132,7 +132,7 @@ This app connects to an external MongoDB server (not embedded).
 - Database name: `dashboard`
 - The app does NOT start or manage MongoDB
 - **Authentication:** Users must be created in the app database (not `admin`). The app uses `authSource=MONGO_DATABASE`. See `MONGODB_SETUP.md` for details.
-- **Docker note:** When running in Docker, `MONGO_HOST` must be set to the MongoDB server's actual IP address (e.g., `192.168.1.30`). Do not use `127.0.0.1` or `localhost`.
+- **Docker note:** When running in Docker, `MONGO_HOST` must be set to the MongoDB server's actual IP address. Do not use `127.0.0.1` or `localhost`.
 
 **Important:** The MongoDB user must be created manually before the app will connect. See `MONGODB_SETUP.md` for setup instructions.
 

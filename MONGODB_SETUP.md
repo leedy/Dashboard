@@ -16,7 +16,7 @@ MongoServerError: Authentication failed. (code 18)
 **Step 1:** Connect to MongoDB and create the user:
 
 ```bash
-mongosh "mongodb://admin:adminpassword@192.168.1.30:27017/admin"
+mongosh "mongodb://admin:adminpassword@<your-mongo-host>:27017/admin"
 ```
 
 ```javascript
@@ -32,7 +32,7 @@ db.createUser({
 **Step 2:** Configure your app's `backend/.env` to match:
 
 ```env
-MONGO_HOST=192.168.1.30
+MONGO_HOST=<your-mongo-host>
 MONGO_PORT=27017
 MONGO_USERNAME=dashboard_user
 MONGO_PASSWORD=mySecurePassword123
@@ -45,7 +45,7 @@ Note how the values match up:
 | `use dashboard` | `MONGO_DATABASE=dashboard` |
 | `user: "dashboard_user"` | `MONGO_USERNAME=dashboard_user` |
 | `pwd: "mySecurePassword123"` | `MONGO_PASSWORD=mySecurePassword123` |
-| MongoDB server IP | `MONGO_HOST=192.168.1.30` |
+| MongoDB server IP | `MONGO_HOST=<your-mongo-host>` |
 
 **Step 3:** Start the app - it should now connect successfully.
 
@@ -128,7 +128,7 @@ mongodb://user:pass@host:port/database?authSource=database
 For example, with `MONGO_DATABASE=dashboard`:
 
 ```
-mongodb://dashboard_user:pass@192.168.1.30:27017/dashboard?authSource=dashboard
+mongodb://dashboard_user:pass@<your-mongo-host>:27017/dashboard?authSource=dashboard
 ```
 
 ### Common Authentication Error
@@ -313,7 +313,7 @@ db.currentOp(true).inprog.forEach(function(op) {
 
 When running the Dashboard app in Docker:
 
-- `MONGO_HOST` must be set to your MongoDB server's actual IP address (e.g., `192.168.1.30`)
+- `MONGO_HOST` must be set to your MongoDB server's actual IP address
 - Do NOT use `127.0.0.1` or `localhost` - the container cannot reach the host this way
 - The container uses bridge networking with explicit port mapping
 
