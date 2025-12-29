@@ -1,8 +1,8 @@
 # Dashboard App Docker Image
 # This file tells Docker how to build your app
 
-# Start with Node.js 20 (LTS version)
-FROM node:20-alpine
+# Start with Node.js 22 (required by yahoo-finance2)
+FROM node:22-alpine
 
 # Set working directory inside the container
 WORKDIR /app

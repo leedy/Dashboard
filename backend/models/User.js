@@ -7,8 +7,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     trim: true,
     minlength: 3,
-    maxlength: 30,
-    index: true
+    maxlength: 30
   },
   email: {
     type: String,
@@ -42,9 +41,5 @@ const userSchema = new mongoose.Schema({
 }, {
   timestamps: true // Adds createdAt and updatedAt
 });
-
-// Index for efficient lookups
-userSchema.index({ username: 1 });
-userSchema.index({ email: 1 });
 
 module.exports = mongoose.model('User', userSchema);
