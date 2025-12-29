@@ -131,8 +131,10 @@ This app connects to an external MongoDB server (not embedded).
 - Connection configured in `backend/.env` (set MONGO_HOST to your server's IP or hostname)
 - Database name: `dashboard`
 - The app does NOT start or manage MongoDB
-- For Docker deployments: use `127.0.0.1` if MongoDB is on the same host
 - **Authentication:** Users must be created in the app database (not `admin`). The app uses `authSource=MONGO_DATABASE`. See `MONGODB_SETUP.md` for details.
+- **Docker note:** The provided `docker-compose.yml` uses `network_mode: host`, which allows `127.0.0.1` to reach MongoDB on the Docker host. Without host networking, use the host's actual IP address.
+
+**Important:** The MongoDB user must be created manually before the app will connect. See `MONGODB_SETUP.md` for setup instructions.
 
 **Collections:**
 - `preferences` - User settings and favorites

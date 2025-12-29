@@ -2,6 +2,55 @@
 
 This guide covers setting up MongoDB for the Dashboard application, including user creation and authentication configuration.
 
+## Before You Start (Required)
+
+**The MongoDB user must be created manually before the app will work.** The app does not create database users automatically - it only connects using the credentials you provide.
+
+If you skip this step, you'll see this error when starting the app:
+```
+MongoServerError: Authentication failed. (code 18)
+```
+
+### Quick Example: Create User and Configure App
+
+**Step 1:** Connect to MongoDB and create the user:
+
+```bash
+mongosh "mongodb://admin:adminpassword@192.168.1.30:27017/admin"
+```
+
+```javascript
+use dashboard
+
+db.createUser({
+  user: "dashboard_user",
+  pwd: "mySecurePassword123",
+  roles: [{ role: "readWrite", db: "dashboard" }]
+})
+```
+
+**Step 2:** Configure your app's `backend/.env` to match:
+
+```env
+MONGO_HOST=192.168.1.30
+MONGO_PORT=27017
+MONGO_USERNAME=dashboard_user
+MONGO_PASSWORD=mySecurePassword123
+MONGO_DATABASE=dashboard
+```
+
+Note how the values match up:
+| MongoDB Command | Environment Variable |
+|-----------------|---------------------|
+| `use dashboard` | `MONGO_DATABASE=dashboard` |
+| `user: "dashboard_user"` | `MONGO_USERNAME=dashboard_user` |
+| `pwd: "mySecurePassword123"` | `MONGO_PASSWORD=mySecurePassword123` |
+| MongoDB server IP | `MONGO_HOST=192.168.1.30` |
+
+**Step 3:** Start the app - it should now connect successfully.
+
+---
+
 ## Overview
 
 The Dashboard app requires MongoDB for storing:
@@ -17,7 +66,7 @@ The Dashboard app requires MongoDB for storing:
 - Network access to MongoDB from your app server
 - `mongosh` CLI tool for database administration
 
-## Quick Setup
+## Detailed Setup
 
 ### 1. Connect to MongoDB
 

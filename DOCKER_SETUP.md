@@ -7,7 +7,42 @@ This guide covers deploying the Dashboard app using Docker, specifically with Po
 - Docker installed (comes with Unraid)
 - Portainer CE installed and running
 - MongoDB running and accessible (can be on the same server or network)
-- Your MongoDB credentials (host, port, username, password)
+- **MongoDB user created for the app** (see below)
+
+## Before You Start: Create MongoDB User (Required)
+
+**The app will not start without a MongoDB user.** You must create the user manually before deploying.
+
+Connect to your MongoDB server and run:
+
+```bash
+mongosh "mongodb://admin:adminpassword@your_mongo_host:27017/admin"
+```
+
+```javascript
+// Create the database and user
+use dashboard
+
+db.createUser({
+  user: "dashboard_user",
+  pwd: "your_secure_password",
+  roles: [{ role: "readWrite", db: "dashboard" }]
+})
+
+// Verify it works
+db.auth("dashboard_user", "your_secure_password")
+// Should return: { ok: 1 }
+```
+
+The values you use here must match your environment variables:
+
+| What you set in MongoDB | Environment Variable |
+|------------------------|---------------------|
+| `use dashboard` | `MONGO_DATABASE=dashboard` |
+| `user: "dashboard_user"` | `MONGO_USERNAME=dashboard_user` |
+| `pwd: "your_secure_password"` | `MONGO_PASSWORD=your_secure_password` |
+
+See [MONGODB_SETUP.md](MONGODB_SETUP.md) for more details on MongoDB configuration.
 
 ## Files Overview
 
@@ -189,7 +224,7 @@ services:
 ```
 
 **Key settings:**
-- `network_mode: host` - Container uses host's network directly (required for reaching MongoDB)
+- `network_mode: host` - Container shares the host's network stack directly. This is why `MONGO_HOST=127.0.0.1` works when MongoDB runs on the same server - the container sees `127.0.0.1` as the host machine, not itself. Without this setting, you'd need to use the host's actual IP address.
 - `restart: unless-stopped` - Container restarts automatically unless manually stopped
 - Environment variables use `${VAR:-default}` syntax (Portainer values override defaults)
 
