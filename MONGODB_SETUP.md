@@ -311,10 +311,10 @@ db.currentOp(true).inprog.forEach(function(op) {
 
 ## Docker Considerations
 
-When running the Dashboard app in Docker on the same host as MongoDB:
+When running the Dashboard app in Docker:
 
-- Use `MONGO_HOST=127.0.0.1` (not `localhost`)
-- Ensure `network_mode: host` is set in docker-compose.yml
-- The container will connect to MongoDB on the host's network
+- `MONGO_HOST` must be set to your MongoDB server's actual IP address (e.g., `192.168.1.30`)
+- Do NOT use `127.0.0.1` or `localhost` - the container cannot reach the host this way
+- The container uses bridge networking with explicit port mapping
 
 See [DOCKER_SETUP.md](DOCKER_SETUP.md) for complete Docker deployment instructions.

@@ -95,21 +95,22 @@ Scroll down to **Environment variables** and add:
 
 | Variable | Value | Description |
 |----------|-------|-------------|
-| `MONGO_HOST` | `127.0.0.1` | MongoDB host (use `127.0.0.1` if on same server) |
+| `MONGO_HOST` | `192.168.1.30` | MongoDB host IP address (**required** - use your server's actual IP) |
 | `MONGO_PORT` | `27017` | MongoDB port |
 | `MONGO_USERNAME` | your_username | Your MongoDB username |
 | `MONGO_PASSWORD` | your_password | Your MongoDB password |
 | `MONGO_DATABASE` | `dashboard` | Database name |
 
-**Important:** The MongoDB user must be created in the database specified by `MONGO_DATABASE`. See [MONGODB_SETUP.md](MONGODB_SETUP.md) for setup instructions.
+**Important:**
+- `MONGO_HOST` must be set to your MongoDB server's actual IP address (e.g., `192.168.1.30`)
+- Do NOT use `127.0.0.1` or `localhost` - the container cannot reach the host this way
+- The MongoDB user must be created in the database specified by `MONGO_DATABASE`. See [MONGODB_SETUP.md](MONGODB_SETUP.md) for setup instructions.
 
 #### Optional variables (both options)
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `BACKEND_PORT` | `3001` | Port the app runs on (change if 3001 is in use) |
-
-**Note:** If MongoDB is on a different server, use that server's IP address instead of `127.0.0.1`.
 
 ### Step 4: Deploy
 
@@ -147,9 +148,10 @@ The container will rebuild with the latest code from GitHub.
 **Cause:** Container can't reach MongoDB server.
 
 **Solutions:**
-- If MongoDB is on the same server, use `MONGO_HOST=127.0.0.1`
-- Verify `network_mode: host` is in docker-compose.yml
+- Verify `MONGO_HOST` is set to your MongoDB server's actual IP address (e.g., `192.168.1.30`)
+- Do NOT use `127.0.0.1` or `localhost` - use the real IP address
 - Check MongoDB is running: `mongosh mongodb://user:pass@host:27017/dashboard`
+- Ensure MongoDB is accepting connections from the Docker network
 
 #### "Authentication failed" (code 18)
 
@@ -212,9 +214,10 @@ services:
     build: .
     container_name: dashboard-app
     restart: unless-stopped
-    network_mode: host          # Required to reach MongoDB on local network
+    ports:
+      - "${BACKEND_PORT:-3001}:${BACKEND_PORT:-3001}"
     environment:
-      - MONGO_HOST=${MONGO_HOST:-127.0.0.1}
+      - MONGO_HOST=${MONGO_HOST:?MONGO_HOST is required}
       - MONGO_PORT=${MONGO_PORT:-27017}
       - MONGO_USERNAME=${MONGO_USERNAME:-dashboard_user}
       - MONGO_PASSWORD=${MONGO_PASSWORD:-changeme}
@@ -224,14 +227,15 @@ services:
 ```
 
 **Key settings:**
-- `network_mode: host` - Container shares the host's network stack directly. This is why `MONGO_HOST=127.0.0.1` works when MongoDB runs on the same server - the container sees `127.0.0.1` as the host machine, not itself. Without this setting, you'd need to use the host's actual IP address.
+- `ports` - Maps container port to host port. This allows Portainer to display the port allocation correctly.
+- `MONGO_HOST` - **Required.** Must be your MongoDB server's actual IP address (e.g., `192.168.1.30`). Cannot use `127.0.0.1` since the container has its own network.
 - `restart: unless-stopped` - Container restarts automatically unless manually stopped
 - Environment variables use `${VAR:-default}` syntax (Portainer values override defaults)
 
 ### Dockerfile
 
 ```dockerfile
-FROM node:20-alpine
+FROM node:22-alpine
 WORKDIR /app
 
 # Install dependencies
@@ -256,7 +260,7 @@ CMD ["node", "server.js"]
 ```
 
 **What it does:**
-1. Starts with Node.js 20 (Alpine Linux for small size)
+1. Starts with Node.js 22 (Alpine Linux for small size)
 2. Installs backend dependencies (production only)
 3. Installs frontend dependencies
 4. Copies source code
@@ -265,13 +269,13 @@ CMD ["node", "server.js"]
 
 ### Port Configuration
 
-The app runs on port **3001** by default. Since we use `network_mode: host`, this port is exposed directly on the host.
+The app runs on port **3001** by default.
 
 To change the port:
 1. Update `BACKEND_PORT` environment variable in Portainer
 2. Access the app on the new port
 
-**Note:** With host networking, the `ports:` mapping in docker-compose.yml is not used.
+The port will be displayed correctly in Portainer's container list.
 
 ## Architecture
 
