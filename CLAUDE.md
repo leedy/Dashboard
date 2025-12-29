@@ -132,6 +132,7 @@ This app connects to an external MongoDB server (not embedded).
 - Database name: `dashboard`
 - The app does NOT start or manage MongoDB
 - For Docker deployments: use `127.0.0.1` if MongoDB is on the same host
+- **Authentication:** Users must be created in the app database (not `admin`). The app uses `authSource=MONGO_DATABASE`. See `MONGODB_SETUP.md` for details.
 
 **Collections:**
 - `preferences` - User settings and favorites
@@ -393,6 +394,7 @@ In production, backend serves the built frontend from `dist/` folder. No separat
 
 Additional documentation in repository:
 - `README.md` - Full project documentation
+- `MONGODB_SETUP.md` - MongoDB user creation and authentication setup
 - `DOCKER_SETUP.md` - Docker/Portainer deployment guide
 - `RASPBERRY_PI_SETUP.md` - Raspberry Pi deployment guide
 - `KIOSK_MODE.md` - Kiosk mode configuration

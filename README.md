@@ -154,6 +154,8 @@ BACKEND_PORT=3001             # Backend server port
 
 **Note:** For Docker deployments on the same host as MongoDB, use `127.0.0.1` as MONGO_HOST.
 
+**Important:** The MongoDB user must be created in the database specified by `MONGO_DATABASE` (not in `admin`). See [MONGODB_SETUP.md](MONGODB_SETUP.md) for detailed user creation and authentication instructions.
+
 **Note**: The MongoDB configuration is stored in `server/.env` (backend), not in the root directory.
 
 #### TMDb API Configuration (Admin Panel)

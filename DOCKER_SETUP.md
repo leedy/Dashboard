@@ -66,6 +66,8 @@ Scroll down to **Environment variables** and add:
 | `MONGO_PASSWORD` | your_password | Your MongoDB password |
 | `MONGO_DATABASE` | `dashboard` | Database name |
 
+**Important:** The MongoDB user must be created in the database specified by `MONGO_DATABASE`. See [MONGODB_SETUP.md](MONGODB_SETUP.md) for setup instructions.
+
 #### Optional variables (both options)
 
 | Variable | Default | Description |
@@ -113,6 +115,15 @@ The container will rebuild with the latest code from GitHub.
 - If MongoDB is on the same server, use `MONGO_HOST=127.0.0.1`
 - Verify `network_mode: host` is in docker-compose.yml
 - Check MongoDB is running: `mongosh mongodb://user:pass@host:27017/dashboard`
+
+#### "Authentication failed" (code 18)
+
+**Cause:** MongoDB user doesn't exist in the correct database.
+
+**Solutions:**
+- The user must be created in the database specified by `MONGO_DATABASE`, not in `admin`
+- See [MONGODB_SETUP.md](MONGODB_SETUP.md) for user creation instructions
+- Test authentication: `mongosh` then `use dashboard` then `db.auth("user", "pass")`
 
 #### "Network Error" in Browser
 
