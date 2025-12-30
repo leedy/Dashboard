@@ -205,23 +205,26 @@
   background: #1e88e5;
 }
 
-/* Statistics */
-.stats-grid {
+/* Statistics - scoped to avoid conflicts with UsageAnalytics */
+.admin-disney-tracking .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1rem;
   margin-bottom: 1rem;
 }
 
-.stat-card {
+.admin-disney-tracking .stat-card,
+.admin-disney-tracking .stat-card:nth-child(2),
+.admin-disney-tracking .stat-card:nth-child(3) {
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   padding: 1rem;
   text-align: center;
+  box-shadow: none;
 }
 
-.stat-value {
+.admin-disney-tracking .stat-value {
   display: block;
   font-size: 1.75rem;
   font-weight: 600;
@@ -229,10 +232,13 @@
   margin-bottom: 0.25rem;
 }
 
-.stat-label {
+.admin-disney-tracking .stat-label {
   display: block;
   font-size: 0.85rem;
   color: #b0b0b0;
+  opacity: 1;
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 .stats-details {
