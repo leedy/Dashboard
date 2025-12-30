@@ -33,6 +33,12 @@ const waitTimeSnapshotSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  parkAvgWait: {
+    type: Number  // Average wait time across the park at this snapshot
+  },
+  parkOpenRideCount: {
+    type: Number  // Number of rides currently open in this park
+  },
   context: {
     dayOfWeek: {
       type: Number,  // 0-6 (Sunday-Saturday)
@@ -46,6 +52,18 @@ const waitTimeSnapshotSchema = new mongoose.Schema({
       type: Number,  // 1-12
       required: true
     },
+    year: {
+      type: Number,  // e.g., 2025
+      required: true
+    },
+    weekOfYear: {
+      type: Number,  // 1-53
+      required: true
+    },
+    isWeekend: {
+      type: Boolean,
+      required: true
+    },
     isHoliday: {
       type: Boolean,
       default: false
@@ -55,6 +73,8 @@ const waitTimeSnapshotSchema = new mongoose.Schema({
     },
     weather: {
       temperature: Number,
+      feelsLike: Number,
+      humidity: Number,
       weatherCode: Number,
       isRaining: Boolean
     }

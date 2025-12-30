@@ -20,6 +20,50 @@ const PARKS = {
   8: { name: 'Animal Kingdom', slug: 'animal-kingdom' }
 };
 
+/**
+ * Get ISO week number (1-53)
+ * @param {Date} date
+ * @returns {number}
+ */
+function getWeekOfYear(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+/**
+ * Calculate park statistics (average wait time and open ride count)
+ * @param {Object} parkData - Park data from API
+ * @returns {{avgWait: number|null, openRideCount: number}} Park stats
+ */
+function calculateParkStats(parkData) {
+  if (!parkData || !parkData.lands) return { avgWait: null, openRideCount: 0 };
+
+  let totalWait = 0;
+  let ridesWithWait = 0;
+  let openRideCount = 0;
+
+  for (const land of parkData.lands) {
+    if (!land.rides) continue;
+    for (const ride of land.rides) {
+      if (ride.is_open) {
+        openRideCount++;
+        if (ride.wait_time > 0) {
+          totalWait += ride.wait_time;
+          ridesWithWait++;
+        }
+      }
+    }
+  }
+
+  return {
+    avgWait: ridesWithWait > 0 ? Math.round(totalWait / ridesWithWait) : null,
+    openRideCount: openRideCount
+  };
+}
+
 // Track the cron job instance
 let cronJob = null;
 let isCollecting = false;
@@ -77,14 +121,20 @@ async function collectAllParks() {
     const weather = await weatherService.getCurrentWeather();
     const holidayInfo = holidayService.checkHoliday(now);
 
+    const dayOfWeek = now.getDay();
     const context = {
-      dayOfWeek: now.getDay(),
+      dayOfWeek: dayOfWeek,
       hour: now.getHours(),
       month: now.getMonth() + 1,
+      year: now.getFullYear(),
+      weekOfYear: getWeekOfYear(now),
+      isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
       isHoliday: holidayInfo.isHoliday,
       holidayName: holidayInfo.holidayName || undefined,
       weather: weather ? {
         temperature: weather.temperature,
+        feelsLike: weather.feelsLike,
+        humidity: weather.humidity,
         weatherCode: weather.weatherCode,
         isRaining: weather.isRaining
       } : undefined
@@ -126,6 +176,9 @@ async function collectAllParks() {
         continue;
       }
 
+      // Calculate park-wide statistics
+      const parkStats = calculateParkStats(parkData);
+
       // Process each land and ride
       for (const land of parkData.lands) {
         if (!land.rides) continue;
@@ -142,6 +195,8 @@ async function collectAllParks() {
               waitTime: ride.wait_time || 0,
               isOpen: ride.is_open || false,
               timestamp: now,
+              parkAvgWait: parkStats.avgWait,
+              parkOpenRideCount: parkStats.openRideCount,
               context: context
             });
 

@@ -29,7 +29,7 @@ const RAIN_CODES = [
 
 /**
  * Get current weather at Disney World
- * @returns {Promise<{temperature: number, weatherCode: number, isRaining: boolean} | null>}
+ * @returns {Promise<{temperature: number, feelsLike: number, humidity: number, weatherCode: number, isRaining: boolean} | null>}
  */
 async function getCurrentWeather() {
   // Check cache first
@@ -41,7 +41,7 @@ async function getCurrentWeather() {
   }
 
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${DISNEY_WORLD_LAT}&longitude=${DISNEY_WORLD_LON}&current=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=America%2FNew_York`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${DISNEY_WORLD_LAT}&longitude=${DISNEY_WORLD_LON}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code&temperature_unit=fahrenheit&timezone=America%2FNew_York`;
 
     const response = await fetch(url);
 
@@ -54,6 +54,8 @@ async function getCurrentWeather() {
 
     const weather = {
       temperature: Math.round(data.current.temperature_2m),
+      feelsLike: Math.round(data.current.apparent_temperature),
+      humidity: Math.round(data.current.relative_humidity_2m),
       weatherCode: data.current.weather_code,
       isRaining: RAIN_CODES.includes(data.current.weather_code)
     };
