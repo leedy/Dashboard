@@ -1,0 +1,307 @@
+.admin-disney-tracking {
+  padding: 1.5rem;
+  max-width: 900px;
+}
+
+.tracking-header {
+  margin-bottom: 1.5rem;
+}
+
+.tracking-header h2 {
+  margin: 0 0 0.5rem 0;
+  color: #e0e0e0;
+}
+
+.tracking-subtitle {
+  color: #888;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.loading {
+  padding: 2rem;
+  text-align: center;
+  color: #888;
+}
+
+.tracking-error {
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid #f44336;
+  color: #f44336;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tracking-error button {
+  background: transparent;
+  border: 1px solid #f44336;
+  color: #f44336;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tracking-section {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.tracking-section h3 {
+  margin: 0 0 1rem 0;
+  color: #e0e0e0;
+  font-size: 1.1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+/* Status Grid */
+.status-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.status-indicator.running {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+.status-indicator.stopped {
+  background: rgba(158, 158, 158, 0.2);
+  color: #9e9e9e;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.stopped .status-dot {
+  animation: none;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.status-detail {
+  display: flex;
+  gap: 0.5rem;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.status-detail .label {
+  color: #888;
+}
+
+.status-detail .value {
+  color: #e0e0e0;
+}
+
+.status-detail.error .value {
+  color: #f44336;
+}
+
+/* Controls */
+.controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: flex-end;
+}
+
+.interval-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.interval-control label {
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.interval-control input {
+  width: 80px;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #e0e0e0;
+  font-size: 1rem;
+}
+
+.interval-control input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button-group {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.button-group button {
+  padding: 0.6rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.button-group button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-start {
+  background: #4caf50;
+  color: white;
+}
+
+.btn-start:hover:not(:disabled) {
+  background: #43a047;
+}
+
+.btn-stop {
+  background: #f44336;
+  color: white;
+}
+
+.btn-stop:hover:not(:disabled) {
+  background: #e53935;
+}
+
+.btn-collect {
+  background: #2196f3;
+  color: white;
+}
+
+.btn-collect:hover:not(:disabled) {
+  background: #1e88e5;
+}
+
+/* Statistics */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.stat-card {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #4fc3f7;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.stats-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-detail {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.stat-detail .label {
+  color: #888;
+}
+
+.stat-detail .value {
+  color: #e0e0e0;
+}
+
+/* Info Section */
+.tracking-info {
+  background: rgba(33, 150, 243, 0.1);
+  border: 1px solid rgba(33, 150, 243, 0.3);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.tracking-info h4 {
+  margin: 0 0 0.75rem 0;
+  color: #4fc3f7;
+  font-size: 1rem;
+}
+
+.tracking-info ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #aaa;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.tracking-info li {
+  margin-bottom: 0.25rem;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .admin-disney-tracking {
+    padding: 1rem;
+  }
+
+  .controls-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .button-group button {
+    width: 100%;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

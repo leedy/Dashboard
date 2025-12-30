@@ -43,6 +43,8 @@ const usageRoutes = require('./routes/usage');
 const adminAuthRoutes = require('./routes/adminAuth');
 const userAuthRoutes = require('./routes/userAuth');
 const tmdbRoutes = require('./routes/tmdb');
+const disneyTrackingRoutes = require('./routes/disneyTracking');
+const disneyDataCollector = require('./services/disneyDataCollector');
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3001;
@@ -69,6 +71,7 @@ app.use('/api/standings', standingsCacheRoutes);
 app.use('/api/stocks', stocksRoutes);
 app.use('/api/usage', usageRoutes);
 app.use('/api/tmdb', tmdbRoutes);
+app.use('/api/disney/tracking', disneyTrackingRoutes);
 
 // Proxy routes for external APIs
 // Custom NHL endpoint for recent games
@@ -296,4 +299,7 @@ if (require('fs').existsSync(distPath)) {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Backend server running on http://0.0.0.0:${PORT}`);
   console.log(`Accessible at http://localhost:${PORT} and http://<your-ip>:${PORT}`);
+
+  // Initialize Disney data collector from saved preferences
+  disneyDataCollector.initializeFromPreferences();
 });

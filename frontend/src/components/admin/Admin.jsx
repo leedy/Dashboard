@@ -5,6 +5,7 @@ import PhotoManagement from './PhotoManagement';
 import UsageAnalytics from './UsageAnalytics';
 import AdminUsers from './AdminUsers';
 import AdminDisneyDefaults from './AdminDisneyDefaults';
+import AdminDisneyTracking from './AdminDisneyTracking';
 import './Admin.css';
 
 function Admin({ preferences, onSave, onCancel }) {
@@ -63,6 +64,12 @@ function Admin({ preferences, onSave, onCancel }) {
           Disney Defaults
         </button>
         <button
+          className={`admin-tab ${activeTab === 'disney-tracking' ? 'active' : ''}`}
+          onClick={() => setActiveTab('disney-tracking')}
+        >
+          Disney Tracking
+        </button>
+        <button
           className={`admin-tab ${activeTab === 'photos' ? 'active' : ''}`}
           onClick={() => setActiveTab('photos')}
         >
@@ -103,6 +110,9 @@ function Admin({ preferences, onSave, onCancel }) {
         )}
         {activeTab === 'disney-defaults' && (
           <AdminDisneyDefaults />
+        )}
+        {activeTab === 'disney-tracking' && (
+          <AdminDisneyTracking />
         )}
         {activeTab === 'photos' && (
           <PhotoManagement />
