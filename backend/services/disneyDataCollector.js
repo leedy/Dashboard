@@ -56,10 +56,24 @@ async function collectAllParks() {
   let snapshotsCreated = 0;
 
   try {
+    const now = new Date();
+
+    // Check if another instance already collected recently (within last 4 minutes)
+    const fourMinutesAgo = new Date(now.getTime() - 4 * 60 * 1000);
+    const recentSnapshot = await WaitTimeSnapshot.findOne({
+      timestamp: { $gte: fourMinutesAgo }
+    }).lean();
+
+    if (recentSnapshot) {
+      const age = Math.round((now - new Date(recentSnapshot.timestamp)) / 1000);
+      console.log(`Disney collector: Recent data exists (${age}s old), skipping to prevent duplicates`);
+      isCollecting = false;
+      return { success: true, snapshotsCreated: 0, errors: [], skipped: 'Recent data exists' };
+    }
+
     console.log('Disney collector: Starting data collection...');
 
     // Get current context (weather + holiday info)
-    const now = new Date();
     const weather = await weatherService.getCurrentWeather();
     const holidayInfo = holidayService.checkHoliday(now);
 
@@ -156,6 +170,11 @@ async function collectAllParks() {
               { upsert: true, new: true }
             );
           } catch (error) {
+            // Ignore duplicate key errors (another instance already saved this data)
+            if (error.code === 11000) {
+              // Silently skip duplicates
+              continue;
+            }
             errors.push(`Error saving ride ${ride.name}: ${error.message}`);
           }
         }

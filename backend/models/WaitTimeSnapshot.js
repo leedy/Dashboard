@@ -72,6 +72,9 @@ waitTimeSnapshotSchema.index({ parkId: 1, timestamp: -1 });
 // Compound index for prediction queries (day/hour patterns)
 waitTimeSnapshotSchema.index({ 'context.dayOfWeek': 1, 'context.hour': 1, rideId: 1 });
 
+// Unique index to prevent duplicate snapshots (safety net for multi-instance deployments)
+waitTimeSnapshotSchema.index({ rideId: 1, timestamp: 1 }, { unique: true });
+
 // Note: No TTL index - data is kept forever for long-term predictions
 
 module.exports = mongoose.model('WaitTimeSnapshot', waitTimeSnapshotSchema);
