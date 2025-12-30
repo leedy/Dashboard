@@ -299,7 +299,10 @@ if (require('fs').existsSync(distPath)) {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Backend server running on http://0.0.0.0:${PORT}`);
   console.log(`Accessible at http://localhost:${PORT} and http://<your-ip>:${PORT}`);
+});
 
-  // Initialize Disney data collector from saved preferences
+// Initialize Disney data collector after MongoDB is connected
+const mongoose = require('mongoose');
+mongoose.connection.once('open', () => {
   disneyDataCollector.initializeFromPreferences();
 });
