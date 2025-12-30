@@ -44,6 +44,7 @@ const adminAuthRoutes = require('./routes/adminAuth');
 const userAuthRoutes = require('./routes/userAuth');
 const tmdbRoutes = require('./routes/tmdb');
 const disneyTrackingRoutes = require('./routes/disneyTracking');
+const rideClassificationRoutes = require('./routes/rideClassification');
 const disneyDataCollector = require('./services/disneyDataCollector');
 
 const app = express();
@@ -72,6 +73,7 @@ app.use('/api/stocks', stocksRoutes);
 app.use('/api/usage', usageRoutes);
 app.use('/api/tmdb', tmdbRoutes);
 app.use('/api/disney/tracking', disneyTrackingRoutes);
+app.use('/api/disney/classifications', rideClassificationRoutes);
 
 // Proxy routes for external APIs
 // Custom NHL endpoint for recent games

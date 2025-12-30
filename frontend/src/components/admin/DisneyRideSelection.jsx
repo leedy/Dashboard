@@ -9,32 +9,68 @@ const PARKS = {
   'animal-kingdom': { id: 8, name: 'Animal Kingdom', icon: '🦁' }
 };
 
+const CATEGORIES = [
+  { value: 'headliner', label: 'Headliners', color: '#e74c3c', description: 'E-ticket attractions with longest waits' },
+  { value: 'popular', label: 'Popular', color: '#f39c12', description: 'Well-known attractions with moderate waits' },
+  { value: 'standard', label: 'Standard', color: '#3498db', description: 'Regular attractions' },
+  { value: 'minor', label: 'Minor', color: '#95a5a6', description: 'Shows, walk-throughs, low-wait experiences' },
+  { value: 'unclassified', label: 'Unclassified', color: '#bdc3c7', description: 'Not yet categorized' }
+];
+
+const DEFAULT_DISPLAY_CATEGORIES = ['headliner', 'popular', 'standard', 'minor', 'unclassified'];
+const DEFAULT_CROWD_CATEGORIES = ['headliner', 'popular'];
+
 function DisneyRideSelection({ preferences, onSave }) {
+  // Determine if using new category system or legacy
+  const useCategorySystem = preferences.disneyDisplayCategories !== null &&
+                            preferences.disneyDisplayCategories !== undefined;
+
+  const [displayCategories, setDisplayCategories] = useState(
+    preferences.disneyDisplayCategories || DEFAULT_DISPLAY_CATEGORIES
+  );
+  const [crowdCategories, setCrowdCategories] = useState(
+    preferences.disneyCrowdCategories || DEFAULT_CROWD_CATEGORIES
+  );
+  const [classificationStats, setClassificationStats] = useState(null);
+  const [saveMessage, setSaveMessage] = useState(null);
+  const [showLegacy, setShowLegacy] = useState(!useCategorySystem);
+
+  // Legacy state (for backward compatibility)
   const [allRides, setAllRides] = useState({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedPark, setSelectedPark] = useState('magic-kingdom');
   const [excludedRides, setExcludedRides] = useState(preferences.disneyExcludedRides || []);
   const [knownRides, setKnownRides] = useState(preferences.disneyKnownRides || []);
-  const [saveMessage, setSaveMessage] = useState(null);
-  const [newRidesDetected, setNewRidesDetected] = useState(0);
 
   useEffect(() => {
-    fetchAllRides();
+    fetchClassificationStats();
+    if (showLegacy) {
+      fetchAllRides();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
-  // Sync excludedRides and knownRides with preferences when they change
   useEffect(() => {
     setExcludedRides(preferences.disneyExcludedRides || []);
     setKnownRides(preferences.disneyKnownRides || []);
+    setDisplayCategories(preferences.disneyDisplayCategories || DEFAULT_DISPLAY_CATEGORIES);
+    setCrowdCategories(preferences.disneyCrowdCategories || DEFAULT_CROWD_CATEGORIES);
   }, [preferences]);
 
-  const fetchAllRides = async (isRefresh = false) => {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
+  const fetchClassificationStats = async () => {
+    try {
+      const response = await axios.get('/api/disney/classifications/stats');
+      setClassificationStats(response.data.stats);
+    } catch (error) {
+      console.error('Error fetching classification stats:', error);
     }
+  };
+
+  const fetchAllRides = async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
 
     try {
       const ridesData = {};
@@ -42,180 +78,204 @@ function DisneyRideSelection({ preferences, onSave }) {
 
       for (const [parkKey, park] of Object.entries(PARKS)) {
         const response = await axios.get(`/api/queue-times/parks/${park.id}/queue_times.json`);
-
-        // Flatten all rides from all lands
         const rides = [];
         if (response.data.lands) {
           response.data.lands.forEach(land => {
             if (land.rides) {
               land.rides.forEach(ride => {
-                rides.push({
-                  ...ride,
-                  landName: land.name,
-                  parkKey: parkKey
-                });
+                rides.push({ ...ride, landName: land.name, parkKey });
                 allCurrentRideIds.push(ride.id);
               });
             }
           });
         }
-
         ridesData[parkKey] = rides.sort((a, b) => a.name.localeCompare(b.name));
       }
 
       setAllRides(ridesData);
 
-      // Detect new rides (rides in API but not in knownRides)
-      const newRides = allCurrentRideIds.filter(id => !knownRides.includes(id));
-
-      // Only auto-exclude if this is not a first-time user (knownRides has some entries)
-      // For first-time users, just populate knownRides without excluding anything
-      if (newRides.length > 0 && knownRides.length > 0) {
-        setNewRidesDetected(newRides.length);
-
-        // Auto-exclude new rides and update known rides
-        const updatedExcluded = [...new Set([...excludedRides, ...newRides])];
-        const updatedKnown = [...new Set([...knownRides, ...allCurrentRideIds])];
-
-        setExcludedRides(updatedExcluded);
-        setKnownRides(updatedKnown);
-
-        // Auto-save the updated preferences
-        const updatedPreferences = {
-          ...preferences,
-          disneyExcludedRides: updatedExcluded,
-          disneyKnownRides: updatedKnown
-        };
-
-        await onSave(updatedPreferences);
-
-        setSaveMessage({
-          type: 'success',
-          text: `Found ${newRides.length} new attraction(s) - automatically excluded from crowd calculations`
-        });
-        setTimeout(() => {
-          setSaveMessage(null);
-          setNewRidesDetected(0);
-        }, 5000);
-      } else if (newRides.length > 0 && knownRides.length === 0) {
-        // First-time user: just populate knownRides without excluding
-        const updatedKnown = [...new Set(allCurrentRideIds)];
-        setKnownRides(updatedKnown);
-
-        const updatedPreferences = {
-          ...preferences,
-          disneyKnownRides: updatedKnown
-        };
-
-        await onSave(updatedPreferences);
-      } else if (isRefresh) {
-        // Just update known rides to include current state
-        const updatedKnown = [...new Set([...knownRides, ...allCurrentRideIds])];
-        if (updatedKnown.length !== knownRides.length) {
-          setKnownRides(updatedKnown);
-          await onSave({
-            ...preferences,
-            disneyKnownRides: updatedKnown
-          });
-        }
-
-        setSaveMessage({ type: 'success', text: 'Attraction list refreshed - no new attractions found' });
+      if (isRefresh) {
+        setSaveMessage({ type: 'success', text: 'Attraction list refreshed' });
         setTimeout(() => setSaveMessage(null), 3000);
       }
     } catch (error) {
       console.error('Error fetching rides:', error);
-      setSaveMessage({ type: 'error', text: 'Failed to fetch attractions. Please try again.' });
+      setSaveMessage({ type: 'error', text: 'Failed to fetch attractions' });
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  const isRideExcluded = (rideId) => {
-    return excludedRides.includes(rideId);
+  // Category system handlers
+  const toggleDisplayCategory = async (category) => {
+    const updated = displayCategories.includes(category)
+      ? displayCategories.filter(c => c !== category)
+      : [...displayCategories, category];
+    setDisplayCategories(updated);
+    await saveCategories(updated, crowdCategories);
   };
+
+  const toggleCrowdCategory = async (category) => {
+    const updated = crowdCategories.includes(category)
+      ? crowdCategories.filter(c => c !== category)
+      : [...crowdCategories, category];
+    setCrowdCategories(updated);
+    await saveCategories(displayCategories, updated);
+  };
+
+  const saveCategories = async (display, crowd) => {
+    try {
+      await onSave({
+        ...preferences,
+        disneyDisplayCategories: display,
+        disneyCrowdCategories: crowd
+      });
+      setSaveMessage({ type: 'success', text: 'Settings saved' });
+      setTimeout(() => setSaveMessage(null), 2000);
+    } catch (error) {
+      setSaveMessage({ type: 'error', text: 'Failed to save' });
+      setTimeout(() => setSaveMessage(null), 3000);
+    }
+  };
+
+  const handleSwitchToCategories = async () => {
+    try {
+      await onSave({
+        ...preferences,
+        disneyDisplayCategories: DEFAULT_DISPLAY_CATEGORIES,
+        disneyCrowdCategories: DEFAULT_CROWD_CATEGORIES
+      });
+      setDisplayCategories(DEFAULT_DISPLAY_CATEGORIES);
+      setCrowdCategories(DEFAULT_CROWD_CATEGORIES);
+      setShowLegacy(false);
+      setSaveMessage({ type: 'success', text: 'Switched to category-based filtering' });
+      setTimeout(() => setSaveMessage(null), 3000);
+    } catch (error) {
+      setSaveMessage({ type: 'error', text: 'Failed to switch' });
+    }
+  };
+
+  const handleSwitchToLegacy = async () => {
+    try {
+      await onSave({
+        ...preferences,
+        disneyDisplayCategories: null,
+        disneyCrowdCategories: null
+      });
+      setShowLegacy(true);
+      await fetchAllRides();
+      setSaveMessage({ type: 'success', text: 'Switched to individual ride selection' });
+      setTimeout(() => setSaveMessage(null), 3000);
+    } catch (error) {
+      setSaveMessage({ type: 'error', text: 'Failed to switch' });
+    }
+  };
+
+  // Legacy handlers
+  const isRideExcluded = (rideId) => excludedRides.includes(rideId);
 
   const toggleRide = async (rideId) => {
     const updatedExcluded = excludedRides.includes(rideId)
       ? excludedRides.filter(id => id !== rideId)
       : [...excludedRides, rideId];
-
     setExcludedRides(updatedExcluded);
-
-    // Auto-save
-    const updatedPreferences = {
-      ...preferences,
-      disneyExcludedRides: updatedExcluded,
-      disneyKnownRides: knownRides
-    };
-    await onSave(updatedPreferences);
+    await onSave({ ...preferences, disneyExcludedRides: updatedExcluded, disneyKnownRides: knownRides });
   };
 
   const toggleAllInPark = async (include) => {
     const parkRides = allRides[selectedPark] || [];
     const parkRideIds = parkRides.map(r => r.id);
-
     let updatedExcluded;
     if (include) {
-      // Remove all park rides from excluded list (include them)
       updatedExcluded = excludedRides.filter(id => !parkRideIds.includes(id));
     } else {
-      // Add all park rides to excluded list (exclude them)
       updatedExcluded = [...excludedRides];
       parkRideIds.forEach(id => {
-        if (!updatedExcluded.includes(id)) {
-          updatedExcluded.push(id);
-        }
+        if (!updatedExcluded.includes(id)) updatedExcluded.push(id);
       });
     }
-
     setExcludedRides(updatedExcluded);
-
-    // Auto-save
-    const updatedPreferences = {
-      ...preferences,
-      disneyExcludedRides: updatedExcluded,
-      disneyKnownRides: knownRides
-    };
-    await onSave(updatedPreferences);
-  };
-
-
-  const handleRefresh = async () => {
-    await fetchAllRides(true);
-  };
-
-  const handleResetToDefaults = async () => {
-    try {
-      // Fetch default preferences using the public endpoint
-      const response = await axios.get('/api/preferences/defaults');
-      const defaultExcluded = response.data.disneyExcludedRides || [];
-      const defaultKnown = response.data.disneyKnownRides || [];
-
-      setExcludedRides(defaultExcluded);
-      setKnownRides(defaultKnown);
-
-      // Save to user preferences
-      const updatedPreferences = {
-        ...preferences,
-        disneyExcludedRides: defaultExcluded,
-        disneyKnownRides: defaultKnown
-      };
-      await onSave(updatedPreferences);
-
-      setSaveMessage({ type: 'success', text: 'Reset to system defaults successfully' });
-      setTimeout(() => setSaveMessage(null), 3000);
-    } catch (error) {
-      console.error('Error resetting to defaults:', error);
-      setSaveMessage({ type: 'error', text: 'Failed to reset to defaults' });
-      setTimeout(() => setSaveMessage(null), 3000);
-    }
+    await onSave({ ...preferences, disneyExcludedRides: updatedExcluded, disneyKnownRides: knownRides });
   };
 
   const currentParkRides = allRides[selectedPark] || [];
   const includedCount = currentParkRides.filter(r => !isRideExcluded(r.id)).length;
   const totalCount = currentParkRides.length;
 
+  // Render category-based UI
+  if (!showLegacy) {
+    return (
+      <div className="disney-ride-selection">
+        <div className="ride-selection-header">
+          <h2>Disney Dashboard Settings</h2>
+          <p>Select which ride categories to display and include in crowd calculations</p>
+        </div>
+
+        <div className="category-selection">
+          <section className="category-section">
+            <h3>Categories to Display</h3>
+            <p>Choose which ride categories appear on your Disney dashboard</p>
+            <div className="category-checkboxes">
+              {CATEGORIES.map(cat => (
+                <label key={cat.value} className="category-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={displayCategories.includes(cat.value)}
+                    onChange={() => toggleDisplayCategory(cat.value)}
+                  />
+                  <span className={`category-label category-${cat.value}`} style={{ backgroundColor: cat.color }}>
+                    {cat.label}
+                  </span>
+                  <span className="category-description">
+                    {cat.description}
+                    {classificationStats && ` (${classificationStats[cat.value] || 0} rides)`}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </section>
+
+          <section className="category-section">
+            <h3>Categories for Crowd Level</h3>
+            <p>Choose which categories are used to calculate the park crowd level</p>
+            <div className="category-checkboxes">
+              {CATEGORIES.map(cat => (
+                <label key={cat.value} className="category-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={crowdCategories.includes(cat.value)}
+                    onChange={() => toggleCrowdCategory(cat.value)}
+                  />
+                  <span className={`category-label category-${cat.value}`} style={{ backgroundColor: cat.color }}>
+                    {cat.label}
+                  </span>
+                  <span className="category-description">
+                    {classificationStats && `${classificationStats[cat.value] || 0} rides`}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </section>
+
+          <div className="migration-notice" style={{ background: 'rgba(52, 152, 219, 0.1)', borderColor: '#3498db' }}>
+            <p style={{ color: '#3498db' }}>Want more control? Switch to individual ride selection.</p>
+            <button onClick={handleSwitchToLegacy} style={{ background: '#3498db' }}>
+              Switch to Individual Selection
+            </button>
+          </div>
+        </div>
+
+        {saveMessage && (
+          <div className={`save-message ${saveMessage.type}`} style={{ marginTop: '1rem', textAlign: 'center' }}>
+            {saveMessage.text}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Render legacy individual ride selection UI
   return (
     <div className="disney-ride-selection">
       <div className="ride-selection-header">
@@ -243,25 +303,14 @@ function DisneyRideSelection({ preferences, onSave }) {
           <div className="ride-selection-controls">
             <div className="selection-stats">
               {includedCount} of {totalCount} attractions included
-              {newRidesDetected > 0 && (
-                <span className="new-rides-badge">+{newRidesDetected} new</span>
-              )}
             </div>
             <div className="bulk-actions">
               <button
                 className="refresh-btn"
-                onClick={handleRefresh}
+                onClick={() => fetchAllRides(true)}
                 disabled={refreshing}
-                title="Refresh attraction list from Disney API"
               >
                 {refreshing ? '🔄 Refreshing...' : '🔄 Refresh List'}
-              </button>
-              <button
-                className="reset-defaults-btn"
-                onClick={handleResetToDefaults}
-                title="Reset to system default settings"
-              >
-                🔄 Reset to Defaults
               </button>
               <button className="bulk-btn" onClick={() => toggleAllInPark(true)}>
                 Include All
@@ -302,12 +351,22 @@ function DisneyRideSelection({ preferences, onSave }) {
             ))}
           </div>
 
-          {saveMessage && (
-            <div className={`save-message ${saveMessage.type}`} style={{ marginTop: '1rem', textAlign: 'center' }}>
-              {saveMessage.text}
-            </div>
-          )}
+          <div className="migration-notice">
+            <p>Simplify your settings with category-based filtering!</p>
+            <button onClick={handleSwitchToCategories}>
+              Switch to Categories
+            </button>
+            <button onClick={() => {}}>
+              Keep Individual Selection
+            </button>
+          </div>
         </>
+      )}
+
+      {saveMessage && (
+        <div className={`save-message ${saveMessage.type}`} style={{ marginTop: '1rem', textAlign: 'center' }}>
+          {saveMessage.text}
+        </div>
       )}
     </div>
   );

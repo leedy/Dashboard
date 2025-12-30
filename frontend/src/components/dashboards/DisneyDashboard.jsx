@@ -9,6 +9,12 @@ function DisneyDashboard({ preferences, activePark }) {
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [viewMode, setViewMode] = useState('by-wait'); // 'by-land' or 'by-wait'
+  const [classifications, setClassifications] = useState({}); // rideId -> classification type
+
+  // Check if using category system
+  const useCategorySystem = preferences.disneyDisplayCategories !== null &&
+                            preferences.disneyDisplayCategories !== undefined &&
+                            Array.isArray(preferences.disneyDisplayCategories);
 
   // Update selected park when activePark prop changes (during auto-rotation)
   useEffect(() => {
@@ -48,6 +54,23 @@ function DisneyDashboard({ preferences, activePark }) {
     fetchWaitTimes();
     fetchParkHours();
   }, [selectedPark]);
+
+  // Fetch classifications once on mount
+  useEffect(() => {
+    const fetchClassifications = async () => {
+      try {
+        const response = await axios.get('/api/disney/classifications');
+        const classMap = {};
+        response.data.rides.forEach(ride => {
+          classMap[ride.rideId] = ride.classification?.type || 'unclassified';
+        });
+        setClassifications(classMap);
+      } catch (error) {
+        console.error('Error fetching classifications:', error);
+      }
+    };
+    fetchClassifications();
+  }, []);
 
   const fetchWaitTimes = async () => {
     setLoading(true);
@@ -142,20 +165,36 @@ function DisneyDashboard({ preferences, activePark }) {
     });
   };
 
+  // Helper to check if a ride should be included based on filtering mode
+  const shouldIncludeRide = (rideId, forCrowdCalc = false) => {
+    if (useCategorySystem) {
+      const rideClassification = classifications[rideId] || 'unclassified';
+      const categories = forCrowdCalc
+        ? (preferences.disneyCrowdCategories || ['headliner', 'popular'])
+        : (preferences.disneyDisplayCategories || ['headliner', 'popular', 'standard', 'minor', 'unclassified']);
+      return categories.includes(rideClassification);
+    } else {
+      // Legacy: check exclusion list
+      const excludedRides = preferences.disneyExcludedRides || [];
+      return !excludedRides.includes(rideId);
+    }
+  };
+
   // Get all rides flattened and sorted by wait time (longest first)
   const getAllRidesSorted = () => {
     if (!waitTimesData.lands || waitTimesData.lands.length === 0) {
       return [];
     }
 
-    const excludedRides = preferences.disneyExcludedRides || [];
     const allRides = [];
     waitTimesData.lands.forEach(land => {
       if (land.rides) {
         land.rides.forEach(ride => {
-          // Only include rides that are not in the excluded list
-          if (!excludedRides.includes(ride.id)) {
-            allRides.push(ride);
+          if (shouldIncludeRide(ride.id, false)) {
+            allRides.push({
+              ...ride,
+              classification: classifications[ride.id] || 'unclassified'
+            });
           }
         });
       }
@@ -164,7 +203,6 @@ function DisneyDashboard({ preferences, activePark }) {
     // Sort by wait time descending (longest first)
     // Closed rides go to the end
     return allRides.sort((a, b) => {
-      // Trust the API's is_open status
       const aOpen = a.is_open;
       const bOpen = b.is_open;
 
@@ -181,14 +219,12 @@ function DisneyDashboard({ preferences, activePark }) {
       return null;
     }
 
-    const excludedRides = preferences.disneyExcludedRides || [];
-
     const openRides = [];
     waitTimesData.lands.forEach(land => {
       if (land.rides) {
         land.rides.forEach(ride => {
-          // Include only open rides that are not in the excluded list
-          if (ride.is_open && !excludedRides.includes(ride.id)) {
+          // Include only open rides that pass the filter (using crowd categories)
+          if (ride.is_open && shouldIncludeRide(ride.id, true)) {
             openRides.push(ride);
           }
         });
@@ -205,13 +241,13 @@ function DisneyDashboard({ preferences, activePark }) {
 
     // Categorize crowd level
     if (averageWaitTime < 20) {
-      return { level: 'Low', color: 'low', avgWait: Math.round(averageWaitTime) };
+      return { level: 'Low', color: 'low', avgWait: Math.round(averageWaitTime), rideCount: openRides.length };
     } else if (averageWaitTime < 35) {
-      return { level: 'Moderate', color: 'moderate', avgWait: Math.round(averageWaitTime) };
+      return { level: 'Moderate', color: 'moderate', avgWait: Math.round(averageWaitTime), rideCount: openRides.length };
     } else if (averageWaitTime < 50) {
-      return { level: 'High', color: 'high', avgWait: Math.round(averageWaitTime) };
+      return { level: 'High', color: 'high', avgWait: Math.round(averageWaitTime), rideCount: openRides.length };
     } else {
-      return { level: 'Very High', color: 'very-high', avgWait: Math.round(averageWaitTime) };
+      return { level: 'Very High', color: 'very-high', avgWait: Math.round(averageWaitTime), rideCount: openRides.length };
     }
   };
 
@@ -290,9 +326,8 @@ function DisneyDashboard({ preferences, activePark }) {
               // Original view: grouped by land
               <div className="lands-grid">
                 {waitTimesData.lands.map((land) => {
-                  const excludedRides = preferences.disneyExcludedRides || [];
-                  // Filter to only show included rides
-                  const includedRides = land.rides ? land.rides.filter(ride => !excludedRides.includes(ride.id)) : [];
+                  // Filter to only show included rides based on current filtering mode
+                  const includedRides = land.rides ? land.rides.filter(ride => shouldIncludeRide(ride.id, false)) : [];
 
                   // Only show the land section if it has included rides
                   if (includedRides.length === 0) return null;

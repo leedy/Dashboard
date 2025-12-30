@@ -71,6 +71,15 @@ const preferencesSchema = new mongoose.Schema({
     type: [Number],
     default: []
   },
+  // Category-based filtering (replaces individual ride exclusions)
+  disneyDisplayCategories: {
+    type: [String],
+    default: null  // null = use legacy exclusion system
+  },
+  disneyCrowdCategories: {
+    type: [String],
+    default: null  // null = use legacy exclusion system
+  },
   tmdbApiKey: {
     type: String,
     default: ''
