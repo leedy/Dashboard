@@ -1,6 +1,8 @@
 const path = require('path');
 const appDir = __dirname;
 
+// Development config - includes Vite dev server
+// For production (Docker), use only the backend app
 module.exports = {
   apps: [
     {
