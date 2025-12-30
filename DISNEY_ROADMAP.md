@@ -11,8 +11,8 @@ Collect historical wait time data from all 4 Disney World parks, auto-classify r
 
 ## Task Checklist
 
-### Phase 0: Setup
-- [ ] Install `node-cron` and `date-holidays` backend dependencies
+### Phase 0: Setup ✅
+- [x] Install `node-cron` and `date-holidays` backend dependencies
 
 ### Phase 1: Foundation (Models + Services)
 - [ ] Create `WaitTimeSnapshot` model (`backend/models/WaitTimeSnapshot.js`)
@@ -225,3 +225,5 @@ npm install chart.js react-chartjs-2
 ---
 
 **Last Updated:** 2025-12-30
+
+**Phase 0 completed:** Dependencies installed and verified
