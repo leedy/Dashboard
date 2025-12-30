@@ -207,7 +207,7 @@ function AdminDisneyTracking() {
           </div>
           <div className="stat-detail">
             <span className="label">Data Retention:</span>
-            <span className="value">{status?.config?.retentionDays || 90} days</span>
+            <span className="value">Forever</span>
           </div>
         </div>
       </div>
@@ -218,7 +218,7 @@ function AdminDisneyTracking() {
         <ul>
           <li>When enabled, the system collects wait times from all 4 Disney World parks</li>
           <li>Each snapshot includes weather conditions and holiday information for context</li>
-          <li>Data is automatically deleted after {status?.config?.retentionDays || 90} days</li>
+          <li>Data is kept forever to enable accurate long-term predictions</li>
           <li>Once enough data is collected, predictions will become available</li>
         </ul>
       </div>

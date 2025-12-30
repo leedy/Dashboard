@@ -72,7 +72,6 @@ waitTimeSnapshotSchema.index({ parkId: 1, timestamp: -1 });
 // Compound index for prediction queries (day/hour patterns)
 waitTimeSnapshotSchema.index({ 'context.dayOfWeek': 1, 'context.hour': 1, rideId: 1 });
 
-// TTL index - auto-delete after 90 days
-waitTimeSnapshotSchema.index({ timestamp: 1 }, { expireAfterSeconds: 90 * 24 * 60 * 60 });
+// Note: No TTL index - data is kept forever for long-term predictions
 
 module.exports = mongoose.model('WaitTimeSnapshot', waitTimeSnapshotSchema);

@@ -121,7 +121,7 @@ Collect historical wait time data from all 4 Disney World parks, auto-classify r
 disneyTracking: {
   enabled: { type: Boolean, default: false },
   collectionIntervalMinutes: { type: Number, default: 5 },
-  retentionDays: { type: Number, default: 90 },
+  // retentionDays removed - data kept forever for long-term predictions
   lastCollectionTime: Date,
   status: String,           // 'running', 'stopped', 'error'
   errorMessage: String
@@ -176,7 +176,7 @@ disneyTracking: {
 | Setting | Default |
 |---------|---------|
 | Collection Interval | 5 minutes |
-| Data Retention | 90 days |
+| Data Retention | Forever (no auto-delete) |
 | Min Snapshots for Classification | 100 |
 | Headliner Threshold | 45 min |
 | Popular Threshold | 25 min |
