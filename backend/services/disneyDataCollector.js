@@ -81,6 +81,27 @@ async function collectAllParks() {
     const parkDataPromises = parkIds.map(parkId => fetchParkData(parkId));
     const parkResults = await Promise.all(parkDataPromises);
 
+    // Check if any rides are open across all parks
+    let anyRideOpen = false;
+    for (const parkData of parkResults) {
+      if (!parkData || !parkData.lands) continue;
+      for (const land of parkData.lands) {
+        if (!land.rides) continue;
+        if (land.rides.some(ride => ride.is_open)) {
+          anyRideOpen = true;
+          break;
+        }
+      }
+      if (anyRideOpen) break;
+    }
+
+    // Skip saving if all parks are closed
+    if (!anyRideOpen) {
+      const duration = Date.now() - startTime;
+      console.log(`Disney collector: All parks closed, skipping save (${duration}ms)`);
+      return { success: true, snapshotsCreated: 0, errors: [], skipped: 'All parks closed' };
+    }
+
     // Process each park's data
     for (let i = 0; i < parkIds.length; i++) {
       const parkId = parkIds[i];
