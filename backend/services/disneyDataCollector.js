@@ -352,13 +352,15 @@ async function initializeFromPreferences() {
   try {
     const prefs = await Preferences.findOne({ userId: 'admin' });
 
-    if (prefs?.disneyTracking?.enabled) {
-      const interval = prefs.disneyTracking.collectionIntervalMinutes || 5;
-      console.log('Disney collector: Auto-starting from saved preferences');
-      startCollection(interval);
-    } else {
-      console.log('Disney collector: Not enabled in preferences');
+    // Default to enabled unless explicitly disabled
+    if (prefs?.disneyTracking?.enabled === false) {
+      console.log('Disney collector: Disabled in preferences');
+      return;
     }
+
+    const interval = prefs?.disneyTracking?.collectionIntervalMinutes || 5;
+    console.log('Disney collector: Auto-starting (default enabled)');
+    startCollection(interval);
   } catch (error) {
     console.error('Disney collector: Error checking preferences:', error.message);
   }
