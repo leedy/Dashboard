@@ -14,12 +14,12 @@ Collect historical wait time data from all 4 Disney World parks, auto-classify r
 ### Phase 0: Setup ✅
 - [x] Install `node-cron` and `date-holidays` backend dependencies
 
-### Phase 1: Foundation (Models + Services)
-- [ ] Create `WaitTimeSnapshot` model (`backend/models/WaitTimeSnapshot.js`)
-- [ ] Create `RideMetadata` model (`backend/models/RideMetadata.js`)
-- [ ] Extend `Preferences` model with `disneyTracking` config
-- [ ] Create `weatherService.js` (`backend/services/weatherService.js`)
-- [ ] Create `holidayService.js` (`backend/services/holidayService.js`)
+### Phase 1: Foundation (Models + Services) ✅
+- [x] Create `WaitTimeSnapshot` model (`backend/models/WaitTimeSnapshot.js`)
+- [x] Create `RideMetadata` model (`backend/models/RideMetadata.js`)
+- [x] Extend `Preferences` model with `disneyTracking` config
+- [x] Create `weatherService.js` (`backend/services/weatherService.js`)
+- [x] Create `holidayService.js` (`backend/services/holidayService.js`)
 
 ### Phase 2: Data Collection
 - [ ] Create `disneyDataCollector.js` service (`backend/services/disneyDataCollector.js`)
@@ -227,3 +227,4 @@ npm install chart.js react-chartjs-2
 **Last Updated:** 2025-12-30
 
 **Phase 0 completed:** Dependencies installed and verified
+**Phase 1 completed:** Models and services created

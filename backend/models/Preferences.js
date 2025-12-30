@@ -74,6 +74,31 @@ const preferencesSchema = new mongoose.Schema({
   tmdbApiKey: {
     type: String,
     default: ''
+  },
+  disneyTracking: {
+    enabled: {
+      type: Boolean,
+      default: false
+    },
+    collectionIntervalMinutes: {
+      type: Number,
+      default: 5
+    },
+    retentionDays: {
+      type: Number,
+      default: 90
+    },
+    lastCollectionTime: {
+      type: Date
+    },
+    status: {
+      type: String,
+      enum: ['stopped', 'running', 'error'],
+      default: 'stopped'
+    },
+    errorMessage: {
+      type: String
+    }
   }
 }, {
   timestamps: true
