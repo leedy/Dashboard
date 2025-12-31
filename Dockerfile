@@ -4,6 +4,9 @@
 # Start with Node.js 22 (required by yahoo-finance2)
 FROM node:22-alpine
 
+# Set production environment
+ENV NODE_ENV=production
+
 # Set working directory inside the container
 WORKDIR /app
 

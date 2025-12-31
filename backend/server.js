@@ -283,19 +283,20 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });
 
-// Serve static files from the React app in production
-// Check if dist folder exists (production build)
+// Serve static files from the React app in production only
 const distPath = path.join(__dirname, '../frontend/dist');
-if (require('fs').existsSync(distPath)) {
+if (process.env.NODE_ENV === 'production' && require('fs').existsSync(distPath)) {
   app.use(express.static(distPath));
 
   // Handle React routing - return index.html for all non-API routes
   app.get('*', (req, res) => {
     res.sendFile(path.join(distPath, 'index.html'));
   });
-  console.log('Serving production build from /dist');
+  console.log('Production mode: Serving frontend from /dist');
+} else if (process.env.NODE_ENV === 'production') {
+  console.log('Production mode: No /dist folder found. Run "npm run build" in frontend/');
 } else {
-  console.log('No production build found. Run "npm run build" first or use "npm run dev:all" for development.');
+  console.log('Development mode: API-only. Access frontend via Vite dev server (port 5173)');
 }
 
 app.listen(PORT, '0.0.0.0', () => {

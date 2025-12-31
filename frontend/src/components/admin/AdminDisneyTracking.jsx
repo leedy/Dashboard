@@ -89,7 +89,7 @@ function AdminDisneyTracking() {
     );
   }
 
-  const isRunning = status?.config?.status === 'running';
+  const isRunning = status?.collector?.isRunning === true;
 
   return (
     <div className="admin-disney-tracking">

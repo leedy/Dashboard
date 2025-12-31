@@ -11,6 +11,8 @@ services:
       - path: ./docker.env
         required: false
     environment:
+      # App mode
+      - NODE_ENV=production
       # MongoDB Configuration (MONGO_HOST must be set - cannot use 127.0.0.1 with bridge networking)
       - MONGO_HOST=${MONGO_HOST:?MONGO_HOST is required}
       - MONGO_PORT=${MONGO_PORT:-27017}

@@ -355,14 +355,23 @@ async function initializeFromPreferences() {
     // Default to enabled unless explicitly disabled
     if (prefs?.disneyTracking?.enabled === false) {
       console.log('Disney collector: Disabled in preferences');
+      // Sync database status to match reality
+      await updateTrackingStatus('stopped');
       return;
     }
 
     const interval = prefs?.disneyTracking?.collectionIntervalMinutes || 5;
     console.log('Disney collector: Auto-starting (default enabled)');
     startCollection(interval);
+    // startCollection already calls updateTrackingStatus('running')
   } catch (error) {
     console.error('Disney collector: Error checking preferences:', error.message);
+    // Don't leave stale 'running' status if initialization failed
+    try {
+      await updateTrackingStatus('stopped', error.message);
+    } catch (e) {
+      // Ignore - can't update status without DB connection
+    }
   }
 }
 
