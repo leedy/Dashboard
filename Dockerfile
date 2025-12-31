@@ -4,9 +4,6 @@
 # Start with Node.js 22 (required by yahoo-finance2)
 FROM node:22-alpine
 
-# Set production environment
-ENV NODE_ENV=production
-
 # Set working directory inside the container
 WORKDIR /app
 
@@ -31,6 +28,9 @@ COPY frontend/ ./frontend/
 # Build the frontend (creates dist/ folder)
 WORKDIR /app/frontend
 RUN npm run build
+
+# Set production environment for runtime
+ENV NODE_ENV=production
 
 # Switch back to backend directory for running
 WORKDIR /app/backend
