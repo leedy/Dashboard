@@ -2,6 +2,15 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './DisneyDashboard.css';
 
+// Weights for crowd level calculation - higher weight = more influence on crowd score
+const CROWD_WEIGHTS = {
+  headliner: 2.0,    // Most influence - these define the park experience
+  popular: 1.0,      // Standard weight
+  standard: 0.5,     // Less influence
+  minor: 0,          // Excluded entirely
+  unclassified: 0    // Excluded entirely
+};
+
 function DisneyDashboard({ preferences, activePark }) {
   const [selectedPark, setSelectedPark] = useState('magic-kingdom');
   const [waitTimesData, setWaitTimesData] = useState({ lands: [] });
@@ -213,41 +222,48 @@ function DisneyDashboard({ preferences, activePark }) {
     });
   };
 
-  // Calculate current crowd level based on average wait times
+  // Calculate current crowd level based on weighted average wait times
   const getCrowdLevel = () => {
     if (!waitTimesData.lands || waitTimesData.lands.length === 0) {
       return null;
     }
 
-    const openRides = [];
+    let totalWeightedWait = 0;
+    let totalWeight = 0;
+    let rideCount = 0;
+
     waitTimesData.lands.forEach(land => {
       if (land.rides) {
         land.rides.forEach(ride => {
-          // Include only open rides that pass the filter (using crowd categories)
-          if (ride.is_open && shouldIncludeRide(ride.id, true)) {
-            openRides.push(ride);
+          if (ride.is_open) {
+            const classification = classifications[ride.id] || 'unclassified';
+            const weight = CROWD_WEIGHTS[classification] || 0;
+
+            if (weight > 0) {
+              totalWeightedWait += ride.wait_time * weight;
+              totalWeight += weight;
+              rideCount++;
+            }
           }
         });
       }
     });
 
-    if (openRides.length === 0) {
+    if (totalWeight === 0) {
       return null;
     }
 
-    // Calculate average wait time
-    const totalWaitTime = openRides.reduce((sum, ride) => sum + ride.wait_time, 0);
-    const averageWaitTime = totalWaitTime / openRides.length;
+    const weightedAverage = totalWeightedWait / totalWeight;
 
     // Categorize crowd level
-    if (averageWaitTime < 20) {
-      return { level: 'Low', color: 'low', avgWait: Math.round(averageWaitTime), rideCount: openRides.length };
-    } else if (averageWaitTime < 35) {
-      return { level: 'Moderate', color: 'moderate', avgWait: Math.round(averageWaitTime), rideCount: openRides.length };
-    } else if (averageWaitTime < 50) {
-      return { level: 'High', color: 'high', avgWait: Math.round(averageWaitTime), rideCount: openRides.length };
+    if (weightedAverage < 20) {
+      return { level: 'Low', color: 'low', avgWait: Math.round(weightedAverage), rideCount };
+    } else if (weightedAverage < 35) {
+      return { level: 'Moderate', color: 'moderate', avgWait: Math.round(weightedAverage), rideCount };
+    } else if (weightedAverage < 50) {
+      return { level: 'High', color: 'high', avgWait: Math.round(weightedAverage), rideCount };
     } else {
-      return { level: 'Very High', color: 'very-high', avgWait: Math.round(averageWaitTime), rideCount: openRides.length };
+      return { level: 'Very High', color: 'very-high', avgWait: Math.round(weightedAverage), rideCount };
     }
   };
 

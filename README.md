@@ -588,19 +588,36 @@ const latestClosing = new Date(Math.max(...closingTimes));
 
 ### Real-Time Crowd Level Calculation
 
-The Disney dashboard calculates live crowd levels based on current wait times:
+The Disney dashboard calculates live crowd levels using a **weighted average** based on ride classifications:
 
+**Category Weights:**
+| Category | Weight | Description |
+|----------|--------|-------------|
+| Headliner | 2.0x | E-ticket attractions (Seven Dwarfs, Flight of Passage, etc.) |
+| Popular | 1.0x | Well-known attractions with moderate waits |
+| Standard | 0.5x | Regular attractions |
+| Minor | 0 | Excluded (shows, walk-throughs, low-wait experiences) |
+| Unclassified | 0 | Excluded until categorized |
+
+**Calculation:**
 ```javascript
-// Calculate average wait time across all open rides
-const openRides = allRides.filter(ride => ride.is_open);
-const averageWaitTime = totalWaitTime / openRides.length;
+// Weighted average: headliners count double, standard rides count half
+const CROWD_WEIGHTS = { headliner: 2.0, popular: 1.0, standard: 0.5, minor: 0, unclassified: 0 };
+
+// For each open ride with weight > 0:
+totalWeightedWait += ride.wait_time * weight;
+totalWeight += weight;
+
+const weightedAverage = totalWeightedWait / totalWeight;
 
 // Categorize into crowd levels
-if (averageWaitTime < 20) return 'Low';
-else if (averageWaitTime < 35) return 'Moderate';
-else if (averageWaitTime < 50) return 'High';
+if (weightedAverage < 20) return 'Low';
+else if (weightedAverage < 35) return 'Moderate';
+else if (weightedAverage < 50) return 'High';
 else return 'Very High';
 ```
+
+**Why weighted?** A park with headliners at 60+ minutes feels busy even if minor attractions have no wait. The weighted approach ensures popular attractions have more influence on the crowd score, better reflecting the actual park experience.
 
 This provides an instant, data-driven assessment of current park congestion without requiring third-party crowd prediction APIs.
 
