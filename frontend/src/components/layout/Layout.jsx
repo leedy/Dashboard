@@ -32,16 +32,17 @@ function Layout({ children, currentDashboard, onDashboardChange, onAdminAccess, 
       items: [
         { id: 'weather', name: 'Weather', available: true },
         { id: 'car-wash', name: "Bob's Car Wash", available: true },
-        { id: 'stocks', name: 'Market Overview', available: true },
+        { id: 'stocks', name: 'Market Overview', available: false }, // Disabled: Yahoo Finance rate limiting
         { id: 'countdown', name: 'Countdown', available: true },
       ]
     }
   ];
 
-  // Filter categories to only show items with photos if needed
+  // Filter categories to only show available items with photos if needed
   const visibleCategories = dashboardCategories.map(category => ({
     ...category,
     items: category.items.filter(item => {
+      if (!item.available) return false;
       if (item.requiresPhotos && photoCounts) {
         return photoCounts[item.id] > 0;
       }

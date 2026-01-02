@@ -111,7 +111,18 @@ router.get('/quotes', async (req, res) => {
 
     res.json(transformedQuotes);
   } catch (error) {
-    console.error('Error fetching stock quotes:', error);
+    console.error('Error fetching stock quotes:', error.message);
+
+    // If rate limited (429) or other error, return stale cache if available
+    if (quotesCache.data) {
+      console.log('Returning stale cache due to error');
+      return res.json(quotesCache.data.map(q => ({
+        ...q,
+        stale: true,
+        cacheAge: quotesCache.lastFetch ? Math.round((Date.now() - quotesCache.lastFetch) / 60000) : null
+      })));
+    }
+
     res.status(500).json({ error: 'Failed to fetch stock quotes', details: error.message });
   }
 });

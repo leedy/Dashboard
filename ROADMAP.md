@@ -88,6 +88,23 @@ This document tracks completed features, planned enhancements, and future ideas 
 
 ### Financial & Tracking
 
+#### Stock Data Source Replacement
+**Priority:** High
+**Current Status:** Market Overview dashboard disabled due to Yahoo Finance rate limiting (429 errors)
+**Issue:** The `yahoo-finance2` npm package relies on unofficial Yahoo Finance API which aggressively rate limits requests
+**Options to explore:**
+- Alpha Vantage (free tier: 25 requests/day, 500/month) - requires API key
+- Finnhub (free tier: 60 calls/minute) - requires API key
+- Polygon.io (free tier available) - requires API key
+- IEX Cloud (free tier: 50,000 messages/month) - requires API key
+- Twelve Data (free tier: 800 calls/day) - requires API key
+
+**Tasks:**
+- [ ] Research free tier limits and features for each option
+- [ ] Choose best option based on rate limits and data quality
+- [ ] Implement new stock data provider
+- [ ] Re-enable Market Overview dashboard
+
 #### YNAB API Integration
 **Priority:** High (see extensive API research below)
 **Features:**
@@ -99,7 +116,7 @@ This document tracks completed features, planned enhancements, and future ideas 
 - **See detailed implementation plan in API Research section**
 
 #### Stock Watchlist Expansion
-**Priority:** Medium
+**Priority:** Medium (blocked by Stock Data Source Replacement above)
 **Features:**
 - Track specific stocks beyond major indices
 - Individual stock cards with 52-week range
