@@ -1,20 +1,36 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './StocksDashboard.css';
+
+// Polling intervals based on market state (matching backend cache durations)
+const POLL_INTERVALS = {
+  REGULAR: 5 * 60 * 1000,      // 5 minutes during market hours
+  PRE: 15 * 60 * 1000,         // 15 minutes during pre-market
+  POST: 15 * 60 * 1000,        // 15 minutes during after-hours
+  CLOSED: 60 * 60 * 1000       // 1 hour when market is closed
+};
 
 function StocksDashboard() {
   const [quotes, setQuotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
+  const intervalRef = useRef(null);
+
+  // Get polling interval based on market state
+  const getPollInterval = (marketState) => {
+    return POLL_INTERVALS[marketState] || POLL_INTERVALS.CLOSED;
+  };
 
   useEffect(() => {
     fetchQuotes();
 
-    // Refresh every 5 minutes
-    const interval = setInterval(fetchQuotes, 5 * 60 * 1000);
+    // Start with default interval, will be adjusted after first fetch
+    intervalRef.current = setInterval(fetchQuotes, POLL_INTERVALS.CLOSED);
 
-    return () => clearInterval(interval);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, []);
 
   const fetchQuotes = async () => {
@@ -24,6 +40,16 @@ function StocksDashboard() {
       setQuotes(response.data);
       setLastUpdate(new Date());
       setLoading(false);
+
+      // Adjust polling interval based on market state
+      const marketState = response.data[0]?.marketState || 'CLOSED';
+      const newInterval = getPollInterval(marketState);
+
+      // Update interval if it changed
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = setInterval(fetchQuotes, newInterval);
+      }
     } catch (err) {
       console.error('Error fetching stock quotes:', err);
       setError('Failed to load market data');

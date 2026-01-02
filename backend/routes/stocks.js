@@ -3,12 +3,55 @@ const router = express.Router();
 const YahooFinance = require('yahoo-finance2').default;
 const yahooFinance = new YahooFinance();
 
-// Cache for stock quotes (5 minute cache)
+// Cache for stock quotes
 let quotesCache = {
   data: null,
-  lastFetch: null,
-  cacheDuration: 5 * 60 * 1000 // 5 minutes
+  lastFetch: null
 };
+
+// Cache durations based on market state
+const CACHE_DURATIONS = {
+  regular: 5 * 60 * 1000,      // 5 minutes during market hours
+  extended: 15 * 60 * 1000,    // 15 minutes during pre/post market
+  closed: 60 * 60 * 1000       // 1 hour when market is closed
+};
+
+// Determine current market state based on ET timezone
+function getMarketState() {
+  const now = new Date();
+
+  // Convert to ET (handles DST automatically)
+  const etTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const day = etTime.getDay(); // 0 = Sunday, 6 = Saturday
+  const hour = etTime.getHours();
+  const minute = etTime.getMinutes();
+  const timeInMinutes = hour * 60 + minute;
+
+  // Weekend - market closed
+  if (day === 0 || day === 6) {
+    return 'closed';
+  }
+
+  // Market hours (all in ET):
+  // Pre-market: 4:00 AM - 9:30 AM (240 - 570 minutes)
+  // Regular: 9:30 AM - 4:00 PM (570 - 960 minutes)
+  // After-hours: 4:00 PM - 8:00 PM (960 - 1200 minutes)
+  // Closed: 8:00 PM - 4:00 AM
+
+  if (timeInMinutes >= 570 && timeInMinutes < 960) {
+    return 'regular';
+  } else if ((timeInMinutes >= 240 && timeInMinutes < 570) ||
+             (timeInMinutes >= 960 && timeInMinutes < 1200)) {
+    return 'extended';
+  } else {
+    return 'closed';
+  }
+}
+
+function getCacheDuration() {
+  const state = getMarketState();
+  return CACHE_DURATIONS[state];
+}
 
 // Major indices symbols
 const INDICES = [
@@ -22,14 +65,16 @@ const INDICES = [
 router.get('/quotes', async (req, res) => {
   try {
     const now = Date.now();
+    const cacheDuration = getCacheDuration();
+    const marketState = getMarketState();
 
     // Check cache
-    if (quotesCache.data && quotesCache.lastFetch && (now - quotesCache.lastFetch) < quotesCache.cacheDuration) {
-      console.log('Returning cached stock quotes');
+    if (quotesCache.data && quotesCache.lastFetch && (now - quotesCache.lastFetch) < cacheDuration) {
+      console.log(`Returning cached stock quotes (market: ${marketState}, cache: ${cacheDuration / 60000}min)`);
       return res.json(quotesCache.data);
     }
 
-    console.log('Fetching fresh stock quotes from Yahoo Finance');
+    console.log(`Fetching fresh stock quotes (market: ${marketState}, cache: ${cacheDuration / 60000}min)`);
 
     // Fetch quotes for all indices
     const quotes = await yahooFinance.quote(INDICES);
