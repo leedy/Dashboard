@@ -219,6 +219,38 @@ app.use('/api/themeparks', async (req, res) => {
   }
 });
 
+// Disney World Weather API
+const weatherService = require('./services/weatherService');
+
+app.get('/api/disney/weather', async (req, res) => {
+  try {
+    const [current, forecast] = await Promise.all([
+      weatherService.getCurrentWeather(),
+      weatherService.getForecast()
+    ]);
+
+    // Add description to current weather
+    const currentWithDescription = current ? {
+      ...current,
+      description: weatherService.getWeatherDescription(current.weatherCode)
+    } : null;
+
+    // Add description to forecast days
+    const forecastWithDescription = forecast ? forecast.map(day => ({
+      ...day,
+      description: weatherService.getWeatherDescription(day.weatherCode)
+    })) : null;
+
+    res.json({
+      current: currentWithDescription,
+      forecast: forecastWithDescription
+    });
+  } catch (error) {
+    console.error('Weather API error:', error.message);
+    res.status(500).json({ error: 'Weather API request failed' });
+  }
+});
+
 // Team news RSS feed endpoint - supports any team
 app.get('/api/news/team/:teamName', async (req, res) => {
   try {

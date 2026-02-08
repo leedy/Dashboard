@@ -80,9 +80,76 @@ async function isRaining() {
   return weather ? weather.isRaining : false;
 }
 
+/**
+ * Get 5-day forecast for Disney World
+ * @returns {Promise<Array<{date: string, high: number, low: number, weatherCode: number, precipChance: number}> | null>}
+ */
+async function getForecast() {
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${DISNEY_WORLD_LAT}&longitude=${DISNEY_WORLD_LON}&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max&temperature_unit=fahrenheit&timezone=America%2FNew_York&forecast_days=6`;
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      console.error('Forecast API error:', response.status, response.statusText);
+      return null;
+    }
+
+    const data = await response.json();
+
+    // Map the daily data into a more usable format
+    const forecast = data.daily.time.map((date, index) => ({
+      date: date,
+      high: Math.round(data.daily.temperature_2m_max[index]),
+      low: Math.round(data.daily.temperature_2m_min[index]),
+      weatherCode: data.daily.weather_code[index],
+      precipChance: data.daily.precipitation_probability_max[index] || 0
+    }));
+
+    return forecast;
+  } catch (error) {
+    console.error('Error fetching forecast:', error.message);
+    return null;
+  }
+}
+
+/**
+ * Get weather description from code
+ */
+function getWeatherDescription(code) {
+  const descriptions = {
+    0: 'Clear',
+    1: 'Mostly Clear',
+    2: 'Partly Cloudy',
+    3: 'Cloudy',
+    45: 'Foggy',
+    48: 'Foggy',
+    51: 'Light Drizzle',
+    53: 'Drizzle',
+    55: 'Heavy Drizzle',
+    61: 'Light Rain',
+    63: 'Rain',
+    65: 'Heavy Rain',
+    66: 'Freezing Rain',
+    67: 'Heavy Freezing Rain',
+    71: 'Light Snow',
+    73: 'Snow',
+    75: 'Heavy Snow',
+    80: 'Light Showers',
+    81: 'Showers',
+    82: 'Heavy Showers',
+    95: 'Thunderstorm',
+    96: 'Thunderstorm w/ Hail',
+    99: 'Severe Thunderstorm'
+  };
+  return descriptions[code] || 'Unknown';
+}
+
 module.exports = {
   getCurrentWeather,
   isRaining,
+  getForecast,
+  getWeatherDescription,
   DISNEY_WORLD_LAT,
   DISNEY_WORLD_LON
 };
