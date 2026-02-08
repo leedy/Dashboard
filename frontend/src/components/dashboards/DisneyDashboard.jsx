@@ -19,6 +19,9 @@ function DisneyDashboard({ preferences, activePark }) {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [viewMode, setViewMode] = useState('by-wait'); // 'by-land' or 'by-wait'
   const [classifications, setClassifications] = useState({}); // rideId -> classification type
+  const [dataMode, setDataMode] = useState('live'); // 'live' or 'records'
+  const [recordsData, setRecordsData] = useState(null);
+  const [recordsLoading, setRecordsLoading] = useState(false);
 
   // Check if using category system
   const useCategorySystem = preferences.disneyDisplayCategories !== null &&
@@ -36,25 +39,25 @@ function DisneyDashboard({ preferences, activePark }) {
     'magic-kingdom': {
       id: 6,
       name: 'Magic Kingdom',
-      icon: '🏰',
+      icon: '\u{1F3F0}',
       entityId: '75ea578a-adc8-4116-a54d-dccb60765ef9'
     },
     'epcot': {
       id: 5,
       name: 'Epcot',
-      icon: '🌐',
+      icon: '\u{1F310}',
       entityId: '47f90d2c-e191-4239-a466-5892ef59a88b'
     },
     'hollywood-studios': {
       id: 7,
       name: 'Hollywood Studios',
-      icon: '🎬',
+      icon: '\u{1F3AC}',
       entityId: '288747d1-8b4f-4a64-867e-ea7c9b27bad8'
     },
     'animal-kingdom': {
       id: 8,
       name: 'Animal Kingdom',
-      icon: '🦁',
+      icon: '\u{1F981}',
       entityId: '1c84a229-8862-4648-9c71-378ddd2c7693'
     }
   };
@@ -81,6 +84,13 @@ function DisneyDashboard({ preferences, activePark }) {
     fetchClassifications();
   }, []);
 
+  // Fetch records when in records mode or when park changes while in records mode
+  useEffect(() => {
+    if (dataMode === 'records') {
+      fetchRecords();
+    }
+  }, [dataMode, selectedPark]);
+
   const fetchWaitTimes = async () => {
     setLoading(true);
     try {
@@ -94,6 +104,20 @@ function DisneyDashboard({ preferences, activePark }) {
       setWaitTimesData({ lands: [] });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchRecords = async () => {
+    setRecordsLoading(true);
+    try {
+      const parkId = parks[selectedPark].id;
+      const response = await axios.get(`/api/disney/tracking/records/${parkId}`);
+      setRecordsData(response.data.rides);
+    } catch (error) {
+      console.error('Error fetching records:', error);
+      setRecordsData(null);
+    } finally {
+      setRecordsLoading(false);
     }
   };
 
@@ -174,6 +198,12 @@ function DisneyDashboard({ preferences, activePark }) {
     });
   };
 
+  const formatRecordDate = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
   // Helper to check if a ride should be included based on filtering mode
   const shouldIncludeRide = (rideId, forCrowdCalc = false) => {
     if (useCategorySystem) {
@@ -218,6 +248,60 @@ function DisneyDashboard({ preferences, activePark }) {
       if (!aOpen && !bOpen) return 0;
       if (!aOpen) return 1;
       if (!bOpen) return -1;
+      return b.wait_time - a.wait_time;
+    });
+  };
+
+  // Transform records data into land-grouped structure for By Land view
+  const getRecordsAsLands = () => {
+    if (!recordsData) return [];
+
+    const landMap = {};
+    recordsData.forEach(ride => {
+      if (!shouldIncludeRide(ride.rideId, false)) return;
+      const landKey = ride.landId || 'unknown';
+      if (!landMap[landKey]) {
+        landMap[landKey] = {
+          id: ride.landId,
+          name: ride.landName || 'Unknown Land',
+          rides: []
+        };
+      }
+      landMap[landKey].rides.push({
+        id: ride.rideId,
+        name: ride.rideName,
+        wait_time: ride.peakWaitTime || 0,
+        is_open: ride.peakWaitTime != null,
+        isActive: ride.isActive,
+        peakDate: ride.peakWaitTimeDate,
+        classification: ride.classification?.type || 'unclassified'
+      });
+    });
+
+    return Object.values(landMap);
+  };
+
+  // Get all records sorted by peak wait time for By Wait Time view
+  const getAllRecordsSorted = () => {
+    if (!recordsData) return [];
+
+    const rides = recordsData
+      .filter(ride => shouldIncludeRide(ride.rideId, false))
+      .map(ride => ({
+        id: ride.rideId,
+        name: ride.rideName,
+        wait_time: ride.peakWaitTime || 0,
+        is_open: ride.peakWaitTime != null,
+        isActive: ride.isActive,
+        peakDate: ride.peakWaitTimeDate,
+        classification: ride.classification?.type || 'unclassified'
+      }));
+
+    return rides.sort((a, b) => {
+      // Rides with no data go to the end
+      if (!a.is_open && !b.is_open) return 0;
+      if (!a.is_open) return 1;
+      if (!b.is_open) return -1;
       return b.wait_time - a.wait_time;
     });
   };
@@ -268,6 +352,42 @@ function DisneyDashboard({ preferences, activePark }) {
   };
 
   const crowdLevel = getCrowdLevel();
+  const isRecordsMode = dataMode === 'records';
+  const isLoading = isRecordsMode ? recordsLoading : loading;
+
+  // Render a ride card (shared between live and records mode)
+  const renderRideCard = (ride, rideIsOpen) => {
+    const isRetired = isRecordsMode && ride.isActive === false;
+    const hasNoData = isRecordsMode && !ride.is_open;
+
+    return (
+      <div
+        key={ride.id}
+        className={`ride-card ${hasNoData ? 'closed' : getWaitTimeClass(ride.wait_time, rideIsOpen)} ${isRetired ? 'retired' : ''}`}
+      >
+        <div className="ride-info">
+          <span className="ride-name">
+            {ride.name}
+            {isRetired && <span className="retired-badge">RETIRED</span>}
+          </span>
+          <div className="ride-status">
+            {hasNoData ? (
+              <span className="status-badge no-data">No Data</span>
+            ) : (
+              <>
+                <div className="wait-time-group">
+                  <span className="wait-time">{ride.wait_time} min</span>
+                  {isRecordsMode && ride.peakDate && (
+                    <span className="record-date">{formatRecordDate(ride.peakDate)}</span>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="disney-dashboard">
@@ -275,20 +395,38 @@ function DisneyDashboard({ preferences, activePark }) {
         <div className="header-content">
           <div className="header-left">
             <h2>Disney World Wait Times</h2>
-            {parkHours && (
+            {!isRecordsMode && parkHours && (
               <p className="park-hours">
                 {parks[selectedPark].name} Hours: {parkHours.open} - {parkHours.close}
               </p>
             )}
-            {!isParkOpen() && parkHours && (
+            {!isRecordsMode && !isParkOpen() && parkHours && (
               <div className="park-closed-banner">
-                <span className="park-closed-text">⚠️ PARK CLOSED</span>
+                <span className="park-closed-text">{'\u26A0\uFE0F'} PARK CLOSED</span>
               </div>
             )}
-            {lastUpdated && (
+            {!isRecordsMode && lastUpdated && (
               <p className="last-updated">Last updated: {formatLastUpdated()}</p>
             )}
+            {isRecordsMode && (
+              <p className="last-updated">Showing all-time record wait times</p>
+            )}
           </div>
+        </div>
+
+        <div className="data-mode-toggle">
+          <button
+            className={`toggle-btn ${dataMode === 'live' ? 'active' : ''}`}
+            onClick={() => setDataMode('live')}
+          >
+            Live
+          </button>
+          <button
+            className={`toggle-btn ${dataMode === 'records' ? 'active' : ''}`}
+            onClick={() => setDataMode('records')}
+          >
+            All-Time Records
+          </button>
         </div>
 
         <div className="view-toggle">
@@ -319,7 +457,7 @@ function DisneyDashboard({ preferences, activePark }) {
               </button>
             ))}
           </div>
-          {crowdLevel && (
+          {!isRecordsMode && crowdLevel && (
             <div className="crowd-level-container">
               <div className={`crowd-level-badge crowd-${crowdLevel.color}`}>
                 <span className="crowd-level-label">Current Crowd Level</span>
@@ -331,11 +469,41 @@ function DisneyDashboard({ preferences, activePark }) {
         </div>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="loading-container">
-          <p>Loading {parks[selectedPark].name} wait times...</p>
+          <p>Loading {parks[selectedPark].name} {isRecordsMode ? 'records' : 'wait times'}...</p>
+        </div>
+      ) : isRecordsMode ? (
+        // Records mode content
+        <div className="dashboard-content">
+          {recordsData && recordsData.length > 0 ? (
+            viewMode === 'by-land' ? (
+              <div className="lands-grid">
+                {getRecordsAsLands().map((land) => {
+                  if (land.rides.length === 0) return null;
+                  return (
+                    <div key={land.id} className="land-section">
+                      <h3 className="land-name">{land.name}</h3>
+                      <div className="rides-list">
+                        {land.rides.map((ride) => renderRideCard(ride, ride.is_open))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rides-sorted-grid">
+                {getAllRecordsSorted().map((ride) => renderRideCard(ride, ride.is_open))}
+              </div>
+            )
+          ) : (
+            <div className="no-data">
+              <p>No record data available for this park.</p>
+            </div>
+          )}
         </div>
       ) : (
+        // Live mode content
         <div className="dashboard-content">
           {waitTimesData.lands && waitTimesData.lands.length > 0 ? (
             viewMode === 'by-land' ? (
@@ -415,32 +583,43 @@ function DisneyDashboard({ preferences, activePark }) {
         </div>
       )}
 
-      <div className="crowd-level-legend">
-        <h4>Crowd Level Guide</h4>
-        <div className="legend-items">
-          <div className="legend-item">
-            <span className="legend-badge crowd-low">Low</span>
-            <span className="legend-text">Average wait under 20 minutes</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-badge crowd-moderate">Moderate</span>
-            <span className="legend-text">Average wait 20-35 minutes</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-badge crowd-high">High</span>
-            <span className="legend-text">Average wait 35-50 minutes</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-badge crowd-very-high">Very High</span>
-            <span className="legend-text">Average wait over 50 minutes</span>
+      {!isRecordsMode && (
+        <div className="crowd-level-legend">
+          <h4>Crowd Level Guide</h4>
+          <div className="legend-items">
+            <div className="legend-item">
+              <span className="legend-badge crowd-low">Low</span>
+              <span className="legend-text">Average wait under 20 minutes</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-badge crowd-moderate">Moderate</span>
+              <span className="legend-text">Average wait 20-35 minutes</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-badge crowd-high">High</span>
+              <span className="legend-text">Average wait 35-50 minutes</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-badge crowd-very-high">Very High</span>
+              <span className="legend-text">Average wait over 50 minutes</span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="info-box">
         <p>
-          <strong>Note:</strong> Wait times are live from Disney World parks.
-          Data powered by <a href="https://queue-times.com" target="_blank" rel="noopener noreferrer">Queue-Times.com</a>
+          {isRecordsMode ? (
+            <>
+              <strong>Note:</strong> Showing the highest recorded wait time for each ride.
+              Data collected by the Disney tracking system.
+            </>
+          ) : (
+            <>
+              <strong>Note:</strong> Wait times are live from Disney World parks.
+              Data powered by <a href="https://queue-times.com" target="_blank" rel="noopener noreferrer">Queue-Times.com</a>
+            </>
+          )}
         </p>
       </div>
     </div>

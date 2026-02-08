@@ -215,6 +215,22 @@ router.get('/rides', async (req, res) => {
 });
 
 /**
+ * GET /api/disney/tracking/records/:parkId
+ * Get all-time record wait times for rides in a park
+ */
+router.get('/records/:parkId', async (req, res) => {
+  try {
+    const rides = await RideMetadata.find({ parkId: parseInt(req.params.parkId) })
+      .select('rideId rideName parkId landId landName classification.type isActive peakWaitTime peakWaitTimeDate peakWaitTimeContext')
+      .sort({ peakWaitTime: -1 });
+    res.json({ rides });
+  } catch (error) {
+    console.error('Error getting records:', error);
+    res.status(500).json({ message: 'Error getting record wait times' });
+  }
+});
+
+/**
  * DELETE /api/disney/tracking/data
  * Clear all tracking data (admin only) - use with caution
  */

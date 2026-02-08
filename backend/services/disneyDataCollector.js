@@ -204,7 +204,7 @@ async function collectAllParks() {
             snapshotsCreated++;
 
             // Update ride metadata (upsert)
-            await RideMetadata.findOneAndUpdate(
+            const metadata = await RideMetadata.findOneAndUpdate(
               { rideId: ride.id },
               {
                 $set: {
@@ -224,6 +224,27 @@ async function collectAllParks() {
               },
               { upsert: true, new: true }
             );
+
+            // Update peak wait time if current wait exceeds the stored peak
+            if (ride.is_open && ride.wait_time > 0 &&
+                (metadata.peakWaitTime == null || ride.wait_time > metadata.peakWaitTime)) {
+              await RideMetadata.updateOne(
+                { rideId: ride.id },
+                { $set: {
+                    peakWaitTime: ride.wait_time,
+                    peakWaitTimeDate: now,
+                    peakWaitTimeContext: {
+                      dayOfWeek: context.dayOfWeek,
+                      hour: context.hour,
+                      month: context.month,
+                      year: context.year,
+                      isWeekend: context.isWeekend,
+                      isHoliday: context.isHoliday,
+                      holidayName: context.holidayName
+                    }
+                }}
+              );
+            }
           } catch (error) {
             // Ignore duplicate key errors (another instance already saved this data)
             if (error.code === 11000) {

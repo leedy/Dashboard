@@ -75,6 +75,23 @@ const rideMetadataSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  peakWaitTime: {
+    type: Number,
+    default: null
+  },
+  peakWaitTimeDate: {
+    type: Date,
+    default: null
+  },
+  peakWaitTimeContext: {
+    dayOfWeek: Number,
+    hour: Number,
+    month: Number,
+    year: Number,
+    isWeekend: Boolean,
+    isHoliday: Boolean,
+    holidayName: String
   }
 }, {
   timestamps: true
